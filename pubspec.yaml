@@ -23,6 +23,9 @@ dependencies:
   flutter_screenutil:
   flutter_spinkit:
   flutter_gl:
+  flutter_prism:
+  flutter_riverpod:
+  flex_color_picker:
 
 dev_dependencies:
   flutter_test:

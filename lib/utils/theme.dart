@@ -1,7 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
 
-
+const Color mainDark = Color(0xFF313131);
 const Color theme = Color.fromARGB(255, 245, 245, 245);
 const Color appYellow = Color.fromARGB(255, 242, 190, 92);
 const Color neu = Color.fromARGB(100, 105, 105, 105);
@@ -230,8 +230,8 @@ class KdeTheme
     ),
     tabBarTheme: TabBarTheme(
       indicatorColor: appYellow,
-      labelStyle: lightTextTheme.bodyMedium,
-      unselectedLabelStyle: lightTextTheme.labelMedium,
+      labelStyle: lightTextTheme.bodyMedium!.copyWith(color: appYellow),
+      unselectedLabelStyle: lightTextTheme.labelMedium!.copyWith(color: neutral3),
     )
 
   );
@@ -266,8 +266,8 @@ class KdeTheme
       ),
       tabBarTheme: TabBarTheme(
           indicatorColor: appYellow,
-          labelStyle: darkTextTheme.bodyMedium,
-        unselectedLabelStyle: darkTextTheme.labelMedium,
+        labelStyle: darkTextTheme.bodyMedium!.copyWith(color: appYellow),
+        unselectedLabelStyle: darkTextTheme.labelMedium!.copyWith(color: neutral3),
       )
   );
 }

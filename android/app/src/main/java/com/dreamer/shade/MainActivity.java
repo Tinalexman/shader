@@ -1,4 +1,4 @@
-package com.example.shade;
+package com.dreamer.shade;
 
 import io.flutter.embedding.android.FlutterActivity;
 

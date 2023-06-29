@@ -97,6 +97,14 @@ packages:
       url: "https://pub.dev"
     source: hosted
     version: "1.0.0"
+  dart_prism:
+    dependency: transitive
+    description:
+      name: dart_prism
+      sha256: "0061a22072e81877bb2447236d15c43413764d957fd0b822f91a5442486af516"
+      url: "https://pub.dev"
+    source: hosted
+    version: "0.2.1"
   fake_async:
     dependency: transitive
     description:
@@ -121,6 +129,22 @@ packages:
       url: "https://pub.dev"
     source: hosted
     version: "5.3.1"
+  flex_color_picker:
+    dependency: "direct main"
+    description:
+      name: flex_color_picker
+      sha256: d8279250820ad279123fa8ee94151dd99400dd9ef4fb096589fcf956765d39a9
+      url: "https://pub.dev"
+    source: hosted
+    version: "3.2.2"
+  flex_seed_scheme:
+    dependency: transitive
+    description:
+      name: flex_seed_scheme
+      sha256: e4168a6fc88a3e5bc3d6b7a748c6a6083eedc193d343ddc26bbad7fb1b258555
+      url: "https://pub.dev"
+    source: hosted
+    version: "1.3.0"
   flutter:
     dependency: "direct main"
     description: flutter
@@ -206,6 +230,22 @@ packages:
       url: "https://pub.dev"
     source: hosted
     version: "2.0.15"
+  flutter_prism:
+    dependency: "direct main"
+    description:
+      name: flutter_prism
+      sha256: d21bb0c7398a2ea43003bc8b3b4ccd301bc57ad88a87e8627914a4ef18fc81b3
+      url: "https://pub.dev"
+    source: hosted
+    version: "0.2.2"
+  flutter_riverpod:
+    dependency: "direct main"
+    description:
+      name: flutter_riverpod
+      sha256: b83ac5827baadefd331ea1d85110f34645827ea234ccabf53a655f41901a9bf4
+      url: "https://pub.dev"
+    source: hosted
+    version: "2.3.6"
   flutter_screenutil:
     dependency: "direct main"
     description:
@@ -328,6 +368,14 @@ packages:
       url: "https://pub.dev"
     source: hosted
     version: "3.7.3"
+  riverpod:
+    dependency: transitive
+    description:
+      name: riverpod
+      sha256: "80e48bebc83010d5e67a11c9514af6b44bbac1ec77b4333c8ea65dbc79e2d8ef"
+      url: "https://pub.dev"
+    source: hosted
+    version: "2.3.6"
   sky_engine:
     dependency: transitive
     description: flutter
@@ -349,6 +397,14 @@ packages:
       url: "https://pub.dev"
     source: hosted
     version: "1.11.0"
+  state_notifier:
+    dependency: transitive
+    description:
+      name: state_notifier
+      sha256: "8fe42610f179b843b12371e40db58c9444f8757f8b69d181c97e50787caed289"
+      url: "https://pub.dev"
+    source: hosted
+    version: "0.7.2+1"
   stream_channel:
     dependency: transitive
     description:
@@ -431,4 +487,4 @@ packages:
     version: "3.1.2"
 sdks:
   dart: ">=2.19.2 <3.0.0"
-  flutter: ">=3.3.0"
+  flutter: ">=3.7.0"
