@@ -21,7 +21,27 @@ class _SplashState extends State<Splash> with SingleTickerProviderStateMixin {
       duration: const Duration(seconds: 2),
       reverseDuration: const Duration(seconds: 2),
     );
+
+    headerAnimation = Tween<double>(begin: 0.0, end: 1.0).animate(CurvedAnimation(
+        parent: controller,
+        curve: const Interval(0.2, 0.5, curve: Curves.fastOutSlowIn)));
+
+    trailingAnimation = Tween<double>(begin: 0.0, end: 1.0).animate(CurvedAnimation(
+        parent: controller,
+        curve: const Interval(0.2, 0.5, curve: Curves.fastOutSlowIn)));
+
+    controller.forward();
+    controller.addListener(refresh);
   }
+
+  @override
+  void dispose() {
+    controller.removeListener(refresh);
+    controller.dispose();
+    super.dispose();
+  }
+
+  void refresh() => setState(() {});
 
   @override
   Widget build(BuildContext context) {
