@@ -5,7 +5,6 @@ import 'package:is_first_run/is_first_run.dart';
 import 'package:shade/pages/others/menu.dart';
 import 'package:shade/utils/constants.dart';
 import 'package:shade/utils/theme.dart';
-import 'package:animate_gradient/animate_gradient.dart';
 
 class Splash extends StatefulWidget {
   const Splash({super.key});
@@ -49,7 +48,7 @@ class _SplashState extends State<Splash> with SingleTickerProviderStateMixin {
               IsFirstRun.isFirstCall().then(
                 (first) => Navigator.of(context).pushReplacement(
                   MaterialPageRoute(
-                    builder: (context) => _OnboardScreen(),
+                    builder: (context) => first ? _OnboardScreen() : const MenuScreen(),
                   ),
                 ),
               );
@@ -94,22 +93,6 @@ class _SplashState extends State<Splash> with SingleTickerProviderStateMixin {
     );
   }
 }
-
-// AnimateGradient(
-// duration: const Duration(seconds: 4),
-// animateAlignments: true,
-// primaryBegin: Alignment.topLeft,
-// primaryEnd: Alignment.bottomLeft,
-// secondaryBegin: Alignment.bottomLeft,
-// secondaryEnd: Alignment.topRight,
-// primaryColors: const [
-// Colors.yellowAccent,
-// Colors.orangeAccent,
-// ],
-// secondaryColors: const [percentRed, containerRed],
-// child: ,
-// )
-
 
 
 class _OnboardScreen extends StatefulWidget {

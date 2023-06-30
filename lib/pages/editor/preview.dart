@@ -1,6 +1,5 @@
 import 'dart:async';
 import 'dart:developer' as d;
-import 'dart:math';
 
 import 'package:flutter/material.dart';
 import 'package:flutter_gl/flutter_gl.dart';
@@ -10,9 +9,8 @@ import 'package:flutter_screenutil/flutter_screenutil.dart';
 import 'package:shade/shader/mesh.dart';
 import 'package:shade/shader/shader.dart';
 import 'package:shade/utils/constants.dart';
+import 'package:shade/utils/theme.dart';
 import 'package:shade/utils/providers.dart';
-
-import '../../utils/theme.dart';
 
 class ShaderPreview extends ConsumerStatefulWidget {
   const ShaderPreview({Key? key}) : super(key: key);
@@ -127,7 +125,7 @@ class _ShaderPreviewState extends ConsumerState<ShaderPreview> {
         mainAxisAlignment: MainAxisAlignment.center,
         children: [
           Text(
-            renderState ? "Rendering" : "Stopped",
+            renderState ? "Rendering at 30 FPS" : "Stopped",
             style: context.textTheme.bodyLarge!.copyWith(
               fontWeight: FontWeight.w600,
               color: renderState ? appYellow : theme,

@@ -35,10 +35,10 @@ class _MenuScreenState extends State<MenuScreen> {
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
                 SizedBox(height: 30.h),
-                Text("Hi!",
+                Text("Hi,",
                     style: context.textTheme.headlineLarge!
                         .copyWith(color: theme)),
-                Text("What would you like to do today?",
+                Text("what would you like to do today?",
                     style: context.textTheme.bodyLarge!.copyWith(color: theme)),
                 SizedBox(height: 50.h),
                 Row(
@@ -70,16 +70,7 @@ class _MenuScreenState extends State<MenuScreen> {
                     ),
                   ],
                 ),
-                SizedBox(
-                  height: 50.h,
-                ),
-                Align(
-                  alignment: Alignment.bottomCenter,
-                  child: Text("By The Dreamer",
-                      style:
-                          context.textTheme.bodySmall!.copyWith(color: theme),
-                  ),
-                )
+                SizedBox(height: 50.h),
               ],
             ),
           ),
@@ -110,7 +101,7 @@ class ShadeAction extends StatelessWidget {
         padding: EdgeInsets.symmetric(horizontal: 10.w, vertical: 5.h),
         decoration: BoxDecoration(
             color: neutral2,
-            borderRadius: BorderRadius.circular(6.r),
+            borderRadius: BorderRadius.circular(5.r),
             boxShadow: const [
               BoxShadow(
                 color: Colors.white12,

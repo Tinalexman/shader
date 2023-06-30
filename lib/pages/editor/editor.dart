@@ -1,14 +1,14 @@
-import 'package:flutter/material.dart';
-import 'package:flutter_screenutil/flutter_screenutil.dart';
-import 'package:shade/utils/providers.dart';
-import 'package:shade/shader/shader.dart';
-import 'package:shade/utils/constants.dart';
 import 'package:flex_color_picker/flex_color_picker.dart';
+import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'package:flutter_screenutil/flutter_screenutil.dart';
+import 'package:shade/utils/constants.dart';
+import 'package:shade/utils/providers.dart';
 import 'package:shade/utils/shader_preview_config.dart';
+import 'package:shade/utils/theme.dart';
+import 'package:shade/utils/widgets.dart';
 
-import '../../utils/theme.dart';
-import '../../utils/widgets.dart';
+import 'function_tool.dart';
 
 class CodeEditor extends ConsumerStatefulWidget {
   const CodeEditor({Key? key}) : super(key: key);
@@ -19,10 +19,10 @@ class CodeEditor extends ConsumerStatefulWidget {
 
 class _CodeEditorState extends ConsumerState<CodeEditor> {
   late TextEditingController codeController;
-
   final List<String> shaders = ["Vertex Shader", "Fragment Shader"];
-
   late String initial;
+
+  late List<CodeBlockConfig> configs = [];
 
   @override
   void initState() {
@@ -30,6 +30,32 @@ class _CodeEditorState extends ConsumerState<CodeEditor> {
     codeController =
         TextEditingController(text: ref.read(vertexShaderProvider));
     initial = shaders[0];
+    configs = [
+      CodeBlockConfig(
+        name: "main",
+        onCodeChange: (val) {
+          if (initial == shaders[0]) {
+            ref.watch(vertexShaderProvider.notifier).state =
+                codeController.text;
+          } else {
+            ref.watch(fragmentShaderProvider.notifier).state =
+                codeController.text;
+          }
+
+          if (ref.read(hotCompileProvider)) {
+            createNewShader(ref);
+          }
+
+          setState(() {});
+        },
+      ),
+      CodeBlockConfig(
+        name: 'test',
+        returnType: 'int',
+        parameters: ["int time", "float e", "bool th"],
+        onCodeChange: (val) {},
+      ),
+    ];
   }
 
   @override
@@ -38,104 +64,76 @@ class _CodeEditorState extends ConsumerState<CodeEditor> {
     super.dispose();
   }
 
-  List<Widget> lineNumbers(BuildContext context) {
-    int count = codeController.text.split('\n').length;
-    return List.generate(
-      count,
-      (index) => Text(
-        "${index + 1}",
-        style: context.textTheme.bodyMedium!.copyWith(color: theme),
-      ),
-    );
-  }
-
   @override
   Widget build(BuildContext context) {
-    PreviewConfigurations configs = ref.watch(configurationsProvider);
-
     return Padding(
-      padding: EdgeInsets.symmetric(horizontal: 5.w),
-      child: SingleChildScrollView(
-        child: Column(
-          children: [
-            SizedBox(
-              height: 30.h,
-            ),
-            Center(
-              child: ComboBox(
-                height: 45.h,
-                width: 150.w,
-                items: shaders,
-                initial: initial,
-                hint: "Choose Shader",
+      padding: EdgeInsets.symmetric(horizontal: 20.w),
+      child: Column(
+        children: [
+          Row(
+            mainAxisAlignment: MainAxisAlignment.spaceAround,
+            children: [
+              Text("Vertex",
+                  style: context.textTheme.bodyLarge!.copyWith(color: theme)),
+              Checkbox(
+                checkColor: mainDark,
+                fillColor: MaterialStateProperty.all(appYellow),
+                value: initial == shaders[0],
                 onChanged: (val) => setState(() {
-                  initial = val;
-                  codeController.text = (initial == shaders[0])
-                      ? ref.read(vertexShaderProvider)
-                      : ref.read(fragmentShaderProvider);
+                  if (initial != shaders[0]) {
+                    initial = shaders[0];
+                    codeController.text =
+                        ref.watch(vertexShaderProvider.notifier).state;
+                  }
                 }),
               ),
-            ),
-            SizedBox(height: 30.h),
-            SizedBox(
-              height: 600.h,
-              child: SingleChildScrollView(
-                child: Row(
-                  crossAxisAlignment: CrossAxisAlignment.start,
-                  children: [
-                    Container(
-                      width: 30.w,
-                      color: Colors.transparent,
-                      padding: EdgeInsets.symmetric(vertical: 5.h),
-                      child: Column(
-                        mainAxisAlignment: MainAxisAlignment.start,
-                        crossAxisAlignment: CrossAxisAlignment.center,
-                        children: lineNumbers(context),
+              Text("Fragment",
+                  style: context.textTheme.bodyLarge!.copyWith(color: theme)),
+              Checkbox(
+                checkColor: mainDark,
+                fillColor: MaterialStateProperty.all(appYellow),
+                value: initial == shaders[1],
+                onChanged: (val) => setState(() {
+                  if (initial != shaders[1]) {
+                    initial = shaders[1];
+                    codeController.text =
+                        ref.watch(fragmentShaderProvider.notifier).state;
+                  }
+                }),
+              ),
+            ],
+          ),
+          SizedBox(height: 30.h),
+          Expanded(
+            child: ListView.separated(
+              itemBuilder: (context, index) {
+                if (index == 0) {
+                  return MainCodeBlock(
+                    config: configs[index],
+                    controller: codeController,
+                  );
+                }
+
+                return CodeBlock(
+                  config: configs[index],
+                  onDelete: () => setState(
+                    () => configs.removeAt(index),
+                  ),
+                  onEdit: () => Navigator.of(context).push(
+                    MaterialPageRoute(
+                      builder: (_) => FunctionCreator(
+                        config: configs[index],
+                        create: false,
                       ),
                     ),
-                    Expanded(
-                        child: TextField(
-                      controller: codeController,
-                      keyboardType: TextInputType.multiline,
-                      minLines: null,
-                      maxLines: null,
-                      cursorColor: appYellow,
-                      textAlign: TextAlign.left,
-                      textAlignVertical: TextAlignVertical.top,
-                      textCapitalization: TextCapitalization.none,
-                      scrollPhysics: const NeverScrollableScrollPhysics(),
-                      textInputAction: TextInputAction.newline,
-                      style: context.textTheme.bodyMedium!.copyWith(color: theme),
-                      decoration: InputDecoration(
-                        fillColor: search.withOpacity(0.1),
-                        filled: true,
-                        contentPadding: EdgeInsets.all(5.r),
-                        border: InputBorder.none,
-                        enabledBorder: InputBorder.none,
-                        focusedBorder: InputBorder.none,
-                      ),
-                      onChanged: (val) {
-                        if (initial == shaders[0]) {
-                          ref.watch(vertexShaderProvider.notifier).state =
-                              codeController.text;
-                        } else {
-                          ref.watch(fragmentShaderProvider.notifier).state =
-                              codeController.text;
-                        }
-
-                        if (ref.read(hotCompileProvider)) {
-                          createNewShader(ref);
-                        }
-
-                        setState(() {});
-                      },
-                    )),
-                  ],
-                ),
-              ),
+                  ),
+                );
+              },
+              separatorBuilder: (_, __) => SizedBox(height: 30.h),
+              itemCount: configs.length,
             ),
-          ],
-        ),
+          )
+        ],
       ),
     );
   }

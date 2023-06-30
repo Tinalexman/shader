@@ -1,3 +1,4 @@
+import 'package:equatable/equatable.dart';
 import 'package:flutter/material.dart';
 
 
@@ -37,3 +38,25 @@ void main()
 """;
 
 const double oneOver255 = 0.003921568627450980392;
+
+
+
+class Holder extends Equatable {
+  String name;
+  bool selected;
+
+  Holder({this.name = "", this.selected = false});
+
+  @override
+  List<Object?> get props => [ name ];
+}
+
+
+List<Holder> get returnTypes => [
+  Holder(name: "float"),
+  Holder(name: "int"),
+  Holder(name: "vec2"),
+  Holder(name: "vec3"),
+  Holder(name: "vec4"),
+  Holder(name: "void")
+];

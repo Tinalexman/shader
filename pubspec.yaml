@@ -28,8 +28,7 @@ dependencies:
   flutter_svg:
   flex_color_picker:
   introduction_screen:
-  vitality:
-  animate_gradient:
+  equatable:
   is_first_run:
 
 dev_dependencies:
