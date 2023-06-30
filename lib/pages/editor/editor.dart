@@ -1,7 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
 import 'package:shade/utils/providers.dart';
-import 'package:shade/shader/dream_shader.dart';
+import 'package:shade/shader/shader.dart';
 import 'package:shade/utils/constants.dart';
 import 'package:flex_color_picker/flex_color_picker.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
@@ -17,39 +17,36 @@ class CodeEditor extends ConsumerStatefulWidget {
   ConsumerState<CodeEditor> createState() => _CodeEditorState();
 }
 
-class _CodeEditorState extends ConsumerState<CodeEditor>
-    with SingleTickerProviderStateMixin {
-  late TextEditingController vertexController, fragmentController;
-  late TabController tabController;
+class _CodeEditorState extends ConsumerState<CodeEditor> {
+  late TextEditingController codeController;
+
+  final List<String> shaders = ["Vertex Shader", "Fragment Shader"];
+
+  late String initial;
 
   @override
   void initState() {
     super.initState();
-    vertexController = TextEditingController();
-    fragmentController = TextEditingController();
-
-    vertexController.text = ref.read(vertexShaderProvider);
-    fragmentController.text = ref.read(fragmentShaderProvider);
-
-    tabController = TabController(length: 3, vsync: this);
+    codeController =
+        TextEditingController(text: ref.read(vertexShaderProvider));
+    initial = shaders[0];
   }
 
   @override
   void dispose() {
-    tabController.dispose();
-    fragmentController.dispose();
-    vertexController.dispose();
+    codeController.dispose();
     super.dispose();
   }
 
   List<Widget> lineNumbers(BuildContext context) {
-    int count = vertexController.text.split('\n').length;
+    int count = codeController.text.split('\n').length;
     return List.generate(
-        count,
-        (index) => Text(
-              "${index + 1}",
-              style: context.textTheme.bodyMedium!.copyWith(color: theme),
-            ));
+      count,
+      (index) => Text(
+        "${index + 1}",
+        style: context.textTheme.bodyMedium!.copyWith(color: theme),
+      ),
+    );
   }
 
   @override
@@ -61,206 +58,81 @@ class _CodeEditorState extends ConsumerState<CodeEditor>
       child: SingleChildScrollView(
         child: Column(
           children: [
-            TabBar(
-              controller: tabController,
-              dividerColor: appYellow,
-              tabs: [
-                Tab(
-                  child: Text("Vertex",
-                      style:
-                          context.textTheme.bodyMedium!.copyWith(color: theme)),
-                ),
-                Tab(
-                  child: Text("Fragment",
-                      style:
-                          context.textTheme.bodyMedium!.copyWith(color: theme)),
-                ),
-                Tab(
-                  child: Text("Scene",
-                      style:
-                          context.textTheme.bodyMedium!.copyWith(color: theme)),
-                ),
-              ],
+            SizedBox(
+              height: 30.h,
             ),
+            Center(
+              child: ComboBox(
+                height: 45.h,
+                width: 150.w,
+                items: shaders,
+                initial: initial,
+                hint: "Choose Shader",
+                onChanged: (val) => setState(() {
+                  initial = val;
+                  codeController.text = (initial == shaders[0])
+                      ? ref.read(vertexShaderProvider)
+                      : ref.read(fragmentShaderProvider);
+                }),
+              ),
+            ),
+            SizedBox(height: 30.h),
             SizedBox(
               height: 600.h,
-              child: TabBarView(controller: tabController, children: [
-                SizedBox(
-                  height: 600.h,
-                  child: Row(
-                    crossAxisAlignment: CrossAxisAlignment.start,
-                    children: [
-                      SizedBox(
-                        width: 30.w,
-                        child: Column(
-                          crossAxisAlignment: CrossAxisAlignment.start,
-                          children: lineNumbers(context),
-                        ),
-                      ),
-                      Expanded(
-                          child: TextField(
-                        controller: vertexController,
-                        keyboardType: TextInputType.multiline,
-                        minLines: null,
-                        maxLines: null,
-                        cursorColor: appYellow,
-                        textAlign: TextAlign.left,
-                        textAlignVertical: TextAlignVertical.top,
-                        textCapitalization: TextCapitalization.none,
-                        scrollPhysics: const NeverScrollableScrollPhysics(),
-                        textInputAction: TextInputAction.newline,
-                        style: context.textTheme.bodyMedium!
-                            .copyWith(color: theme),
-                        decoration: InputDecoration(
-                          fillColor: search,
-                          filled: true,
-                          contentPadding: EdgeInsets.all(5.r),
-                          border: InputBorder.none,
-                          enabledBorder: InputBorder.none,
-                          focusedBorder: InputBorder.none,
-                        ),
-                        onChanged: (val) {
-                          ref.watch(vertexShaderProvider.notifier).state =
-                              vertexController.text;
-
-                          if (ref.read(hotCompileProvider)) {
-                            createNewShader(ref);
-                          }
-
-                          setState(() {});
-                        },
-                      )),
-                    ],
-                  ),
-                ),
-                SizedBox(
-                  height: 600.h,
-                  child: Row(
-                    crossAxisAlignment: CrossAxisAlignment.start,
-                    children: [
-                      SizedBox(
-                        width: 30.w,
-                        child: Column(
-                          crossAxisAlignment: CrossAxisAlignment.start,
-                          children: lineNumbers(context),
-                        ),
-                      ),
-                      Expanded(
-                          child: TextField(
-                        controller: fragmentController,
-                        keyboardType: TextInputType.multiline,
-                        minLines: null,
-                        maxLines: null,
-                        cursorColor: appYellow,
-                        textAlign: TextAlign.left,
-                        textAlignVertical: TextAlignVertical.top,
-                        textCapitalization: TextCapitalization.none,
-                        //expands: true,
-                        scrollPhysics: const NeverScrollableScrollPhysics(),
-                        //maxLengthEnforcement: MaxLengthEnforcement.none,
-                        textInputAction: TextInputAction.newline,
-                        style: context.textTheme.bodyMedium!
-                            .copyWith(color: theme),
-                        decoration: InputDecoration(
-                          fillColor: search,
-                          filled: true,
-                          contentPadding: EdgeInsets.all(5.r),
-                          border: InputBorder.none,
-                          enabledBorder: InputBorder.none,
-                          focusedBorder: InputBorder.none,
-                        ),
-                        onChanged: (val) {
-                          ref.watch(fragmentShaderProvider.notifier).state =
-                              fragmentController.text;
-
-                          if (ref.read(hotCompileProvider)) {
-                            createNewShader(ref);
-                          }
-
-                          setState(() {});
-                        },
-                      )),
-                    ],
-                  ),
-                ),
-                SizedBox(
-                  height: 600.h,
-                  child: Padding(
-                    padding: EdgeInsets.symmetric(horizontal: 5.w),
-                    child: SingleChildScrollView(
+              child: SingleChildScrollView(
+                child: Row(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    Container(
+                      width: 30.w,
+                      color: Colors.transparent,
+                      padding: EdgeInsets.symmetric(vertical: 5.h),
                       child: Column(
-                        crossAxisAlignment: CrossAxisAlignment.start,
-                        children: [
-                          SizedBox(
-                            height: 30.h,
-                          ),
-                          Wrap(
-                            spacing: 5.w,
-                            children: [
-                              Text('Scene Name:',
-                                  style: context.textTheme.bodyMedium!
-                                      .copyWith(color: theme),
-                              ),
-                              Text('testScene',
-                                style: context.textTheme.bodyMedium!
-                                    .copyWith(color: theme, fontWeight: FontWeight.w600),
-                              ),
-                            ],
-                          ),
-                          Wrap(
-                            spacing: 5.w,
-                            children: [
-                              Text('Scene Size:',
-                                style: context.textTheme.bodyMedium!
-                                    .copyWith(color: theme),
-                              ),
-                              Text('2.7 kilobytes',
-                                style: context.textTheme.bodyMedium!
-                                    .copyWith(color: theme, fontWeight: FontWeight.w600),
-                              ),
-                            ],
-                          ),
-                          SizedBox(
-                            height: 20.h,
-                          ),
-                          ListTile(
-                            title: Text(
-                              "Clear Color",
-                              style: context.textTheme.bodyMedium!.copyWith(
-                                  color: theme, fontWeight: FontWeight.w600),
-                            ),
-                            onTap: () async => colorPickerDialog(context),
-                            subtitle: Text(
-                                "Background Color for shader preview",
-                                style: context.textTheme.bodyMedium!.copyWith(
-                                    color: theme, fontWeight: FontWeight.w300)),
-                            trailing: ColorIndicator(
-                              color: configs.clearColor,
-                              onSelectFocus: false,
-                            ),
-                          ),
-                          Slide(
-                            header: "Meshes",
-                            content: Column(
-                              crossAxisAlignment: CrossAxisAlignment.start,
-                              children: [
-                                Text(
-                                  "Hello",
-                                  style: context.textTheme.bodyMedium!
-                                      .copyWith(color: theme),
-                                ),
-                                Text("Here",
-                                    style: context.textTheme.bodyMedium!
-                                        .copyWith(color: theme))
-                              ],
-                            ),
-                          )
-                        ],
+                        mainAxisAlignment: MainAxisAlignment.start,
+                        crossAxisAlignment: CrossAxisAlignment.center,
+                        children: lineNumbers(context),
                       ),
                     ),
-                  ),
-                )
-              ]),
+                    Expanded(
+                        child: TextField(
+                      controller: codeController,
+                      keyboardType: TextInputType.multiline,
+                      minLines: null,
+                      maxLines: null,
+                      cursorColor: appYellow,
+                      textAlign: TextAlign.left,
+                      textAlignVertical: TextAlignVertical.top,
+                      textCapitalization: TextCapitalization.none,
+                      scrollPhysics: const NeverScrollableScrollPhysics(),
+                      textInputAction: TextInputAction.newline,
+                      style: context.textTheme.bodyMedium!.copyWith(color: theme),
+                      decoration: InputDecoration(
+                        fillColor: search.withOpacity(0.1),
+                        filled: true,
+                        contentPadding: EdgeInsets.all(5.r),
+                        border: InputBorder.none,
+                        enabledBorder: InputBorder.none,
+                        focusedBorder: InputBorder.none,
+                      ),
+                      onChanged: (val) {
+                        if (initial == shaders[0]) {
+                          ref.watch(vertexShaderProvider.notifier).state =
+                              codeController.text;
+                        } else {
+                          ref.watch(fragmentShaderProvider.notifier).state =
+                              codeController.text;
+                        }
+
+                        if (ref.read(hotCompileProvider)) {
+                          createNewShader(ref);
+                        }
+
+                        setState(() {});
+                      },
+                    )),
+                  ],
+                ),
+              ),
             ),
           ],
         ),

@@ -1,9 +1,10 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
+import 'package:shade/pages/others/settings.dart';
 import 'package:shade/utils/constants.dart';
 import 'package:shade/utils/theme.dart';
 
-import 'editor/shade_maker.dart';
+import '../editor/shade_maker.dart';
 
 class MenuScreen extends StatefulWidget {
   const MenuScreen({super.key});
@@ -20,21 +21,28 @@ class _MenuScreenState extends State<MenuScreen> {
       appBar: AppBar(
         backgroundColor: mainDark,
         elevation: 0.0,
-        title: Text("Shade",
-            style: context.textTheme.headlineSmall!.copyWith(color: appYellow)),
+        title: Image.asset(
+          'assets/icon.png',
+          width: 50.r,
+          height: 50.r,
+        ),
       ),
       body: SafeArea(
         child: Padding(
-          padding: EdgeInsets.symmetric(horizontal: 10.w),
+          padding: EdgeInsets.symmetric(horizontal: 20.w),
           child: SingleChildScrollView(
             child: Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
               children: [
                 SizedBox(height: 30.h),
-                Text("data",
+                Text("Hi!",
+                    style: context.textTheme.headlineLarge!
+                        .copyWith(color: theme)),
+                Text("What would you like to do today?",
                     style: context.textTheme.bodyLarge!.copyWith(color: theme)),
                 SizedBox(height: 50.h),
                 Row(
-                  mainAxisAlignment: MainAxisAlignment.spaceAround,
+                  mainAxisAlignment: MainAxisAlignment.spaceBetween,
                   children: [
                     ShadeAction(
                       icon:
@@ -54,10 +62,24 @@ class _MenuScreenState extends State<MenuScreen> {
                       icon: Icon(Icons.settings_rounded,
                           color: appYellow, size: 24.r),
                       text: "Settings",
-                      onTap: () {},
+                      onTap: () => Navigator.of(context).push(
+                        MaterialPageRoute(
+                          builder: (_) => const SettingsPage(),
+                        ),
+                      ),
                     ),
                   ],
                 ),
+                SizedBox(
+                  height: 50.h,
+                ),
+                Align(
+                  alignment: Alignment.bottomCenter,
+                  child: Text("By The Dreamer",
+                      style:
+                          context.textTheme.bodySmall!.copyWith(color: theme),
+                  ),
+                )
               ],
             ),
           ),

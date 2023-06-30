@@ -7,8 +7,8 @@ import 'package:flutter_gl/flutter_gl.dart';
 import 'package:flutter_gl/native-array/NativeArray.app.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
-import 'package:shade/shader/dream_mesh.dart';
-import 'package:shade/shader/dream_shader.dart';
+import 'package:shade/shader/mesh.dart';
+import 'package:shade/shader/shader.dart';
 import 'package:shade/utils/constants.dart';
 import 'package:shade/utils/providers.dart';
 

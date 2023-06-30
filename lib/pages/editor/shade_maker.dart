@@ -43,6 +43,7 @@ class _SceneEditorState extends ConsumerState<SceneEditor> {
                   child: Column(
                     crossAxisAlignment: CrossAxisAlignment.center,
                     children: [
+
                       Text("Shade",
                           style: context.textTheme.headlineSmall!
                               .copyWith(color: appYellow)),
@@ -76,6 +77,21 @@ class _SceneEditorState extends ConsumerState<SceneEditor> {
                         fillColor: MaterialStateProperty.all(theme),
                       ),
                     ),
+                    ListTile(
+                      title: Text("Landscape Mode",
+                          style: context.textTheme.bodyMedium!.copyWith(
+                              color: theme, fontWeight: FontWeight.w600)),
+                      subtitle: Text("Rotate the shader output",
+                          style: context.textTheme.bodyMedium!.copyWith(
+                              color: theme, fontWeight: FontWeight.w300)),
+                      trailing: Checkbox(
+                        value: true,
+                        onChanged: (val) {},
+                        activeColor: appYellow,
+                        checkColor: mainDark,
+                        fillColor: MaterialStateProperty.all(theme),
+                      ),
+                    ),
                   ],
                 ),
               ),
@@ -85,6 +101,7 @@ class _SceneEditorState extends ConsumerState<SceneEditor> {
       ),
       backgroundColor: mainDark,
       appBar: AppBar(
+        automaticallyImplyLeading: false,
         backgroundColor: mainDark,
         elevation: 0.0,
         title: Text("Shade",

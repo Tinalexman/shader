@@ -1,5 +1,5 @@
 import 'package:flutter_riverpod/flutter_riverpod.dart';
-import 'package:shade/shader/dream_shader.dart';
+import 'package:shade/shader/shader.dart';
 import 'package:shade/utils/constants.dart';
 
 import 'package:shade/utils/shader_preview_config.dart';

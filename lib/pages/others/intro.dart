@@ -2,7 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
 import 'package:introduction_screen/introduction_screen.dart';
 import 'package:is_first_run/is_first_run.dart';
-import 'package:shade/pages/menu.dart';
+import 'package:shade/pages/others/menu.dart';
 import 'package:shade/utils/constants.dart';
 import 'package:shade/utils/theme.dart';
 import 'package:animate_gradient/animate_gradient.dart';
@@ -25,19 +25,23 @@ class _SplashState extends State<Splash> with SingleTickerProviderStateMixin {
 
     controller = AnimationController(
       vsync: this,
-      duration: const Duration(seconds: 2),
-      reverseDuration: const Duration(seconds: 2),
+      duration: const Duration(milliseconds: 1500),
+      reverseDuration: const Duration(milliseconds: 1500),
     );
 
     headerAnimation = Tween<double>(begin: 0.0, end: 1.0).animate(
-        CurvedAnimation(
-            parent: controller,
-            curve: const Interval(0.1, 0.5, curve: Curves.easeInOut)));
+      CurvedAnimation(
+        parent: controller,
+        curve: const Interval(0.1, 0.6, curve: Curves.easeInOut),
+      ),
+    );
 
     trailingAnimation = Tween<double>(begin: 0.0, end: 1.0).animate(
-        CurvedAnimation(
-            parent: controller,
-            curve: const Interval(0.6, 1.0, curve: Curves.easeInOutCubic)));
+      CurvedAnimation(
+        parent: controller,
+        curve: const Interval(0.3, 0.9, curve: Curves.fastOutSlowIn),
+      ),
+    );
 
     controller.forward().then(
           (_) => controller.reverse().then(
@@ -67,50 +71,46 @@ class _SplashState extends State<Splash> with SingleTickerProviderStateMixin {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      body: AnimateGradient(
-        duration: const Duration(seconds: 4),
-        animateAlignments: true,
-        primaryBegin: Alignment.topLeft,
-        primaryEnd: Alignment.bottomLeft,
-        secondaryBegin: Alignment.bottomLeft,
-        secondaryEnd: Alignment.topRight,
-        primaryColors: const [
-          Colors.yellowAccent,
-          Colors.orangeAccent,
-        ],
-        secondaryColors: const [percentRed, containerRed],
-        child: Container(
-          width: 390.w,
-          color: Colors.transparent,
-          child: Column(
-            mainAxisAlignment: MainAxisAlignment.center,
-            crossAxisAlignment: CrossAxisAlignment.center,
-            children: [
-              FadeTransition(
-                opacity: headerAnimation,
-                child: Text(
-                  "Shade",
-                  style: context.textTheme.headlineLarge!
-                      .copyWith(color: theme, fontSize: 48.sp),
-                ),
+      backgroundColor: mainDark,
+      body: Center(
+        child: Column(
+          mainAxisAlignment: MainAxisAlignment.center,
+          crossAxisAlignment: CrossAxisAlignment.center,
+          children: [
+            FadeTransition(
+              opacity: headerAnimation,
+              child: Image.asset('assets/icon.png'),
+            ),
+            FadeTransition(
+              opacity: trailingAnimation,
+              child: Text(
+                "Shade",
+                style: context.textTheme.headlineMedium!.copyWith(color: theme),
               ),
-              SizedBox(
-                height: 50.h,
-              ),
-              FadeTransition(
-                opacity: trailingAnimation,
-                child: Text(
-                  "By The Dreamer",
-                  style: context.textTheme.bodyLarge!.copyWith(color: theme),
-                ),
-              )
-            ],
-          ),
+            )
+          ],
         ),
       ),
     );
   }
 }
+
+// AnimateGradient(
+// duration: const Duration(seconds: 4),
+// animateAlignments: true,
+// primaryBegin: Alignment.topLeft,
+// primaryEnd: Alignment.bottomLeft,
+// secondaryBegin: Alignment.bottomLeft,
+// secondaryEnd: Alignment.topRight,
+// primaryColors: const [
+// Colors.yellowAccent,
+// Colors.orangeAccent,
+// ],
+// secondaryColors: const [percentRed, containerRed],
+// child: ,
+// )
+
+
 
 class _OnboardScreen extends StatefulWidget {
   @override
