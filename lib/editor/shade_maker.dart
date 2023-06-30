@@ -47,18 +47,21 @@ class _SceneEditorState extends ConsumerState<SceneEditor> {
                           style: context.textTheme.headlineSmall!
                               .copyWith(color: appYellow)),
                       Text("Your imagination is your limit",
-                          style: context.textTheme.bodyLarge!.copyWith(color: theme))
+                          style: context.textTheme.bodyLarge!
+                              .copyWith(color: theme))
                     ],
                   ),
                 ),
               ),
               SizedBox(height: 10.h),
-              const Divider(color: neutral3,),
+              const Divider(
+                color: neutral3,
+              ),
               Expanded(
                 child: ListView(
                   children: [
                     ListTile(
-                      title: Text("Hot Recompile",
+                      title: Text("Hot Recompile (Buggy)",
                           style: context.textTheme.bodyMedium!.copyWith(
                               color: theme, fontWeight: FontWeight.w600)),
                       subtitle: Text("Recompile shader on source change",
@@ -137,16 +140,22 @@ class _SceneEditorState extends ConsumerState<SceneEditor> {
       floatingActionButton: page == 0
           ? FloatingActionButton(
               elevation: 2.0,
-              tooltip: 'Render',
-              child: const Icon(
-                Icons.format_paint_rounded,
-                color: headerColor,
+              tooltip: 'Start/Stop Render',
+              child: Icon(
+                ref.watch(renderProvider)
+                    ? Icons.stop_rounded
+                    : Icons.play_arrow_rounded,
+                color: mainDark,
+                size: 26.r,
               ),
               onPressed: () {
                 unFocus();
                 bool lastState = ref.watch(renderProvider.notifier).state;
                 ref.watch(renderProvider.notifier).state = !lastState;
-                ref.watch(tabProvider.notifier).state = 1;
+
+                if(ref.read(renderProvider)) {
+                  ref.watch(tabProvider.notifier).state = 1;
+                }
 
                 createNewShader(ref);
               },

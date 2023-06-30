@@ -1,16 +1,11 @@
-
+import 'package:flutter/material.dart';
 
 
 class PreviewConfigurations
 {
-  double cR = 0.1;
-  double cG = 0.1;
-  double cB = 0.1;
-  double cA = 1.0;
+  Color clearColor = const Color.fromARGB(255, 20, 20, 20);
 
 
 
   PreviewConfigurations();
-
-
 }

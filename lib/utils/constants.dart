@@ -32,3 +32,5 @@ void main() {
   gl_FragColor = vec4(0.8, 0.62, 0.2, 1.0);
 }
 """;
+
+const double oneOver255 = 0.003921568627450980392;

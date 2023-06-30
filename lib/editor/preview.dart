@@ -1,15 +1,18 @@
 import 'dart:async';
 import 'dart:developer' as d;
+import 'dart:math';
 
 import 'package:flutter/material.dart';
 import 'package:flutter_gl/flutter_gl.dart';
 import 'package:flutter_gl/native-array/NativeArray.app.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
-import 'package:shade/utils/providers.dart';
+import 'package:flutter_screenutil/flutter_screenutil.dart';
 import 'package:shade/shader/dream_mesh.dart';
 import 'package:shade/shader/dream_shader.dart';
 import 'package:shade/utils/constants.dart';
-import 'package:shade/utils/shader_preview_config.dart';
+import 'package:shade/utils/providers.dart';
+
+import '../utils/theme.dart';
 
 class ShaderPreview extends ConsumerStatefulWidget {
   const ShaderPreview({Key? key}) : super(key: key);
@@ -34,9 +37,10 @@ class _ShaderPreviewState extends ConsumerState<ShaderPreview> {
 
   bool initialized = false;
 
+  final double delta = 0.035;
 
   late DreamMesh dreamMesh;
-  late Timer timer;
+  Timer? timer;
 
   @override
   void dispose() {
@@ -115,29 +119,49 @@ class _ShaderPreviewState extends ConsumerState<ShaderPreview> {
 
   @override
   Widget build(BuildContext context) {
-    ref.watch(renderProvider);
+    bool renderState = ref.watch(renderProvider);
 
     return SizedBox(
-      child: Center(
-        child: SizedBox(
-          width: width,
-          height: width,
-          child: Builder(builder: (context) {
-            if(initialized) {
-              render();
-            }
+      height: width * 2,
+      child: Column(
+        mainAxisAlignment: MainAxisAlignment.center,
+        children: [
+          Text(
+            renderState ? "Rendering" : "Stopped",
+            style: context.textTheme.bodyLarge!.copyWith(
+              fontWeight: FontWeight.w600,
+              color: renderState ? appYellow : theme,
+            ),
+          ),
+          SizedBox(height: 20.h),
+          SizedBox(
+            width: width,
+            height: width,
+            child: Builder(builder: (_) {
+              if (initialized) {
+                if (renderState && timer == null) {
+                  timer =
+                      Timer.periodic(const Duration(milliseconds: 33), animate);
+                } else {
+                  timer?.cancel();
+                  timer = null;
+                }
+              }
 
-            return flutterGlPlugin.isInitialized
-                ? Texture(
-                    textureId: flutterGlPlugin.textureId!,
-                    filterQuality: FilterQuality.medium,
-                  )
-                : const SizedBox();
-          }),
-        ),
+              return flutterGlPlugin.isInitialized
+                  ? Texture(
+                      textureId: flutterGlPlugin.textureId!,
+                      filterQuality: FilterQuality.medium,
+                    )
+                  : const SizedBox();
+            }),
+          ),
+        ],
       ),
     );
   }
+
+  void animate(timer) => render();
 
   void render() {
     if (!flutterGlPlugin.isInitialized || dreamMesh.vertexArrayObject == null) {
@@ -146,13 +170,18 @@ class _ShaderPreviewState extends ConsumerState<ShaderPreview> {
 
     final gl = ref.watch(glProvider);
     DreamShader shader = ref.watch(shaderProvider);
-    PreviewConfigurations config = ref.watch(configurationsProvider);
+    Color color =
+        ref.watch(configurationsProvider.select((value) => value.clearColor));
 
     gl.viewport(0, 0, (width * devicePixelRatio).toInt(),
         (height * devicePixelRatio).toInt());
 
+    double r = color.red * oneOver255,
+        g = color.green * oneOver255,
+        b = color.blue * oneOver255,
+        a = color.alpha * oneOver255;
 
-    gl.clearColor(config.cR, config.cG, config.cB, config.cA);
+    gl.clearColor(r, g, b, a);
     gl.clear(gl.COLOR_BUFFER_BIT);
 
     gl.bindVertexArray(dreamMesh.vertexArrayObject);
@@ -171,7 +200,10 @@ class _ShaderPreviewState extends ConsumerState<ShaderPreview> {
   void prepare() {
     final gl = ref.watch(glProvider);
 
-    if (!ref.watch(shaderProvider.notifier).state.create(gl, defaultVs, defaultFs)) {
+    if (!ref
+        .watch(shaderProvider.notifier)
+        .state
+        .create(gl, defaultVs, defaultFs)) {
       d.log('Failed to initialize shaders.');
       return;
     }

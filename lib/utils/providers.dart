@@ -6,7 +6,7 @@ import 'package:shade/utils/shader_preview_config.dart';
 
 
 // FOR EDITOR
-final StateProvider<bool> renderProvider = StateProvider((ref) => true);
+final StateProvider<bool> renderProvider = StateProvider((ref) => false);
 final StateProvider<int> tabProvider = StateProvider((ref) => 0);
 
 
