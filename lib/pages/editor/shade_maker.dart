@@ -1,13 +1,13 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
-import 'package:shade/editor/editor.dart';
-import 'package:shade/editor/preview.dart';
+import 'package:shade/pages/editor/editor.dart';
+import 'package:shade/pages/editor/preview.dart';
 import 'package:shade/utils/constants.dart';
 
 import 'package:shade/utils/providers.dart';
 
-import '../utils/theme.dart';
+import '../../utils/theme.dart';
 
 const List<Widget> pages = [CodeEditor(), ShaderPreview()];
 

@@ -15,7 +15,9 @@ const String defaultVs =
 #define varying out
 
 layout (location = 0) in vec3 a_Position;
-void main() {
+
+void main() 
+{
     gl_Position = vec4(a_Position, 1.0);
 }
 """
@@ -28,8 +30,9 @@ const String defaultFs =
 out highp vec4 pc_fragColor;
 #define gl_FragColor pc_fragColor
 
-void main() {
-  gl_FragColor = vec4(0.8, 0.62, 0.2, 1.0);
+void main() 
+{
+  gl_FragColor = vec4(1.0);
 }
 """;
 

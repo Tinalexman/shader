@@ -25,7 +25,12 @@ dependencies:
   flutter_gl:
   flutter_prism:
   flutter_riverpod:
+  flutter_svg:
   flex_color_picker:
+  introduction_screen:
+  vitality:
+  animate_gradient:
+  is_first_run:
 
 dev_dependencies:
   flutter_test:

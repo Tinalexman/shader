@@ -12,7 +12,7 @@ import 'package:shade/shader/dream_shader.dart';
 import 'package:shade/utils/constants.dart';
 import 'package:shade/utils/providers.dart';
 
-import '../utils/theme.dart';
+import '../../utils/theme.dart';
 
 class ShaderPreview extends ConsumerStatefulWidget {
   const ShaderPreview({Key? key}) : super(key: key);

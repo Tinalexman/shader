@@ -7,8 +7,8 @@ import 'package:flex_color_picker/flex_color_picker.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:shade/utils/shader_preview_config.dart';
 
-import '../utils/theme.dart';
-import '../utils/widgets.dart';
+import '../../utils/theme.dart';
+import '../../utils/widgets.dart';
 
 class CodeEditor extends ConsumerStatefulWidget {
   const CodeEditor({Key? key}) : super(key: key);
@@ -194,14 +194,6 @@ class _CodeEditorState extends ConsumerState<CodeEditor>
                           SizedBox(
                             height: 30.h,
                           ),
-                          Text(
-                            "Scene Details",
-                            style: context.textTheme.bodyLarge!.copyWith(
-                                fontWeight: FontWeight.w600, color: theme),
-                          ),
-                          SizedBox(
-                            height: 10.h,
-                          ),
                           Wrap(
                             spacing: 5.w,
                             children: [
@@ -229,15 +221,7 @@ class _CodeEditorState extends ConsumerState<CodeEditor>
                             ],
                           ),
                           SizedBox(
-                            height: 30.h,
-                          ),
-                          Text(
-                            "Shader Configurations",
-                            style: context.textTheme.bodyLarge!.copyWith(
-                                fontWeight: FontWeight.w600, color: theme),
-                          ),
-                          SizedBox(
-                            height: 10.h,
+                            height: 20.h,
                           ),
                           ListTile(
                             title: Text(
