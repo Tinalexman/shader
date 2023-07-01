@@ -2,9 +2,6 @@ import 'package:flutter/material.dart';
 import 'package:shade/utils/constants.dart';
 import 'package:shade/utils/theme.dart';
 
-
-
-
 class SettingsPage extends StatefulWidget {
   const SettingsPage({super.key});
 
@@ -18,7 +15,10 @@ class _SettingsPageState extends State<SettingsPage> {
     return Scaffold(
       backgroundColor: mainDark,
       appBar: AppBar(
-        title: Text("Shade Settings", style: context.textTheme.headlineSmall!.copyWith(color: theme),),
+        title: Text(
+          "Global Settings",
+          style: context.textTheme.headlineSmall!.copyWith(color: theme),
+        ),
         elevation: 0.0,
         backgroundColor: mainDark,
         automaticallyImplyLeading: false,
@@ -26,9 +26,7 @@ class _SettingsPageState extends State<SettingsPage> {
       body: SafeArea(
         child: SingleChildScrollView(
           child: Column(
-            children: [
-              
-            ],
+            children: [],
           ),
         ),
       ),

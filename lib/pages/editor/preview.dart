@@ -22,14 +22,11 @@ class ShaderPreview extends ConsumerStatefulWidget {
 class _ShaderPreviewState extends ConsumerState<ShaderPreview> {
   late FlutterGlPlugin flutterGlPlugin;
 
-  int? fboId;
-
   late double devicePixelRatio;
   late double width;
   late double height;
 
   dynamic sourceTexture;
-
   dynamic defaultFramebuffer;
   dynamic defaultFramebufferTexture;
 
@@ -168,28 +165,16 @@ class _ShaderPreviewState extends ConsumerState<ShaderPreview> {
 
     final gl = ref.watch(glProvider);
     DreamShader shader = ref.watch(shaderProvider);
-    Color color =
-        ref.watch(configurationsProvider.select((value) => value.clearColor));
 
     gl.viewport(0, 0, (width * devicePixelRatio).toInt(),
         (height * devicePixelRatio).toInt());
-
-    double r = color.red * oneOver255,
-        g = color.green * oneOver255,
-        b = color.blue * oneOver255,
-        a = color.alpha * oneOver255;
-
-    gl.clearColor(r, g, b, a);
+    gl.clearColor(0.0, 0.0, 0.0, 1.0);
     gl.clear(gl.COLOR_BUFFER_BIT);
-
     gl.bindVertexArray(dreamMesh.vertexArrayObject);
-
     gl.useProgram(shader.program);
-
     gl.drawArrays(gl.TRIANGLES, 0, dreamMesh.count);
-
     gl.bindVertexArray(0);
-
+    gl.useProgram(0);
     gl.finish();
 
     flutterGlPlugin.updateTexture(sourceTexture);
@@ -201,7 +186,7 @@ class _ShaderPreviewState extends ConsumerState<ShaderPreview> {
     if (!ref
         .watch(shaderProvider.notifier)
         .state
-        .create(gl, defaultVs, defaultFs)) {
+        .create(gl, defaultVertexShader, defaultFs)) {
       d.log('Failed to initialize shaders.');
       return;
     }
@@ -214,23 +199,23 @@ class _ShaderPreviewState extends ConsumerState<ShaderPreview> {
 
   int initVertexBuffers(gl) {
     var vertices = NativeFloat32Array.from([
-      -0.5,
-      -0.5,
+      -1,
+      -1,
       0,
-      0.5,
-      -0.5,
+      1,
+      -1,
       0,
-      0.5,
-      0.5,
+      1,
+      1,
       0,
-      -0.5,
-      -0.5,
+      -1,
+      -1,
       0,
-      0.5,
-      0.5,
+      1,
+      1,
       0,
-      -0.5,
-      0.5,
+      -1,
+      1,
       0,
     ]);
 

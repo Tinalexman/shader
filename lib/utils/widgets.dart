@@ -7,8 +7,6 @@ import 'package:shade/utils/functions.dart';
 import 'package:shade/utils/providers.dart';
 import 'package:shade/utils/theme.dart';
 
-import 'dart:developer';
-
 class Slide extends StatefulWidget {
   final Widget content;
   final String header;
@@ -188,6 +186,7 @@ class ComboBoxState extends State<ComboBox> {
 class CodeBlockConfig {
   String name;
   String body;
+  String documentation;
   List<String> parameters;
   String returnType;
   bool transparent;
@@ -198,8 +197,9 @@ class CodeBlockConfig {
   final Function? onCodeChange;
 
   CodeBlockConfig({
-    this.name = "empty",
+    this.name = "new",
     this.onCodeChange,
+    this.documentation = "",
     this.declaration = "",
     this.body = "",
     this.isMain = false,
@@ -208,20 +208,15 @@ class CodeBlockConfig {
     this.returnType = "void",
   });
 
-
-
-
   String getCode() => isMain ? _mainCode() : _functionCode();
-
 
   String _mainCode() {
     StringBuffer buffer = StringBuffer();
 
     List<String> declarations = declaration.split("\n");
-    buffer.write("#version 300 es\n");
-
-    for(String dec in declarations) {
+    for (String dec in declarations) {
       buffer.write(dec);
+      buffer.write("\n");
     }
 
     buffer.write("\n\n");
@@ -232,25 +227,23 @@ class CodeBlockConfig {
     buffer.write("void main()\n{\n");
 
     List<String> lines = body.split('\n');
-    for(String line in lines) {
+    for (String line in lines) {
       buffer.write("\t$line");
     }
 
-    buffer.write("}");
+    buffer.write("\n}");
 
     return buffer.toString();
   }
-
-
 
   String _functionCode() {
     StringBuffer buffer = StringBuffer();
 
     buffer.write("$returnType $name(");
 
-    for(int i = 0; i < parameters.length; ++i) {
+    for (int i = 0; i < parameters.length; ++i) {
       buffer.write(parameters[i]);
-      if(i != parameters.length - 1) {
+      if (i != parameters.length - 1) {
         buffer.write(", ");
       }
     }
@@ -258,17 +251,14 @@ class CodeBlockConfig {
     buffer.write(")\n{\n");
 
     List<String> lines = body.split('\n');
-    for(String line in lines) {
+    for (String line in lines) {
       buffer.write("\t$line");
     }
 
-    buffer.write("}");
+    buffer.write("\n}");
 
     return buffer.toString();
   }
-
-
-
 }
 
 class CodeBlock extends ConsumerStatefulWidget {
@@ -336,17 +326,19 @@ class _CodeBlockState extends ConsumerState<CodeBlock> {
                       mainAxisSize: MainAxisSize.min,
                       crossAxisAlignment: CrossAxisAlignment.center,
                       children: [
-                        GestureDetector(
-                          onTap: widget.onEdit,
-                          child: Icon(Icons.edit_rounded,
+                        IconButton(
+                          onPressed: widget.onEdit,
+                          splashRadius: 0.01,
+                          icon: Icon(Icons.edit_rounded,
                               color: _color, size: 16.r),
                         ),
                         SizedBox(
-                          width: 15.w,
+                          width: 20.w,
                         ),
-                        GestureDetector(
-                          onTap: widget.onDelete,
-                          child: Icon(Boxicons.bx_x, color: _color, size: 20.r),
+                        IconButton(
+                          onPressed: widget.onDelete,
+                          splashRadius: 0.01,
+                          icon: Icon(Boxicons.bx_x, color: _color, size: 20.r),
                         ),
                       ],
                     )
@@ -426,13 +418,15 @@ class _MainCodeBlockState extends ConsumerState<MainCodeBlock> {
 
     String code = widget.controller.text;
     int mainIndex = code.indexOf("void main()");
-    String declaration = code.substring(0, mainIndex);
+    String declaration = code.substring(0, mainIndex - 2);
     local = TextEditingController(text: declaration);
+    widget.config.declaration = declaration;
 
     int start = code.indexOf("{", mainIndex);
     int end = code.lastIndexOf("}");
-    String content = code.substring(start + 1, end);
+    String content = code.substring(start + 6, end - 1);
     widget.controller.text = content;
+    widget.config.body = content;
   }
 
   @override
@@ -588,7 +582,7 @@ class _Fragment extends StatelessWidget {
     required this.controller,
     required this.transparent,
     required this.onChanged,
-  }): super(key: key);
+  }) : super(key: key);
 
   @override
   Widget build(BuildContext context) {
@@ -608,9 +602,8 @@ class _Fragment extends StatelessWidget {
           textInputAction: TextInputAction.newline,
           style: context.textTheme.bodyMedium!.copyWith(color: theme),
           decoration: InputDecoration(
-            fillColor: transparent
-                ? Colors.transparent
-                : search.withOpacity(0.1),
+            fillColor:
+                transparent ? Colors.transparent : search.withOpacity(0.1),
             filled: true,
             contentPadding: EdgeInsets.all(5.r),
             border: InputBorder.none,
@@ -623,7 +616,6 @@ class _Fragment extends StatelessWidget {
     );
   }
 }
-
 
 class SpecialForm extends StatelessWidget {
   final Widget? prefix;
@@ -800,6 +792,61 @@ class ReturnTypesState extends State<ReturnTypes> {
             elevation: _types[index].selected ? 1 : 0,
             backgroundColor: _types[index].selected ? appYellow : mainDark,
           ),
+        ),
+      ),
+    );
+  }
+}
+
+class ShadeAction extends StatelessWidget {
+  final Widget icon;
+  final String text;
+  final VoidCallback onTap;
+
+  const ShadeAction({
+    super.key,
+    required this.icon,
+    required this.text,
+    required this.onTap,
+  });
+
+  @override
+  Widget build(BuildContext context) {
+    return GestureDetector(
+      onTap: onTap,
+      child: Container(
+        width: 100.w,
+        padding: EdgeInsets.symmetric(horizontal: 10.w, vertical: 5.h),
+        decoration: BoxDecoration(
+            color: neutral2,
+            borderRadius: BorderRadius.circular(5.r),
+            boxShadow: const [
+              BoxShadow(
+                color: Colors.white12,
+                blurRadius: 0.4,
+                spreadRadius: 1.0,
+              )
+            ]),
+        child: Column(
+          mainAxisAlignment: MainAxisAlignment.center,
+          crossAxisAlignment: CrossAxisAlignment.center,
+          children: [
+            SizedBox(
+              height: 10.h,
+            ),
+            icon,
+            SizedBox(
+              height: 15.h,
+            ),
+            Text(
+              text,
+              style: context.textTheme.bodyMedium!
+                  .copyWith(fontWeight: FontWeight.w600, color: theme),
+            ),
+            SizedBox(
+              height: 5.h,
+            ),
+          ],
         ),
       ),
     );

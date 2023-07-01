@@ -1,4 +1,3 @@
-import 'package:equatable/equatable.dart';
 import 'package:flutter/material.dart';
 
 
@@ -9,7 +8,7 @@ extension BuildExtension on BuildContext
 }
 
 
-const String defaultVs =
+const String defaultVertexShader =
 """
 #version 300 es
 #define attribute in
@@ -37,23 +36,22 @@ void main()
 }
 """;
 
+
+const String defaultBuild =
+"""
+
+""";
+
 const String functionInsertionPoint = "// Insert other functions here";
 
-const double oneOver255 = 0.003921568627450980392;
 
 
 
-class Holder extends Equatable {
+class Holder {
   String name;
   bool selected;
 
   Holder({this.name = "", this.selected = false});
-
-  @override
-  String toString() => "Holder{ name: $name, selected: $selected }";
-
-  @override
-  List<Object?> get props => [ name ];
 }
 
 

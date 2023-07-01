@@ -1,8 +1,8 @@
 import 'package:flutter/material.dart';
-import 'package:flutter_screenutil/flutter_screenutil.dart';
 import 'package:introduction_screen/introduction_screen.dart';
 import 'package:is_first_run/is_first_run.dart';
-import 'package:shade/pages/others/menu.dart';
+import 'package:shade/pages/others/help.dart';
+import 'package:shade/pages/editor/shade.dart';
 import 'package:shade/utils/constants.dart';
 import 'package:shade/utils/theme.dart';
 
@@ -48,7 +48,8 @@ class _SplashState extends State<Splash> with SingleTickerProviderStateMixin {
               IsFirstRun.isFirstCall().then(
                 (first) => Navigator.of(context).pushReplacement(
                   MaterialPageRoute(
-                    builder: (context) => first ? _OnboardScreen() : const MenuScreen(),
+                    builder: (context) =>
+                        first ? _OnboardScreen() : const SceneEditor(),
                   ),
                 ),
               );
@@ -93,7 +94,6 @@ class _SplashState extends State<Splash> with SingleTickerProviderStateMixin {
     );
   }
 }
-
 
 class _OnboardScreen extends StatefulWidget {
   @override
@@ -165,7 +165,7 @@ class _OnboardScreenState extends State<_OnboardScreen> {
         ),
         onDone: () => Navigator.of(context).pushReplacement(
           MaterialPageRoute(
-            builder: (_) => const MenuScreen(),
+            builder: (_) => const Help(),
           ),
         ),
         dotsContainerDecorator: const BoxDecoration(color: mainDark),
