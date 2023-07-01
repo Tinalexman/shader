@@ -117,7 +117,7 @@ class _ShaderPreviewState extends ConsumerState<ShaderPreview> {
 
   @override
   Widget build(BuildContext context) {
-    bool renderState = ref.watch(renderProvider);
+    int renderState = ref.watch(renderProvider);
 
     return SizedBox(
       height: width * 2,
@@ -125,10 +125,10 @@ class _ShaderPreviewState extends ConsumerState<ShaderPreview> {
         mainAxisAlignment: MainAxisAlignment.center,
         children: [
           Text(
-            renderState ? "Rendering at 30 FPS" : "Stopped",
+            ref.read(renderStateProvider),
             style: context.textTheme.bodyLarge!.copyWith(
               fontWeight: FontWeight.w600,
-              color: renderState ? appYellow : theme,
+              color: renderState == 2 ? appYellow : theme,
             ),
           ),
           SizedBox(height: 20.h),
@@ -137,7 +137,7 @@ class _ShaderPreviewState extends ConsumerState<ShaderPreview> {
             height: width,
             child: Builder(builder: (_) {
               if (initialized) {
-                if (renderState && timer == null) {
+                if (renderState == 2 && timer == null) {
                   timer =
                       Timer.periodic(const Duration(milliseconds: 33), animate);
                 } else {

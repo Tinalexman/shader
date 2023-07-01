@@ -1,9 +1,13 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_boxicons/flutter_boxicons.dart';
+import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
 import 'package:shade/utils/constants.dart';
 import 'package:shade/utils/functions.dart';
+import 'package:shade/utils/providers.dart';
 import 'package:shade/utils/theme.dart';
+
+import 'dart:developer';
 
 class Slide extends StatefulWidget {
   final Widget content;
@@ -188,19 +192,86 @@ class CodeBlockConfig {
   String returnType;
   bool transparent;
 
-  final Function onCodeChange;
+  final bool isMain;
+  String declaration;
+
+  final Function? onCodeChange;
 
   CodeBlockConfig({
-    required this.name,
-    required this.onCodeChange,
+    this.name = "empty",
+    this.onCodeChange,
+    this.declaration = "",
     this.body = "",
+    this.isMain = false,
     this.transparent = false,
     this.parameters = const [],
     this.returnType = "void",
   });
+
+
+
+
+  String getCode() => isMain ? _mainCode() : _functionCode();
+
+
+  String _mainCode() {
+    StringBuffer buffer = StringBuffer();
+
+    List<String> declarations = declaration.split("\n");
+    buffer.write("#version 300 es\n");
+
+    for(String dec in declarations) {
+      buffer.write(dec);
+    }
+
+    buffer.write("\n\n");
+
+    buffer.write(functionInsertionPoint);
+
+    buffer.write("\n\n");
+    buffer.write("void main()\n{\n");
+
+    List<String> lines = body.split('\n');
+    for(String line in lines) {
+      buffer.write("\t$line");
+    }
+
+    buffer.write("}");
+
+    return buffer.toString();
+  }
+
+
+
+  String _functionCode() {
+    StringBuffer buffer = StringBuffer();
+
+    buffer.write("$returnType $name(");
+
+    for(int i = 0; i < parameters.length; ++i) {
+      buffer.write(parameters[i]);
+      if(i != parameters.length - 1) {
+        buffer.write(", ");
+      }
+    }
+
+    buffer.write(")\n{\n");
+
+    List<String> lines = body.split('\n');
+    for(String line in lines) {
+      buffer.write("\t$line");
+    }
+
+    buffer.write("}");
+
+    return buffer.toString();
+  }
+
+
+
 }
 
-class CodeBlock extends StatefulWidget {
+class CodeBlock extends ConsumerStatefulWidget {
   final CodeBlockConfig config;
   final VoidCallback onDelete;
   final VoidCallback onEdit;
@@ -213,23 +284,25 @@ class CodeBlock extends StatefulWidget {
   });
 
   @override
-  State<CodeBlock> createState() => _CodeBlockState();
+  ConsumerState<CodeBlock> createState() => _CodeBlockState();
 }
 
-class _CodeBlockState extends State<CodeBlock> {
-  late TextEditingController controller;
-  late Color color;
+class _CodeBlockState extends ConsumerState<CodeBlock> {
+  late TextEditingController _controller;
+  late Color _color;
 
   @override
   void initState() {
     super.initState();
-    controller = TextEditingController(text: widget.config.body);
-    color = randomColor();
+    _controller = TextEditingController(text: widget.config.body);
+    _color = ref.read(randomBlockColorProvider)
+        ? randomColor()
+        : ref.read(fixedCodeBlockColorProvider);
   }
 
   @override
   void dispose() {
-    controller.dispose();
+    _controller.dispose();
     super.dispose();
   }
 
@@ -240,7 +313,7 @@ class _CodeBlockState extends State<CodeBlock> {
       padding: EdgeInsets.only(right: 10.w, top: 10.h, bottom: 15.h),
       decoration: BoxDecoration(
         borderRadius: BorderRadius.circular(20.r),
-        border: Border.all(color: color, width: 2.0),
+        border: Border.all(color: _color, width: 2.0),
         color: Colors.transparent,
       ),
       child: Column(
@@ -257,7 +330,7 @@ class _CodeBlockState extends State<CodeBlock> {
                     Text(
                       "${widget.config.name}: ${widget.config.returnType}",
                       style: context.textTheme.bodyLarge!
-                          .copyWith(fontWeight: FontWeight.w700, color: color),
+                          .copyWith(fontWeight: FontWeight.w700, color: _color),
                     ),
                     Row(
                       mainAxisSize: MainAxisSize.min,
@@ -265,24 +338,28 @@ class _CodeBlockState extends State<CodeBlock> {
                       children: [
                         GestureDetector(
                           onTap: widget.onEdit,
-                          child: Icon(Icons.edit_rounded, color: color, size: 16.r),
+                          child: Icon(Icons.edit_rounded,
+                              color: _color, size: 16.r),
                         ),
-                        SizedBox(width: 15.w,),
+                        SizedBox(
+                          width: 15.w,
+                        ),
                         GestureDetector(
                           onTap: widget.onDelete,
-                          child: Icon(Boxicons.bx_x, color: color, size: 20.r),
+                          child: Icon(Boxicons.bx_x, color: _color, size: 20.r),
                         ),
                       ],
                     )
                   ],
                 ),
                 SizedBox(height: 5.h),
-                Text(
-                  "Parameters",
-                  style: context.textTheme.bodyMedium!
-                      .copyWith(color: color, fontWeight: FontWeight.w500),
-                ),
-                SizedBox(height: 2.h),
+                if (widget.config.parameters.isNotEmpty)
+                  Text(
+                    "Parameters",
+                    style: context.textTheme.bodyMedium!
+                        .copyWith(color: _color, fontWeight: FontWeight.w500),
+                  ),
+                if (widget.config.parameters.isNotEmpty) SizedBox(height: 2.h),
                 Column(
                   crossAxisAlignment: CrossAxisAlignment.start,
                   children: List.generate(
@@ -290,7 +367,7 @@ class _CodeBlockState extends State<CodeBlock> {
                     (index) => Text(
                       "- ${widget.config.parameters[index]}",
                       style: context.textTheme.bodyMedium!
-                          .copyWith(color: color, fontWeight: FontWeight.w300),
+                          .copyWith(color: _color, fontWeight: FontWeight.w300),
                     ),
                   ),
                 ),
@@ -303,15 +380,15 @@ class _CodeBlockState extends State<CodeBlock> {
             child: Text(
               "Code",
               style: context.textTheme.bodyMedium!
-                  .copyWith(color: color, fontWeight: FontWeight.w500),
+                  .copyWith(color: _color, fontWeight: FontWeight.w500),
             ),
           ),
           SizedBox(height: 2.h),
           CodeFragment(
             numberWidth: 25.w,
-            controller: controller,
+            controller: _controller,
             onChanged: (val) {
-              widget.config.onCodeChange(val);
+              widget.config.body = val;
               setState(() {});
             },
             transparent: widget.config.transparent,
@@ -322,7 +399,7 @@ class _CodeBlockState extends State<CodeBlock> {
   }
 }
 
-class MainCodeBlock extends StatefulWidget {
+class MainCodeBlock extends ConsumerStatefulWidget {
   final CodeBlockConfig config;
   final TextEditingController controller;
 
@@ -333,17 +410,19 @@ class MainCodeBlock extends StatefulWidget {
   });
 
   @override
-  State<MainCodeBlock> createState() => MainCodeBlockState();
+  ConsumerState<MainCodeBlock> createState() => _MainCodeBlockState();
 }
 
-class MainCodeBlockState extends State<MainCodeBlock> {
+class _MainCodeBlockState extends ConsumerState<MainCodeBlock> {
   late Color color;
   late TextEditingController local;
 
   @override
   void initState() {
     super.initState();
-    color = randomColor();
+    color = ref.read(randomBlockColorProvider)
+        ? randomColor()
+        : ref.read(fixedCodeBlockColorProvider);
 
     String code = widget.controller.text;
     int mainIndex = code.indexOf("void main()");
@@ -355,8 +434,6 @@ class MainCodeBlockState extends State<MainCodeBlock> {
     String content = code.substring(start + 1, end);
     widget.controller.text = content;
   }
-
-  String getFullCode() => "${local.text}\n\n {\n\t${widget.controller.text}}";
 
   @override
   void dispose() {
@@ -402,7 +479,10 @@ class MainCodeBlockState extends State<MainCodeBlock> {
             padding: EdgeInsets.only(left: 15.w),
             child: CodeFragment(
               disableNumbering: true,
-              onChanged: (val) => widget.config.onCodeChange(val),
+              onChanged: (val) {
+                widget.config.declaration = val;
+                setState(() {});
+              },
               transparent: widget.config.transparent,
               controller: local,
             ),
@@ -423,7 +503,10 @@ class MainCodeBlockState extends State<MainCodeBlock> {
               CodeFragment(
                 numberWidth: 25.w,
                 controller: widget.controller,
-                onChanged: (val) => widget.config.onCodeChange(val),
+                onChanged: (val) {
+                  widget.config.onCodeChange!(val);
+                  setState(() {});
+                },
                 transparent: widget.config.transparent,
               )
             ],
@@ -495,30 +578,25 @@ class _CodeFragmentState extends State<CodeFragment> {
   }
 }
 
-class _Fragment extends StatefulWidget {
+class _Fragment extends StatelessWidget {
   final TextEditingController controller;
   final bool transparent;
   final Function onChanged;
 
   const _Fragment({
-    super.key,
+    Key? key,
     required this.controller,
     required this.transparent,
     required this.onChanged,
-  });
+  }): super(key: key);
 
-  @override
-  State<_Fragment> createState() => _FragmentState();
-}
-
-class _FragmentState extends State<_Fragment> {
   @override
   Widget build(BuildContext context) {
     return Expanded(
       child: Padding(
         padding: EdgeInsets.only(right: 5.w),
         child: TextField(
-          controller: widget.controller,
+          controller: controller,
           keyboardType: TextInputType.multiline,
           minLines: null,
           maxLines: null,
@@ -530,7 +608,7 @@ class _FragmentState extends State<_Fragment> {
           textInputAction: TextInputAction.newline,
           style: context.textTheme.bodyMedium!.copyWith(color: theme),
           decoration: InputDecoration(
-            fillColor: widget.transparent
+            fillColor: transparent
                 ? Colors.transparent
                 : search.withOpacity(0.1),
             filled: true,
@@ -539,12 +617,13 @@ class _FragmentState extends State<_Fragment> {
             enabledBorder: InputBorder.none,
             focusedBorder: InputBorder.none,
           ),
-          onChanged: (val) => widget.onChanged(val),
+          onChanged: (val) => onChanged(val),
         ),
       ),
     );
   }
 }
+
 
 class SpecialForm extends StatelessWidget {
   final Widget? prefix;
@@ -608,7 +687,7 @@ class SpecialForm extends StatelessWidget {
       child: TextFormField(
         style: style ?? context.textTheme.bodyMedium!.copyWith(color: theme),
         autovalidateMode:
-        autoValidate ? AutovalidateMode.always : AutovalidateMode.disabled,
+            autoValidate ? AutovalidateMode.always : AutovalidateMode.disabled,
         maxLines: maxLines,
         focusNode: focus,
         autofocus: autoFocus,
@@ -625,21 +704,21 @@ class SpecialForm extends StatelessWidget {
           fillColor: fillColor ?? Colors.transparent,
           filled: true,
           contentPadding:
-          padding ?? EdgeInsets.symmetric(horizontal: 10.w, vertical: 5.h),
+              padding ?? EdgeInsets.symmetric(horizontal: 10.w, vertical: 5.h),
           prefixIcon: prefix,
           suffixIcon: suffix,
           focusedBorder: OutlineInputBorder(
               borderSide: BorderSide(
-                color: borderColor ?? border,
-              )),
+            color: borderColor ?? border,
+          )),
           border: OutlineInputBorder(
               borderSide: BorderSide(
-                color: borderColor ?? border,
-              )),
+            color: borderColor ?? border,
+          )),
           enabledBorder: OutlineInputBorder(
               borderSide: BorderSide(
-                color: borderColor ?? border,
-              )),
+            color: borderColor ?? border,
+          )),
           hintText: hint,
           hintStyle: hintStyle ??
               Theme.of(context)
@@ -664,9 +743,8 @@ class SpecialForm extends StatelessWidget {
   }
 }
 
-
 class ReturnTypes extends StatefulWidget {
-  final Holder? initial;
+  final String? initial;
 
   const ReturnTypes({super.key, this.initial});
 
@@ -675,37 +753,52 @@ class ReturnTypes extends StatefulWidget {
 }
 
 class ReturnTypesState extends State<ReturnTypes> {
-
   late Holder selected;
-  late List<Holder> types;
+  late List<Holder> _types;
 
   @override
   void initState() {
     super.initState();
-    types = returnTypes;
-    selected = widget.initial ?? types[0];
+    _types = returnTypes;
+    selected = _search(widget.initial) ?? _types[0];
+    selected.selected = true;
+  }
+
+  Holder? _search(String? name) {
+    if (name == null) {
+      return null;
+    }
+
+    for (Holder holder in _types) {
+      if (holder.name == name) {
+        return holder;
+      }
+    }
+
+    return null;
   }
 
   @override
   Widget build(BuildContext context) {
     return Wrap(
-      spacing: 8.0,
-      runSpacing: 4.0,
+      spacing: 10.w,
+      runSpacing: 5.h,
       children: List.generate(
-        types.length,
-            (index) => GestureDetector(
-          onTap: () => setState(() => selected = types[index]),
+        _types.length,
+        (index) => GestureDetector(
+          onTap: () => setState(() {
+            selected.selected = false;
+            selected = _types[index];
+            selected.selected = true;
+          }),
           child: Chip(
-            label: Text(types[index].name,
-                style: context.textTheme.bodySmall!.copyWith(
-                    fontSize: 10.sp,
-                    color: types[index].selected
-                        ? headerColor
-                        : neutral3),
+            label: Text(
+              _types[index].name,
+              style: context.textTheme.bodyMedium!.copyWith(
+                  color: _types[index].selected ? headerColor : neutral3),
             ),
-            elevation: types[index].selected ? 1 : 0,
-            backgroundColor:
-            types[index].selected ? appYellow : mainDark,
+            elevation: _types[index].selected ? 1 : 0,
+            backgroundColor: _types[index].selected ? appYellow : mainDark,
           ),
         ),
       ),

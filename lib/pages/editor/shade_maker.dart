@@ -4,15 +4,14 @@ import 'package:flutter_screenutil/flutter_screenutil.dart';
 import 'package:shade/pages/editor/editor.dart';
 import 'package:shade/pages/editor/preview.dart';
 import 'package:shade/utils/constants.dart';
+import 'package:shade/utils/functions.dart';
 
 import 'package:shade/utils/providers.dart';
 
 import '../../utils/theme.dart';
 import 'config.dart';
 
-const List<Widget> pages = [CodeEditor(), SceneSettings(), ShaderPreview()];
-
-void unFocus() => FocusManager.instance.primaryFocus?.unfocus();
+const List<Widget> pages = [CodeEditor(), ShaderPreview(), SceneSettings()];
 
 class SceneEditor extends ConsumerStatefulWidget {
   const SceneEditor({Key? key}) : super(key: key);
@@ -74,27 +73,38 @@ class _SceneEditorState extends ConsumerState<SceneEditor> {
         ],
         onTap: (index) => ref.watch(tabProvider.notifier).state = index,
       ),
-      floatingActionButton: page == 0
+      floatingActionButton: page != 2
           ? FloatingActionButton(
               elevation: 2.0,
               tooltip: 'Start/Stop Render',
               child: Icon(
-                ref.watch(renderProvider)
-                    ? Icons.stop_rounded
-                    : Icons.play_arrow_rounded,
+                page == 0
+                    ? Icons.add_rounded
+                    : (ref.watch(renderProvider) == 2
+                        ? Icons.stop_rounded
+                        : ref.watch(renderProvider) == 1
+                            ? Icons.work_rounded
+                            : Icons.play_arrow_rounded),
                 color: mainDark,
                 size: 26.r,
               ),
               onPressed: () {
                 unFocus();
-                bool lastState = ref.watch(renderProvider.notifier).state;
-                ref.watch(renderProvider.notifier).state = !lastState;
 
-                if (ref.read(renderProvider)) {
-                  ref.watch(tabProvider.notifier).state = 2;
+                if (page == 0) {
+                  ref.watch(newCodeBlockProvider.notifier).state = true;
+                  ref.watch(newCodeBlockProvider.notifier).state = false;
                 }
 
-                createNewShader(ref);
+                if (page == 1) {
+                  int lastState = ref.watch(renderProvider.notifier).state;
+                  int newState = lastState == 0 ? 1 : 0;
+                  ref.watch(renderProvider.notifier).state = newState;
+
+                  if (newState == 1) {
+                    createNewShader(ref);
+                  }
+                }
               },
             )
           : null,

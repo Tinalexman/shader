@@ -37,6 +37,8 @@ void main()
 }
 """;
 
+const String functionInsertionPoint = "// Insert other functions here";
+
 const double oneOver255 = 0.003921568627450980392;
 
 
@@ -46,6 +48,9 @@ class Holder extends Equatable {
   bool selected;
 
   Holder({this.name = "", this.selected = false});
+
+  @override
+  String toString() => "Holder{ name: $name, selected: $selected }";
 
   @override
   List<Object?> get props => [ name ];

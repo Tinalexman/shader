@@ -7,9 +7,7 @@ import 'package:shade/utils/theme.dart';
 final List<Color> _randomColors = [
   appYellow,
   containerRed,
-  percentRed,
   containerGreen,
-  percentGreen,
   selectedWhite,
   theme,
 ];
@@ -27,3 +25,6 @@ List<Widget> lineNumbers(BuildContext context, TextEditingController controller,
     ),
   );
 }
+
+
+void unFocus() => FocusManager.instance.primaryFocus?.unfocus();
