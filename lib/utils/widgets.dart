@@ -2,10 +2,12 @@ import 'package:flutter/material.dart';
 import 'package:flutter_boxicons/flutter_boxicons.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
+import 'package:shade/math/vector.dart';
 import 'package:shade/utils/constants.dart';
 import 'package:shade/utils/functions.dart';
 import 'package:shade/utils/providers.dart';
 import 'package:shade/utils/theme.dart';
+import 'dart:developer';
 
 class Slide extends StatefulWidget {
   final Widget content;
@@ -131,6 +133,8 @@ class ComboBoxState extends State<ComboBox> {
     _selection = widget.initial;
   }
 
+  String? getValue() => _selection;
+
   @override
   Widget build(BuildContext context) {
     return SizedBox(
@@ -187,12 +191,12 @@ class CodeBlockConfig {
   String name;
   String body;
   String documentation;
+  String declaration;
   List<String> parameters;
   String returnType;
   bool transparent;
 
-  final bool isMain;
-  String declaration;
+  final bool fixed;
 
   final Function? onCodeChange;
 
@@ -202,39 +206,13 @@ class CodeBlockConfig {
     this.documentation = "",
     this.declaration = "",
     this.body = "",
-    this.isMain = false,
+    this.fixed = false,
     this.transparent = false,
     this.parameters = const [],
     this.returnType = "void",
   });
 
-  String getCode() => isMain ? _mainCode() : _functionCode();
-
-  String _mainCode() {
-    StringBuffer buffer = StringBuffer();
-
-    List<String> declarations = declaration.split("\n");
-    for (String dec in declarations) {
-      buffer.write(dec);
-      buffer.write("\n");
-    }
-
-    buffer.write("\n\n");
-
-    buffer.write(functionInsertionPoint);
-
-    buffer.write("\n\n");
-    buffer.write("void main()\n{\n");
-
-    List<String> lines = body.split('\n');
-    for (String line in lines) {
-      buffer.write("\t$line");
-    }
-
-    buffer.write("\n}");
-
-    return buffer.toString();
-  }
+  String getCode() => _functionCode();
 
   String _functionCode() {
     StringBuffer buffer = StringBuffer();
@@ -263,14 +241,14 @@ class CodeBlockConfig {
 
 class CodeBlock extends ConsumerStatefulWidget {
   final CodeBlockConfig config;
-  final VoidCallback onDelete;
-  final VoidCallback onEdit;
+  final VoidCallback? onDelete;
+  final VoidCallback? onEdit;
 
   const CodeBlock({
     super.key,
     required this.config,
-    required this.onDelete,
-    required this.onEdit,
+    this.onDelete,
+    this.onEdit,
   });
 
   @override
@@ -322,26 +300,25 @@ class _CodeBlockState extends ConsumerState<CodeBlock> {
                       style: context.textTheme.bodyLarge!
                           .copyWith(fontWeight: FontWeight.w700, color: _color),
                     ),
-                    Row(
-                      mainAxisSize: MainAxisSize.min,
-                      crossAxisAlignment: CrossAxisAlignment.center,
-                      children: [
-                        IconButton(
-                          onPressed: widget.onEdit,
-                          splashRadius: 0.01,
-                          icon: Icon(Icons.edit_rounded,
-                              color: _color, size: 16.r),
-                        ),
-                        SizedBox(
-                          width: 20.w,
-                        ),
-                        IconButton(
-                          onPressed: widget.onDelete,
-                          splashRadius: 0.01,
-                          icon: Icon(Boxicons.bx_x, color: _color, size: 20.r),
-                        ),
-                      ],
-                    )
+                    if (!widget.config.fixed)
+                      Row(
+                        mainAxisSize: MainAxisSize.min,
+                        crossAxisAlignment: CrossAxisAlignment.center,
+                        children: [
+                          IconButton(
+                            onPressed: widget.onEdit,
+                            splashRadius: 0.01,
+                            icon: Icon(Icons.edit_rounded,
+                                color: _color, size: 16.r),
+                          ),
+                          IconButton(
+                            onPressed: widget.onDelete,
+                            splashRadius: 0.01,
+                            icon:
+                                Icon(Boxicons.bx_x, color: _color, size: 20.r),
+                          ),
+                        ],
+                      )
                   ],
                 ),
                 SizedBox(height: 5.h),
@@ -849,6 +826,219 @@ class ShadeAction extends StatelessWidget {
           ],
         ),
       ),
+    );
+  }
+}
+
+class Vector2Input extends StatefulWidget {
+  final String label;
+  final bool fixed;
+  final Vector2 vector;
+  final double minValue;
+  final double maxValue;
+
+  const Vector2Input({
+    super.key,
+    this.fixed = false,
+    this.minValue = -100.0,
+    this.maxValue = 100.0,
+    required this.vector,
+    required this.label,
+  });
+
+  @override
+  State<Vector2Input> createState() => _Vector2InputState();
+}
+
+class _Vector2InputState extends State<Vector2Input> {
+  final List<TextEditingController> _controllers = [];
+
+  @override
+  void initState() {
+    super.initState();
+    _controllers.add(TextEditingController(text: "${widget.vector.x}"));
+    _controllers.add(TextEditingController(text: "${widget.vector.y}"));
+  }
+
+  @override
+  void dispose() {
+    _controllers[1].dispose();
+    _controllers[0].dispose();
+    super.dispose();
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    return Row(
+      crossAxisAlignment: CrossAxisAlignment.center,
+      children: [
+        Text(
+          "${widget.label}:",
+          style: context.textTheme.bodyMedium!.copyWith(color: theme),
+        ),
+        SizedBox(
+          width: 20.w,
+        ),
+        SizedBox(
+          width: 190.w,
+          height: 30.h,
+          child: ListView.separated(
+            itemBuilder: (_, index) => Row(
+              mainAxisSize: MainAxisSize.min,
+              crossAxisAlignment: CrossAxisAlignment.center,
+              children: [
+                Text(
+                  index == 0 ? 'X' : "Y",
+                  style: context.textTheme.bodyLarge!.copyWith(
+                    color: index == 0 ? percentRed : percentGreen,
+                    fontWeight: FontWeight.bold,
+                  ),
+                ),
+                SizedBox(
+                  width: 5.w,
+                ),
+                SpecialForm(
+                  controller: _controllers[index],
+                  width: 55.w,
+                  height: 30.h,
+                  readOnly: widget.fixed,
+                  type: TextInputType.number,
+                  onChange: (val) {
+                    Vector2 vector = widget.vector;
+                    double number = double.parse(val);
+
+                    if(number < widget.minValue) {
+                      number = widget.minValue;
+                    } else if(number > widget.maxValue) {
+                      number = widget.maxValue;
+                    }
+
+                    if (index == 0) {
+                      vector.x = number;
+                    } else {
+                      vector.y = number;
+                    }
+
+                    vector.hasChanged = true;
+                  },
+                ),
+              ],
+            ),
+            separatorBuilder: (_, __) => SizedBox(width: 30.w,),
+            itemCount: 2,
+            scrollDirection: Axis.horizontal,
+          ),
+        )
+      ],
+    );
+  }
+}
+
+class Vector3Input extends StatefulWidget {
+  final String label;
+  final bool fixed;
+  final Vector3 vector;
+  final double minValue;
+  final double maxValue;
+
+  const Vector3Input({
+    super.key,
+    this.fixed = false,
+    this.minValue = -100.0,
+    this.maxValue = 100.0,
+    required this.vector,
+    required this.label,
+  });
+
+  @override
+  State<Vector3Input> createState() => _Vector3InputState();
+}
+
+class _Vector3InputState extends State<Vector3Input> {
+  final List<TextEditingController> _controllers = [];
+
+  @override
+  void initState() {
+    super.initState();
+    _controllers.add(TextEditingController(text: "${widget.vector.x}"));
+    _controllers.add(TextEditingController(text: "${widget.vector.y}"));
+    _controllers.add(TextEditingController(text: "${widget.vector.z}"));
+  }
+
+  @override
+  void dispose() {
+    _controllers[2].dispose();
+    _controllers[1].dispose();
+    _controllers[0].dispose();
+    super.dispose();
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    return Row(
+      mainAxisSize: MainAxisSize.min,
+      crossAxisAlignment: CrossAxisAlignment.center,
+      children: [
+        Text(
+          "${widget.label}:",
+          style: context.textTheme.bodyMedium!.copyWith(color: theme),
+        ),
+        SizedBox(
+          width: 20.w,
+        ),
+        SizedBox(
+          width: 280.w,
+          height: 30.h,
+          child: ListView.separated(
+              itemBuilder: (_, index) => Row(
+                mainAxisSize: MainAxisSize.min,
+                crossAxisAlignment: CrossAxisAlignment.center,
+                children: [
+                  Text(
+                    index == 0 ? 'X' : (index == 1) ? "Y" : "Z",
+                    style: context.textTheme.bodyLarge!.copyWith(
+                      color: index == 0 ? percentRed : (index == 1) ? percentGreen : headerBlue,
+                      fontWeight: FontWeight.bold,
+                    ),
+                  ),
+                  SizedBox(
+                    width: 5.w,
+                  ),
+                  SpecialForm(
+                    controller: _controllers[index],
+                    width: 55.w,
+                    height: 30.h,
+                    readOnly: widget.fixed,
+                    type: TextInputType.number,
+                    onChange: (val) {
+                      Vector3 vector = widget.vector;
+                      double number = double.parse(val);
+
+                      if(number < widget.minValue) {
+                        number = widget.minValue;
+                      } else if(number > widget.maxValue) {
+                        number = widget.maxValue;
+                      }
+
+                      if (index == 0) {
+                        vector.x = number;
+                      } else if(index == 1) {
+                        vector.y = number;
+                      } else {
+                        vector.z = number;
+                      }
+
+                      vector.hasChanged = true;
+                    },
+                  ),
+                ],
+              ),
+              separatorBuilder: (_, __) => SizedBox(width: 30.w,),
+              itemCount: 3,
+              scrollDirection: Axis.horizontal,
+          ),
+        )
+      ],
     );
   }
 }

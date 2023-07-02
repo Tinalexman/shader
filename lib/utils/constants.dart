@@ -23,24 +23,59 @@ void main()
 """
 ;
 
+String get defaultFs => "$defaultDeclarations \n\n $mainFragment";
 
-const String defaultFs =
+const String defaultDeclarations =
 """
 #version 300 es
 out highp vec4 pc_fragColor;
 #define gl_FragColor pc_fragColor
 
+uniform lowp vec2 resolution;
+""";
+
+const String lighting =
+"""
+
+""";
+
+const String shadow =
+"""
+
+""";
+
+const String min =
+"""
+
+""";
+
+const String max =
+"""
+
+""";
+
+const String diff =
+"""
+
+""";
+
+const String render =
+"""
+
+""";
+
+
+const String mainFragment =
+"""
 void main() 
 {
-  gl_FragColor = vec4(1.0);
+  gl_FragColor = vec4(resolution, 1.0, 1.0);
 }
 """;
 
 
-const String defaultBuild =
-"""
 
-""";
+
 
 const String functionInsertionPoint = "// Insert other functions here";
 
@@ -54,6 +89,17 @@ class Holder {
   Holder({this.name = "", this.selected = false});
 }
 
+
+class Pair<K, V>
+{
+  late K k;
+  late V v;
+
+  Pair({required this.k, required this.v});
+
+  @override
+  String toString() => "Pair( k : $k, v : $v )";
+}
 
 List<Holder> get returnTypes => [
   Holder(name: "float"),

@@ -1,5 +1,6 @@
 import 'dart:developer' as d;
-
+import 'package:shade/math/vector.dart';
+import 'package:shade/utils/constants.dart';
 
 class DreamShader
 {
@@ -8,9 +9,9 @@ class DreamShader
   dynamic _vertex;
   dynamic _fragment;
 
-
-
   dynamic get program => _glProgram;
+
+  Map<String, Pair<int, dynamic>> uniforms = {};
 
 
   dynamic _compileShader(dynamic gl, String src, dynamic type) {
@@ -56,5 +57,37 @@ class DreamShader
     gl.useProgram(_glProgram);
 
     return true;
+  }
+
+  int getLocation(dynamic gl, String name) => gl.getUniformLocation(_glProgram, name);
+
+  void add(dynamic gl, String name, Pair<int, dynamic> pair) {
+    int location = gl.getUniformLocation(_glProgram, name);
+    pair.k = location;
+
+    dynamic value = pair.v;
+    if(value is Vector2) {
+      _loadVector2(gl, name, value);
+      value.onChange = (gl, name) => _loadVector2(gl, name, value);
+      value.hasChanged = false;
+    } else if(value is Vector3) {
+      _loadVector3(gl, name, value);
+      value.onChange = (gl, name) => _loadVector3(gl, name, value);
+      value.hasChanged = false;
+    }
+  }
+
+  void _loadVector2(dynamic gl, String name, Vector2 vector) {
+    Pair<int, dynamic>? variable = uniforms[name];
+    if(variable != null) {
+      gl.uniform2f(variable.k, vector.x, vector.y);
+    }
+  }
+
+  void _loadVector3(dynamic gl, String name, Vector3 vector) {
+    Pair<int, dynamic>? variable = uniforms[name];
+    if(variable != null) {
+      gl.uniform3f(variable.k, vector.x, vector.y, vector.z);
+    }
   }
 }

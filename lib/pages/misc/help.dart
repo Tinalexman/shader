@@ -13,7 +13,11 @@ class Help extends StatelessWidget {
       appBar: AppBar(
         elevation: 0.0,
         backgroundColor: mainDark,
-        automaticallyImplyLeading: false,
+        leading: IconButton(
+          icon: Icon(Icons.chevron_left_rounded, color: theme, size: 26.r,),
+          onPressed: () => Navigator.of(context).pop(),
+          splashRadius: 0.01,
+        ),
         title: Text(
           "Help",
           style: context.textTheme.headlineSmall!.copyWith(color: theme),
@@ -29,9 +33,11 @@ class Help extends StatelessWidget {
                 SizedBox(height: 30.h),
                 Text("Hi,",
                     style: context.textTheme.headlineLarge!
-                        .copyWith(color: theme)),
+                        .copyWith(color: theme),
+                ),
                 Text("what would you like to do today?",
-                    style: context.textTheme.bodyLarge!.copyWith(color: theme)),
+                    style: context.textTheme.bodyLarge!.copyWith(color: theme),
+                ),
                 SizedBox(height: 50.h),
               ],
             ),

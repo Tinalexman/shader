@@ -1,19 +1,22 @@
 import 'package:flutter/material.dart';
+import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:introduction_screen/introduction_screen.dart';
 import 'package:is_first_run/is_first_run.dart';
-import 'package:shade/pages/others/help.dart';
+import 'package:shade/pages/misc/help.dart';
 import 'package:shade/pages/editor/shade.dart';
 import 'package:shade/utils/constants.dart';
 import 'package:shade/utils/theme.dart';
+import 'package:shade/utils/providers.dart';
 
-class Splash extends StatefulWidget {
+class Splash extends ConsumerStatefulWidget {
   const Splash({super.key});
 
   @override
-  State<Splash> createState() => _SplashState();
+  ConsumerState<Splash> createState() => _SplashState();
 }
 
-class _SplashState extends State<Splash> with SingleTickerProviderStateMixin {
+class _SplashState extends ConsumerState<Splash>
+    with SingleTickerProviderStateMixin {
   late AnimationController controller;
   late Animation<double> headerAnimation;
   late Animation<double> trailingAnimation;
@@ -43,20 +46,32 @@ class _SplashState extends State<Splash> with SingleTickerProviderStateMixin {
     );
 
     controller.forward().then(
-          (_) => controller.reverse().then(
-            (__) {
-              IsFirstRun.isFirstCall().then(
-                (first) => Navigator.of(context).pushReplacement(
-                  MaterialPageRoute(
-                    builder: (context) =>
-                        first ? _OnboardScreen() : const SceneEditor(),
-                  ),
+      (_) {
+        controller.reverse().then(
+          (__) {
+            assign();
+            IsFirstRun.isFirstCall().then(
+              (first) => Navigator.of(context).pushReplacement(
+                MaterialPageRoute(
+                  builder: (context) =>
+                      first ? _OnboardScreen() : const SceneEditor(),
                 ),
-              );
-            },
-          ),
+              ),
+            );
+          },
         );
+      },
+    );
     controller.addListener(refresh);
+  }
+
+  void assign() {
+    MediaQueryData query = MediaQuery.of(context);
+    ref.watch(openGlConfigurationsProvider.notifier).state = [
+      query.size.width,
+      query.size.height,
+      query.devicePixelRatio
+    ];
   }
 
   @override

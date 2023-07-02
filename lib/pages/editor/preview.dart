@@ -6,8 +6,8 @@ import 'package:flutter_gl/flutter_gl.dart';
 import 'package:flutter_gl/native-array/NativeArray.app.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
-import 'package:shade/shader/mesh.dart';
-import 'package:shade/shader/shader.dart';
+import 'package:shade/components/mesh.dart';
+import 'package:shade/components/shader.dart';
 import 'package:shade/utils/constants.dart';
 import 'package:shade/utils/theme.dart';
 import 'package:shade/utils/providers.dart';
@@ -48,11 +48,11 @@ class _ShaderPreviewState extends ConsumerState<ShaderPreview> {
     super.didChangeDependencies();
 
     if (!initialized) {
-      MediaQueryData query = MediaQuery.of(context);
+      List<double> query = ref.read(openGlConfigurationsProvider);
 
-      width = query.size.width;
-      height = query.size.height;
-      devicePixelRatio = query.devicePixelRatio;
+      width = query[0];
+      height = query[1];
+      devicePixelRatio = query[2];
 
       flutterGlPlugin = FlutterGlPlugin();
 
@@ -138,6 +138,7 @@ class _ShaderPreviewState extends ConsumerState<ShaderPreview> {
                   timer =
                       Timer.periodic(const Duration(milliseconds: 33), animate);
                 } else {
+                  clear(ref.read(glProvider), stop: true);
                   timer?.cancel();
                   timer = null;
                 }
@@ -158,6 +159,19 @@ class _ShaderPreviewState extends ConsumerState<ShaderPreview> {
 
   void animate(timer) => render();
 
+
+  void clear(dynamic gl, {bool stop = false}) {
+     gl.viewport(0, 0, (width * devicePixelRatio).toInt(),
+        (height * devicePixelRatio).toInt());
+    gl.clearColor(0.0, 0.0, 0.0, 1.0);
+    gl.clear(gl.COLOR_BUFFER_BIT);
+
+    if(stop) {
+      gl.finish();
+      flutterGlPlugin.updateTexture(sourceTexture);
+    }
+  }
+
   void render() {
     if (!flutterGlPlugin.isInitialized || dreamMesh.vertexArrayObject == null) {
       return;
@@ -165,11 +179,8 @@ class _ShaderPreviewState extends ConsumerState<ShaderPreview> {
 
     final gl = ref.watch(glProvider);
     DreamShader shader = ref.watch(shaderProvider);
+    clear(gl);
 
-    gl.viewport(0, 0, (width * devicePixelRatio).toInt(),
-        (height * devicePixelRatio).toInt());
-    gl.clearColor(0.0, 0.0, 0.0, 1.0);
-    gl.clear(gl.COLOR_BUFFER_BIT);
     gl.bindVertexArray(dreamMesh.vertexArrayObject);
     gl.useProgram(shader.program);
     gl.drawArrays(gl.TRIANGLES, 0, dreamMesh.count);

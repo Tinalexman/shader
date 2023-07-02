@@ -2,17 +2,17 @@ import 'package:flutter/material.dart';
 import 'package:flutter_boxicons/flutter_boxicons.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
-import 'package:shade/pages/others/help.dart';
+import 'package:shade/pages/misc/help.dart';
 import 'package:shade/pages/editor/editor.dart';
 import 'package:shade/pages/editor/preview.dart';
-import 'package:shade/pages/editor/settings.dart';
-import 'package:shade/pages/others/settings.dart';
+import 'package:shade/pages/editor/parameters.dart';
+import 'package:shade/pages/misc/settings.dart';
 import 'package:shade/utils/constants.dart';
 import 'package:shade/utils/functions.dart';
 import 'package:shade/utils/providers.dart';
 import 'package:shade/utils/theme.dart';
 
-const List<Widget> pages = [CodeEditor(), ShaderPreview(), SceneSettings()];
+const List<Widget> pages = [CodeEditor(), ShaderPreview(), SceneParameters()];
 
 class SceneEditor extends ConsumerStatefulWidget {
   const SceneEditor({Key? key}) : super(key: key);
@@ -31,56 +31,94 @@ class _SceneEditorState extends ConsumerState<SceneEditor> {
     return Scaffold(
       key: scaffoldKey,
       backgroundColor: mainDark,
-      endDrawer: SizedBox(
+      endDrawer: SafeArea(
         child: Drawer(
           backgroundColor: mainDark,
           child: Column(
             children: [
               SizedBox(
-                height: 50.h,
+                height: 40.h,
+              ),
+              Row(
+                children: [
+                  Image.asset('assets/icon.png'),
+                  Column(
+                    crossAxisAlignment: CrossAxisAlignment.start,
+                    children: [
+                      Text(
+                        "Shade",
+                        style: context.textTheme.headlineSmall!
+                            .copyWith(color: theme),
+                      ),
+                      Text(
+                        "Turn your ideas into reality",
+                        style: context.textTheme.bodyMedium!
+                            .copyWith(color: theme),
+                      ),
+                    ],
+                  )
+                ],
+              ),
+              SizedBox(
+                height: 40.h,
+              ),
+              const Divider(
+                color: neutral3,
               ),
               ListTile(
-                leading: Icon(
-                  Icons.help,
-                  color: appYellow,
-                  size: 18.r,
-                ),
-                title: Text(
-                  "Help",
-                  style: context.textTheme.bodyLarge!
-                      .copyWith(color: theme, fontWeight: FontWeight.w600),
-                ),
-                subtitle: Text(
-                  "All you need to know about Shade",
-                  style: context.textTheme.bodyMedium!.copyWith(color: theme),
-                ),
-                onTap: () => Navigator.of(context).push(
-                  MaterialPageRoute(
-                    builder: (_) => const Help(),
+                  leading: SizedBox(
+                    width: 30.w,
+                    child: Center(
+                      child: Icon(
+                        Icons.help,
+                        color: appYellow,
+                        size: 18.r,
+                      ),
+                    ),
                   ),
-                ),
-              ),
+                  title: Text(
+                    "Help",
+                    style: context.textTheme.bodyMedium!
+                        .copyWith(color: theme, fontWeight: FontWeight.w600),
+                  ),
+                  subtitle: Text(
+                    "Everything you need to know",
+                    style: context.textTheme.bodySmall!.copyWith(color: theme),
+                  ),
+                  onTap: () {
+                    Navigator.pop(context);
+                    Navigator.of(context).push(MaterialPageRoute(
+                      builder: (_) => const Help(),
+                    ));
+                  }),
               ListTile(
-                leading: Icon(
-                  Icons.settings,
-                  color: appYellow,
-                  size: 18.r,
-                ),
-                title: Text(
-                  "Settings",
-                  style: context.textTheme.bodyLarge!
-                      .copyWith(color: theme, fontWeight: FontWeight.w600),
-                ),
-                subtitle: Text(
-                  "Tweak and customize Shade",
-                  style: context.textTheme.bodyMedium!.copyWith(color: theme),
-                ),
-                onTap: () => Navigator.of(context).push(
-                  MaterialPageRoute(
-                    builder: (_) => const SettingsPage(),
+                  leading: SizedBox(
+                    width: 30.w,
+                    child: Center(
+                      child: Icon(
+                        Icons.settings,
+                        color: appYellow,
+                        size: 18.r,
+                      ),
+                    ),
                   ),
-                ),
-              ),
+                  title: Text(
+                    "Settings",
+                    style: context.textTheme.bodyMedium!
+                        .copyWith(color: theme, fontWeight: FontWeight.w600),
+                  ),
+                  subtitle: Text(
+                    "Tweak and customize Shade",
+                    style: context.textTheme.bodySmall!.copyWith(color: theme),
+                  ),
+                  onTap: () {
+                    Navigator.pop(context);
+                    Navigator.of(context).push(
+                      MaterialPageRoute(
+                        builder: (_) => const SettingsPage(),
+                      ),
+                    );
+                  }),
             ],
           ),
         ),
@@ -89,27 +127,27 @@ class _SceneEditorState extends ConsumerState<SceneEditor> {
         automaticallyImplyLeading: false,
         backgroundColor: mainDark,
         elevation: 0.0,
-        title: Text(
-          "Shade",
-          style: context.textTheme.headlineSmall!.copyWith(color: appYellow),
+        title: Row(
+          crossAxisAlignment: CrossAxisAlignment.center,
+          children: [
+            Image.asset('assets/icon.png', width: 50.r, height: 50.r,),
+            Text("Shade", style: context.textTheme.headlineSmall!.copyWith(color: theme),)
+          ],
         ),
         actions: [
           Align(
             alignment: Alignment.centerRight,
-            child: Padding(
-              padding: EdgeInsets.only(right: 15.w),
-              child: IconButton(
-                icon: Icon(
-                  Icons.menu_rounded,
-                  color: appYellow,
-                  size: 18.r,
-                ),
-                onPressed: () {
-                  unFocus();
-                  scaffoldKey.currentState?.openEndDrawer();
-                },
-                splashRadius: 0.01,
+            child: IconButton(
+              icon: Icon(
+                Icons.menu_rounded,
+                color: appYellow,
+                size: 26.r,
               ),
+              onPressed: () {
+                unFocus();
+                scaffoldKey.currentState?.openEndDrawer();
+              },
+              splashRadius: 0.01,
             ),
           )
         ],
@@ -146,7 +184,7 @@ class _SceneEditorState extends ConsumerState<SceneEditor> {
               Icons.settings_rounded,
               size: 20.r,
             ),
-            label: "Settings",
+            label: "Options",
           ),
         ],
         onTap: (index) => ref.watch(tabProvider.notifier).state = index,
@@ -173,10 +211,6 @@ class _SceneEditorState extends ConsumerState<SceneEditor> {
 
                 if (newState == 0) {
                   ref.watch(renderStateProvider.notifier).state = "Stopped";
-                }
-
-                if (newState == 1) {
-                  createNewShader(ref);
                 }
               },
             )
