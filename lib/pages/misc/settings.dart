@@ -111,6 +111,8 @@ class _SettingsPageState extends ConsumerState<SettingsPage> {
               ),
             ),
             const Divider(color: neutral3,),
+
+            // Editor Font Size
           ],
         )),
       ),

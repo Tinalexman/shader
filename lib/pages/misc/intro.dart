@@ -69,7 +69,8 @@ class _SplashState extends ConsumerState<Splash>
     MediaQueryData query = MediaQuery.of(context);
     ref.watch(openGlConfigurationsProvider.notifier).state = [
       query.size.width,
-      query.size.height,
+      query.size.width,
+      // query.size.height,
       query.devicePixelRatio
     ];
   }

@@ -1,5 +1,5 @@
 import 'dart:developer' as d;
-import 'package:shade/math/vector.dart';
+import 'package:shade/components/math.dart';
 import 'package:shade/utils/constants.dart';
 
 class DreamShader
@@ -74,6 +74,18 @@ class DreamShader
       _loadVector3(gl, name, value);
       value.onChange = (gl, name) => _loadVector3(gl, name, value);
       value.hasChanged = false;
+    } else if(value is Vector4) {
+      _loadVector4(gl, name, value);
+      value.onChange = (gl, name) => _loadVector4(gl, name, value);
+      value.hasChanged = false;
+    } else if(value is DreamDouble) {
+      _loadDouble(gl, name, value);
+      value.onChange = (gl, name) => _loadDouble(gl, name, value);
+      value.hasChanged = false;
+    } else if(value is DreamInt) {
+      _loadInt(gl, name, value);
+      value.onChange = (gl, name) => _loadInt(gl, name, value);
+      value.hasChanged = false;
     }
   }
 
@@ -88,6 +100,27 @@ class DreamShader
     Pair<int, dynamic>? variable = uniforms[name];
     if(variable != null) {
       gl.uniform3f(variable.k, vector.x, vector.y, vector.z);
+    }
+  }
+
+  void _loadVector4(dynamic gl, String name, Vector4 vector) {
+    Pair<int, dynamic>? variable = uniforms[name];
+    if(variable != null) {
+      gl.uniform4f(variable.k, vector.x, vector.y, vector.z, vector.w);
+    }
+  }
+
+  void _loadDouble(dynamic gl, String name, DreamDouble val) {
+    Pair<int, dynamic>? variable = uniforms[name];
+    if(variable != null) {
+      gl.uniform1f(variable.k, val.value);
+    }
+  }
+
+  void _loadInt(dynamic gl, String name, DreamInt val) {
+    Pair<int, dynamic>? variable = uniforms[name];
+    if(variable != null) {
+      gl.uniform1i(variable.k, val.value);
     }
   }
 }

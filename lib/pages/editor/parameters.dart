@@ -2,7 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter_boxicons/flutter_boxicons.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
-import 'package:shade/math/vector.dart';
+import 'package:shade/components/math.dart';
 import 'package:shade/utils/constants.dart';
 import 'package:shade/utils/functions.dart';
 import 'package:shade/utils/providers.dart';
@@ -42,7 +42,7 @@ class _SceneSettingsState extends ConsumerState<SceneParameters> {
                   ),
                 ),
                 Text(
-                  "You need to register your uniforms before it can be applied to the shader.",
+                  "You need to register your uniforms before it can be loaded into to the shader.",
                   textAlign: TextAlign.center,
                   style: context.textTheme.bodyMedium!.copyWith(color: theme),
                 ),

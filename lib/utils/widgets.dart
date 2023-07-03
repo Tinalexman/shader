@@ -1,8 +1,10 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_boxicons/flutter_boxicons.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'package:flutter_highlight/flutter_highlight.dart';
+import 'package:flutter_highlight/themes/github.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
-import 'package:shade/math/vector.dart';
+import 'package:shade/components/math.dart';
 import 'package:shade/utils/constants.dart';
 import 'package:shade/utils/functions.dart';
 import 'package:shade/utils/providers.dart';
@@ -880,7 +882,7 @@ class _Vector2InputState extends State<Vector2Input> {
           width: 20.w,
         ),
         SizedBox(
-          width: 190.w,
+          width: 200.w,
           height: 30.h,
           child: ListView.separated(
             itemBuilder: (_, index) => Row(
@@ -899,7 +901,7 @@ class _Vector2InputState extends State<Vector2Input> {
                 ),
                 SpecialForm(
                   controller: _controllers[index],
-                  width: 55.w,
+                  width: 70.w,
                   height: 30.h,
                   readOnly: widget.fixed,
                   type: TextInputType.number,
@@ -907,9 +909,9 @@ class _Vector2InputState extends State<Vector2Input> {
                     Vector2 vector = widget.vector;
                     double number = double.parse(val);
 
-                    if(number < widget.minValue) {
+                    if (number < widget.minValue) {
                       number = widget.minValue;
-                    } else if(number > widget.maxValue) {
+                    } else if (number > widget.maxValue) {
                       number = widget.maxValue;
                     }
 
@@ -924,7 +926,9 @@ class _Vector2InputState extends State<Vector2Input> {
                 ),
               ],
             ),
-            separatorBuilder: (_, __) => SizedBox(width: 30.w,),
+            separatorBuilder: (_, __) => SizedBox(
+              width: 30.w,
+            ),
             itemCount: 2,
             scrollDirection: Axis.horizontal,
           ),
@@ -987,58 +991,82 @@ class _Vector3InputState extends State<Vector3Input> {
           width: 20.w,
         ),
         SizedBox(
-          width: 280.w,
+          width: 290.w,
           height: 30.h,
           child: ListView.separated(
-              itemBuilder: (_, index) => Row(
-                mainAxisSize: MainAxisSize.min,
-                crossAxisAlignment: CrossAxisAlignment.center,
-                children: [
-                  Text(
-                    index == 0 ? 'X' : (index == 1) ? "Y" : "Z",
-                    style: context.textTheme.bodyLarge!.copyWith(
-                      color: index == 0 ? percentRed : (index == 1) ? percentGreen : headerBlue,
-                      fontWeight: FontWeight.bold,
-                    ),
+            itemBuilder: (_, index) => Row(
+              mainAxisSize: MainAxisSize.min,
+              crossAxisAlignment: CrossAxisAlignment.center,
+              children: [
+                Text(
+                  index == 0
+                      ? 'X'
+                      : (index == 1)
+                          ? "Y"
+                          : "Z",
+                  style: context.textTheme.bodyLarge!.copyWith(
+                    color: index == 0
+                        ? percentRed
+                        : (index == 1)
+                            ? percentGreen
+                            : headerBlue,
+                    fontWeight: FontWeight.bold,
                   ),
-                  SizedBox(
-                    width: 5.w,
-                  ),
-                  SpecialForm(
-                    controller: _controllers[index],
-                    width: 55.w,
-                    height: 30.h,
-                    readOnly: widget.fixed,
-                    type: TextInputType.number,
-                    onChange: (val) {
-                      Vector3 vector = widget.vector;
-                      double number = double.parse(val);
+                ),
+                SizedBox(
+                  width: 5.w,
+                ),
+                SpecialForm(
+                  controller: _controllers[index],
+                  width: 70.w,
+                  height: 30.h,
+                  readOnly: widget.fixed,
+                  type: TextInputType.number,
+                  onChange: (val) {
+                    Vector3 vector = widget.vector;
+                    double number = double.parse(val);
 
-                      if(number < widget.minValue) {
-                        number = widget.minValue;
-                      } else if(number > widget.maxValue) {
-                        number = widget.maxValue;
-                      }
+                    if (number < widget.minValue) {
+                      number = widget.minValue;
+                    } else if (number > widget.maxValue) {
+                      number = widget.maxValue;
+                    }
 
-                      if (index == 0) {
-                        vector.x = number;
-                      } else if(index == 1) {
-                        vector.y = number;
-                      } else {
-                        vector.z = number;
-                      }
+                    if (index == 0) {
+                      vector.x = number;
+                    } else if (index == 1) {
+                      vector.y = number;
+                    } else {
+                      vector.z = number;
+                    }
 
-                      vector.hasChanged = true;
-                    },
-                  ),
-                ],
-              ),
-              separatorBuilder: (_, __) => SizedBox(width: 30.w,),
-              itemCount: 3,
-              scrollDirection: Axis.horizontal,
+                    vector.hasChanged = true;
+                  },
+                ),
+              ],
+            ),
+            separatorBuilder: (_, __) => SizedBox(
+              width: 20.w,
+            ),
+            itemCount: 3,
+            scrollDirection: Axis.horizontal,
           ),
         )
       ],
+    );
+  }
+}
+
+class CodeView extends StatelessWidget {
+  const CodeView({super.key});
+
+  @override
+  Widget build(BuildContext context) {
+    return HighlightView(
+      "",
+      language: 'glsl',
+      theme: githubTheme,
+      textStyle: context.textTheme.bodyMedium!.copyWith(color: theme),
     );
   }
 }

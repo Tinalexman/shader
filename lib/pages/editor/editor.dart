@@ -1,3 +1,5 @@
+import 'dart:developer';
+
 import 'package:flutter/material.dart';
 import 'package:flutter_boxicons/flutter_boxicons.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
@@ -29,54 +31,64 @@ class _CodeEditorState extends ConsumerState<CodeEditor>
     fragmentConfigs = [
       CodeBlockConfig(
         name: "build",
-        returnType: "float",
+        body: """
+mediump float sD = length(ray) - 1.0;
+mediump float sID = 1.0;
+
+mediump vec2 s = vec2(sD, sID);
+
+
+mediump vec2 res = s;
+return res;
+        """,
+        returnType: "vec2",
+        parameters: ["vec3 ray"],
         fixed: true,
         documentation:
             "This is the method in which your entire scene is built. "
             "This method should return the shortest distance from this pixel to any shape in your scene.",
       ),
-      CodeBlockConfig(
-        name: "material",
-        returnType: "vec3",
-        fixed: true,
-        documentation:
-        "This is the method in which lighting and textures are applied to your scene. "
-            "This method should return the final color calculated for this pixel",
-      ),
+      // CodeBlockConfig(
+      //   name: "material",
+      //   returnType: "vec3",
+      //   fixed: true,
+      //   documentation:
+      //       "This is the method in which lighting and textures are applied to your scene. "
+      //       "This method should return the final color calculated for this pixel",
+      // ),
     ];
   }
 
   Future<String> _assembleShader() async {
     StringBuffer buffer = StringBuffer();
-
     buffer.write(defaultDeclarations);
-
     buffer.write("\n\n");
 
-    buffer.write(min);
-    buffer.write("\n\n");
+    //for (int i = fragmentConfigs.length - 1; i <= 0; --i) {
+      buffer.write(fragmentConfigs[0].getCode());
+      buffer.write("\n\n");
+    //}
 
-    buffer.write(max);
+    buffer.write(rayMarch);
     buffer.write("\n\n");
-
+    buffer.write(join);
+    buffer.write("\n\n");
+    buffer.write(intersect);
+    buffer.write("\n\n");
     buffer.write(diff);
     buffer.write("\n\n");
-
     buffer.write(lighting);
     buffer.write("\n\n");
-
     buffer.write(shadow);
     buffer.write("\n\n");
-
     buffer.write(render);
     buffer.write("\n\n");
-
-    for (int i = fragmentConfigs.length - 1; i <= 0; --i) {
-      buffer.write(fragmentConfigs[i].getCode());
-      buffer.write("\n\n");
-    }
+    buffer.write(uv);
+    buffer.write("\n\n");
 
     buffer.write(mainFragment);
+
+    log(buffer.toString());
 
     return buffer.toString();
   }
@@ -137,7 +149,9 @@ class _CodeEditorState extends ConsumerState<CodeEditor>
               ],
             ),
           ),
-          SizedBox(height: 10.h,),
+          SizedBox(
+            height: 10.h,
+          ),
           Padding(
             padding: EdgeInsets.symmetric(horizontal: 20.w),
             child: Column(
@@ -176,7 +190,6 @@ class _CodeEditorState extends ConsumerState<CodeEditor>
               ],
             ),
           ),
-
         ],
       ),
     );
