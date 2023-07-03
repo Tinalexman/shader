@@ -31,31 +31,44 @@ class _CodeEditorState extends ConsumerState<CodeEditor>
     fragmentConfigs = [
       CodeBlockConfig(
         name: "build",
+        returnVariable: "data",
         body: """
-mediump float sD = length(ray) - 1.0;
-mediump float sID = 1.0;
+float sD = length(ray) - 1.0;
+float sID = 1.0;
+vec2 s = vec2(sD, sID);
 
-mediump vec2 s = vec2(sD, sID);
+float pD = dot(ray, vec3(0.0, 1.0, 0.0)) + 1.0;
+float pID = 2.0;
+vec2 p = vec2(pD, pID);
 
-
-mediump vec2 res = s;
-return res;
-        """,
+data = join(p, s);
+""",
         returnType: "vec2",
         parameters: ["vec3 ray"],
         fixed: true,
         documentation:
             "This is the method in which your entire scene is built. "
-            "This method should return the shortest distance from this pixel to any shape in your scene.",
+            "This method returns the data which contains the shortest "
+            "distance from this 'ray' to any shape in your scene as well "
+            "as the ID needed to color it appropriately in the material function.",
       ),
-      // CodeBlockConfig(
-      //   name: "material",
-      //   returnType: "vec3",
-      //   fixed: true,
-      //   documentation:
-      //       "This is the method in which lighting and textures are applied to your scene. "
-      //       "This method should return the final color calculated for this pixel",
-      // ),
+      CodeBlockConfig(
+        name: "material",
+        returnVariable: "color",
+        returnType: "vec3",
+        parameters: ['vec3 ray', 'float ID'],
+        fixed: true,
+        body: """
+if(ID == 1.0) {
+    color = vec3(0.9, 0.9, 0.0);
+} else if(ID == 2.0) {
+    color = vec3(0.0, 0.5, 0.5);
+}
+""",
+        documentation: "This is the method in which lighting and textures are "
+            "applied to your scene. This method should return the final "
+            "color information calculated for this 'ray' based on the value of 'ID'. ",
+      ),
     ];
   }
 
@@ -63,30 +76,24 @@ return res;
     StringBuffer buffer = StringBuffer();
     buffer.write(defaultDeclarations);
     buffer.write("\n\n");
-
-    //for (int i = fragmentConfigs.length - 1; i <= 0; --i) {
-      buffer.write(fragmentConfigs[0].getCode());
-      buffer.write("\n\n");
-    //}
-
-    buffer.write(rayMarch);
-    buffer.write("\n\n");
     buffer.write(join);
     buffer.write("\n\n");
-    buffer.write(intersect);
+    buffer.write(fragmentConfigs[0].getCode());
     buffer.write("\n\n");
-    buffer.write(diff);
+    buffer.write(fragmentConfigs[1].getCode());
+    buffer.write("\n\n");
+    buffer.write(rayMarch);
+    buffer.write("\n\n");
+    buffer.write(normal);
     buffer.write("\n\n");
     buffer.write(lighting);
-    buffer.write("\n\n");
-    buffer.write(shadow);
     buffer.write("\n\n");
     buffer.write(render);
     buffer.write("\n\n");
     buffer.write(uv);
     buffer.write("\n\n");
-
     buffer.write(mainFragment);
+    buffer.write("\n\n");
 
     log(buffer.toString());
 
@@ -141,7 +148,7 @@ return res;
                   splashRadius: 0.01,
                 ),
                 IconButton(
-                  onPressed: () => showDocumentation(fragmentConfigs[1]),
+                  onPressed: () {},
                   icon:
                       Icon(Boxicons.bx_file, color: selectedWhite, size: 18.r),
                   splashRadius: 0.01,
@@ -191,48 +198,6 @@ return res;
             ),
           ),
         ],
-      ),
-    );
-  }
-
-  void showDocumentation(CodeBlockConfig config) {
-    unFocus();
-    showModalBottomSheet(
-      context: context,
-      backgroundColor: mainDark,
-      builder: (context) => SizedBox(
-        height: 250.h,
-        child: Padding(
-          padding: EdgeInsets.symmetric(horizontal: 10.w),
-          child: Column(
-            crossAxisAlignment: CrossAxisAlignment.center,
-            children: [
-              SizedBox(height: 20.h),
-              Text(
-                config.name,
-                style: context.textTheme.bodyLarge!
-                    .copyWith(fontWeight: FontWeight.w700, color: theme),
-              ),
-              SizedBox(
-                height: 10.h,
-              ),
-              Text(
-                "${config.parameters.isEmpty ? "" : "${config.parameters.length} parameters : "}"
-                "returns ${config.returnType}",
-                style: context.textTheme.bodyMedium!.copyWith(color: theme),
-              ),
-              SizedBox(height: 50.h),
-              Text(
-                config.documentation,
-                textAlign: TextAlign.center,
-                style: context.textTheme.bodyMedium!.copyWith(color: theme),
-              ),
-              SizedBox(
-                height: 20.h,
-              )
-            ],
-          ),
-        ),
       ),
     );
   }

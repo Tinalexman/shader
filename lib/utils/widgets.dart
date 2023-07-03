@@ -1,15 +1,14 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_boxicons/flutter_boxicons.dart';
-import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:flutter_highlight/flutter_highlight.dart';
 import 'package:flutter_highlight/themes/github.dart';
+import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
 import 'package:shade/components/math.dart';
 import 'package:shade/utils/constants.dart';
 import 'package:shade/utils/functions.dart';
 import 'package:shade/utils/providers.dart';
 import 'package:shade/utils/theme.dart';
-import 'dart:developer';
 
 class Slide extends StatefulWidget {
   final Widget content;
@@ -196,6 +195,7 @@ class CodeBlockConfig {
   String declaration;
   List<String> parameters;
   String returnType;
+  String returnVariable;
   bool transparent;
 
   final bool fixed;
@@ -208,6 +208,7 @@ class CodeBlockConfig {
     this.documentation = "",
     this.declaration = "",
     this.body = "",
+    this.returnVariable = "",
     this.fixed = false,
     this.transparent = false,
     this.parameters = const [],
@@ -230,9 +231,30 @@ class CodeBlockConfig {
 
     buffer.write(")\n{\n");
 
+    if (returnType != 'void') {
+      String expression = "";
+      if (returnType == "float") {
+        expression = "\tfloat $returnVariable = 0.0;\n";
+      } else if (returnType == "vec2") {
+        expression = "\tvec2 $returnVariable = vec2(0.0);\n";
+      } else if (returnType == "vec3") {
+        expression = "\tvec3 $returnVariable = vec3(0.0);\n";
+      } else if (returnType == "vec4") {
+        expression = "\tvec4 $returnVariable = vec4(0.0);\n";
+      } else if (returnType == "int") {
+        expression = "\tint $returnVariable = 0;\n";
+      }
+
+      buffer.write(expression);
+    }
+
     List<String> lines = body.split('\n');
     for (String line in lines) {
-      buffer.write("\t$line");
+      buffer.write("\t$line\n");
+    }
+
+    if (returnType != "void" && returnVariable.isNotEmpty) {
+      buffer.write("\treturn $returnVariable;");
     }
 
     buffer.write("\n}");
@@ -276,11 +298,55 @@ class _CodeBlockState extends ConsumerState<CodeBlock> {
     super.dispose();
   }
 
+  void showDocumentation() {
+    CodeBlockConfig config = widget.config;
+    unFocus();
+    showModalBottomSheet(
+      context: context,
+      backgroundColor: mainDark,
+      builder: (context) => SizedBox(
+        height: 250.h,
+        child: Padding(
+          padding: EdgeInsets.symmetric(horizontal: 10.w),
+          child: Column(
+            crossAxisAlignment: CrossAxisAlignment.center,
+            children: [
+              SizedBox(height: 20.h),
+              Text(
+                config.name,
+                style: context.textTheme.bodyLarge!
+                    .copyWith(fontWeight: FontWeight.w700, color: theme),
+              ),
+              SizedBox(
+                height: 10.h,
+              ),
+              Text(
+                "${config.parameters.isEmpty ? "" :
+                "${config.parameters.length} parameter${config.parameters.length == 1 ? "" : "s"} : "}"
+                "returns ${config.returnType}",
+                style: context.textTheme.bodyMedium!.copyWith(color: theme),
+              ),
+              SizedBox(height: 50.h),
+              Text(
+                config.documentation,
+                textAlign: TextAlign.center,
+                style: context.textTheme.bodyMedium!.copyWith(color: theme),
+              ),
+              SizedBox(
+                height: 20.h,
+              )
+            ],
+          ),
+        ),
+      ),
+    );
+  }
+
   @override
   Widget build(BuildContext context) {
     return Container(
       width: 390.w,
-      padding: EdgeInsets.only(right: 10.w, top: 10.h, bottom: 15.h),
+      padding: EdgeInsets.only(right: 10.w, top: 5.h, bottom: 15.h),
       decoration: BoxDecoration(
         borderRadius: BorderRadius.circular(20.r),
         border: Border.all(color: _color, width: 2.0),
@@ -302,25 +368,32 @@ class _CodeBlockState extends ConsumerState<CodeBlock> {
                       style: context.textTheme.bodyLarge!
                           .copyWith(fontWeight: FontWeight.w700, color: _color),
                     ),
-                    if (!widget.config.fixed)
-                      Row(
-                        mainAxisSize: MainAxisSize.min,
-                        crossAxisAlignment: CrossAxisAlignment.center,
-                        children: [
+                    Row(
+                      mainAxisSize: MainAxisSize.min,
+                      crossAxisAlignment: CrossAxisAlignment.center,
+                      children: [
+                        IconButton(
+                          onPressed: showDocumentation,
+                          splashRadius: 0.01,
+                          icon: Icon(Icons.question_mark_rounded,
+                              color: _color, size: 16.r),
+                        ),
+                        if (!widget.config.fixed)
                           IconButton(
                             onPressed: widget.onEdit,
                             splashRadius: 0.01,
                             icon: Icon(Icons.edit_rounded,
                                 color: _color, size: 16.r),
                           ),
+                        if (!widget.config.fixed)
                           IconButton(
                             onPressed: widget.onDelete,
                             splashRadius: 0.01,
                             icon:
                                 Icon(Boxicons.bx_x, color: _color, size: 20.r),
                           ),
-                        ],
-                      )
+                      ],
+                    )
                   ],
                 ),
                 SizedBox(height: 5.h),
