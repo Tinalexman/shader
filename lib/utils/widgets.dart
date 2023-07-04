@@ -105,7 +105,7 @@ class ComboBox extends StatefulWidget {
   final Widget? prefix;
   final Function? onChanged;
   final double width;
-  final double height;
+  final double? height;
   final Function? onValidate;
   final String? initial;
 
@@ -113,7 +113,7 @@ class ComboBox extends StatefulWidget {
       {Key? key,
       this.hint = "",
       this.items,
-      required this.height,
+      this.height,
       required this.width,
       this.onValidate,
       this.prefix,
@@ -321,8 +321,7 @@ class _CodeBlockState extends ConsumerState<CodeBlock> {
                 height: 10.h,
               ),
               Text(
-                "${config.parameters.isEmpty ? "" :
-                "${config.parameters.length} parameter${config.parameters.length == 1 ? "" : "s"} : "}"
+                "${config.parameters.isEmpty ? "" : "${config.parameters.length} parameter${config.parameters.length == 1 ? "" : "s"} : "}"
                 "returns ${config.returnType}",
                 style: context.textTheme.bodyMedium!.copyWith(color: theme),
               ),
@@ -1000,7 +999,7 @@ class _Vector2InputState extends State<Vector2Input> {
               ],
             ),
             separatorBuilder: (_, __) => SizedBox(
-              width: 30.w,
+              width: 20.w,
             ),
             itemCount: 2,
             scrollDirection: Axis.horizontal,
