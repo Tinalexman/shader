@@ -31,19 +31,19 @@ const Color midGrey = Color.fromARGB(255, 128, 128, 128);
 
 
 const Map<int, Color> _swatchColors = {
-  50: Color(0x15313131),
-  100: Color(0x30313131),
-  200: Color(0x45313131),
-  300: Color(0x60313131),
-  400: Color(0x75313131),
-  500: Color(0x90313131),
-  600: Color(0xA5313131),
-  700: Color(0xB0313131),
-  800: Color(0xCD313131),
-  900: Color(0xFF313131)
+  50: Color.fromRGBO(242, 190, 92, .1),
+  100: Color.fromRGBO(242, 190, 92, .2),
+  200: Color.fromRGBO(242, 190, 92, .3),
+  300: Color.fromRGBO(242, 190, 92, .4),
+  400: Color.fromRGBO(242, 190, 92, .5),
+  500: Color.fromRGBO(242, 190, 92, .6),
+  600: Color.fromRGBO(242, 190, 92, .7),
+  700: Color.fromRGBO(242, 190, 92, .8),
+  800: Color.fromRGBO(242, 190, 92, .9),
+  900: Color.fromRGBO(242, 190, 92, 1),
 };
 
-const MaterialColor materialColor = MaterialColor(0xFF313131, _swatchColors);
+const MaterialColor materialColor = MaterialColor(0xFFBE5C01, _swatchColors);
 
 
 class KdeTheme

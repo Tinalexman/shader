@@ -292,10 +292,14 @@ class CodeBlock extends ConsumerStatefulWidget {
   final CodeBlockConfig config;
   final VoidCallback? onDelete;
   final VoidCallback? onEdit;
+  final Color? color;
+  final bool disable;
 
   const CodeBlock({
     super.key,
+    this.disable = false,
     required this.config,
+    this.color,
     this.onDelete,
     this.onEdit,
   });
@@ -312,9 +316,10 @@ class _CodeBlockState extends ConsumerState<CodeBlock> {
   void initState() {
     super.initState();
     _controller = TextEditingController(text: widget.config.body);
-    _color = ref.read(randomBlockColorProvider)
-        ? randomColor()
-        : ref.read(fixedCodeBlockColorProvider);
+    _color = widget.color ??
+        (ref.read(randomBlockColorProvider)
+            ? randomColor()
+            : ref.read(fixedCodeBlockColorProvider));
   }
 
   @override
@@ -408,10 +413,13 @@ class _CodeBlockState extends ConsumerState<CodeBlock> {
                 Row(
                   mainAxisAlignment: MainAxisAlignment.spaceBetween,
                   children: [
-                    Text(
-                      "${widget.config.name}: ${widget.config.returnType}",
-                      style: context.textTheme.bodyLarge!
-                          .copyWith(fontWeight: FontWeight.w700, color: _color),
+                    SizedBox(
+                      width: 180.w,
+                      child: Text(
+                        "${widget.config.name}: ${widget.config.returnType}",
+                        style: context.textTheme.bodyLarge!
+                            .copyWith(fontWeight: FontWeight.w700, color: _color),
+                      ),
                     ),
                     Row(
                       mainAxisSize: MainAxisSize.min,
@@ -474,22 +482,22 @@ class _CodeBlockState extends ConsumerState<CodeBlock> {
                         ),
                       ],
                     ),
-                    Column(
-                      mainAxisAlignment: MainAxisAlignment.start,
-                      children: [
-                        Text(
-                          "Return Value",
-                          style: context.textTheme.bodyMedium!.copyWith(
-                              color: _color, fontWeight: FontWeight.w600),
-                        ),
-                        if (widget.config.returnType != 'void')
+                    if (widget.config.returnType != 'void')
+                      Column(
+                        mainAxisAlignment: MainAxisAlignment.start,
+                        children: [
+                          Text(
+                            "Return Value",
+                            style: context.textTheme.bodyMedium!.copyWith(
+                                color: _color, fontWeight: FontWeight.w600),
+                          ),
                           Text(
                             "${widget.config.returnType} ${widget.config.returnVariable}",
                             style: context.textTheme.bodyMedium!.copyWith(
                                 color: _color, fontWeight: FontWeight.w300),
                           ),
-                      ],
-                    ),
+                        ],
+                      ),
                   ],
                 )
               ],
@@ -508,6 +516,7 @@ class _CodeBlockState extends ConsumerState<CodeBlock> {
           CodeFragment(
             numberWidth: 25.w,
             controller: _controller,
+            disabled: widget.disable,
             onChanged: (val) {
               widget.config.body = val;
               setState(() {});
@@ -602,6 +611,7 @@ class _MainCodeBlockState extends ConsumerState<MainCodeBlock> {
             padding: EdgeInsets.only(left: 15.w),
             child: CodeFragment(
               disableNumbering: true,
+              disabled: false,
               onChanged: (val) {
                 widget.config.declaration = val;
                 setState(() {});
@@ -625,6 +635,7 @@ class _MainCodeBlockState extends ConsumerState<MainCodeBlock> {
               SizedBox(height: 2.h),
               CodeFragment(
                 numberWidth: 25.w,
+                disabled: false,
                 controller: widget.controller,
                 onChanged: (val) {
                   widget.config.onCodeChange!(val);
@@ -645,7 +656,7 @@ class CodeFragment extends StatefulWidget {
   final TextEditingController controller;
   final Function onChanged;
   final bool transparent;
-
+  final bool disabled;
   final bool disableNumbering;
 
   const CodeFragment({
@@ -653,6 +664,7 @@ class CodeFragment extends StatefulWidget {
     this.disableNumbering = false,
     this.transparent = false,
     this.numberWidth,
+    required this.disabled,
     required this.controller,
     required this.onChanged,
   });
@@ -691,6 +703,7 @@ class _CodeFragmentState extends State<CodeFragment> {
         _Fragment(
           controller: widget.controller,
           transparent: widget.transparent,
+          disabled: widget.disabled,
           onChanged: (val) {
             widget.onChanged(val);
             setState(() {});
@@ -704,10 +717,12 @@ class _CodeFragmentState extends State<CodeFragment> {
 class _Fragment extends StatelessWidget {
   final TextEditingController controller;
   final bool transparent;
+  final bool disabled;
   final Function onChanged;
 
   const _Fragment({
     Key? key,
+    required this.disabled,
     required this.controller,
     required this.transparent,
     required this.onChanged,
@@ -723,6 +738,7 @@ class _Fragment extends StatelessWidget {
           keyboardType: TextInputType.multiline,
           minLines: null,
           maxLines: null,
+          readOnly: disabled,
           cursorColor: appYellow,
           textAlign: TextAlign.left,
           textAlignVertical: TextAlignVertical.top,
@@ -1230,9 +1246,6 @@ class Bullet extends StatelessWidget {
   Widget build(BuildContext context) => Container(
         width: 5.r,
         height: 5.r,
-        decoration: BoxDecoration(
-          color: color,
-          shape: BoxShape.circle
-        ),
+        decoration: BoxDecoration(color: color, shape: BoxShape.circle),
       );
 }

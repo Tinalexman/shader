@@ -1,26 +1,23 @@
 import 'package:flutter/material.dart';
+import 'package:flutter_boxicons/flutter_boxicons.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
 import 'package:shade/utils/constants.dart';
-import 'package:shade/utils/functions.dart';
 import 'package:shade/utils/theme.dart';
 import 'package:shade/utils/widgets.dart';
 
 class HelpContent {
   final String header;
   final String description;
+  final List<String> contents;
   final VoidCallback onClick;
 
   const HelpContent({
     required this.header,
+    required this.contents,
     required this.description,
     required this.onClick,
   });
 }
-
-List<HelpContent> _contents = [
-  HelpContent(header: "Editor", description: "This is the editor", onClick: () {}),
-  HelpContent(header: "Preview", description: "preview", onClick: () {}),
-];
 
 class Help extends StatefulWidget {
   const Help({super.key});
@@ -31,18 +28,34 @@ class Help extends StatefulWidget {
 
 class _HelpState extends State<Help> {
   int current = 0;
-  late PageController controller;
+
+  late List<HelpContent> _contents;
 
   @override
   void initState() {
     super.initState();
-    controller = PageController();
-  }
-
-  @override
-  void dispose() {
-    controller.dispose();
-    super.dispose();
+    _contents = [
+      HelpContent(
+        header: "Editor",
+        description: "Learn all about Shade's code editor.",
+        contents: ["Scene", "Code Blocks"],
+        onClick: () => Navigator.of(context).push(
+          MaterialPageRoute(
+            builder: (_) => const _EditorHelp(),
+          ),
+        ),
+      ),
+      HelpContent(
+        header: "Preview",
+        description: "Watch your shadings come to life in Shade's preview.",
+        contents: ['Moving Around'],
+        onClick: () => Navigator.of(context).push(
+          MaterialPageRoute(
+            builder: (_) => const _PreviewHelp(),
+          ),
+        ),
+      ),
+    ];
   }
 
   @override
@@ -77,46 +90,54 @@ class _HelpState extends State<Help> {
                 SizedBox(
                   height: 650.h,
                   child: PageView.builder(
-                    controller: controller,
                     onPageChanged: (index) => setState(() => current = index),
                     itemBuilder: (context, index) {
-                      Color color = randomColor();
                       return Container(
                         height: 650.h,
                         width: 390.w,
                         padding: EdgeInsets.symmetric(horizontal: 20.w),
                         decoration: BoxDecoration(
-                          border: Border.all(color: color, width: 2.0),
+                          border: Border.all(color: appYellow, width: 2.0),
                           borderRadius: BorderRadius.circular(20.r),
                         ),
                         child: Column(
+                          mainAxisSize: MainAxisSize.max,
                           mainAxisAlignment: MainAxisAlignment.center,
                           crossAxisAlignment: CrossAxisAlignment.start,
                           children: [
                             Text(
                               _contents[index].header,
                               style: context.textTheme.headlineLarge!
-                                  .copyWith(color: color),
-                            ),
-                            SizedBox(
-                              height: 10.h,
+                                  .copyWith(color: appYellow),
                             ),
                             Text(
                               _contents[index].description,
                               style: context.textTheme.bodyLarge!
-                                  .copyWith(color: color),
+                                  .copyWith(color: appYellow),
                             ),
                             SizedBox(
-                              height: 50.h,
+                              height: 20.h,
                             ),
+                            Column(
+                              crossAxisAlignment: CrossAxisAlignment.start,
+                              children: List.generate(
+                                _contents[index].contents.length,
+                                (pos) => Text(
+                                  "- ${_contents[index].contents[pos]}",
+                                  style: context.textTheme.bodyMedium!
+                                      .copyWith(color: appYellow),
+                                ),
+                              ),
+                            ),
+                            SizedBox(height: 50.h),
                             Align(
                               alignment: Alignment.centerRight,
                               child: IconButton(
                                 iconSize: 36.r,
-                                icon: Icon(Icons.chevron_right_rounded,
-                                    color: color),
+                                icon: const Icon(Icons.chevron_right_rounded,
+                                    color: appYellow),
                                 onPressed: _contents[index].onClick,
-                                splashColor: color.withOpacity(0.5),
+                                splashColor: appYellow.withOpacity(0.5),
                               ),
                             )
                           ],
@@ -133,10 +154,317 @@ class _HelpState extends State<Help> {
                     alignment: WrapAlignment.center,
                     children: List.generate(
                       2,
-                      (index) =>
-                          Bullet(color: current == index ? theme : neutral3),
+                      (index) => Bullet(
+                          color: current == index ? appYellow : neutral3),
                     ),
                   ),
+                ),
+              ],
+            ),
+          ),
+        ),
+      ),
+    );
+  }
+}
+
+class _EditorHelp extends StatelessWidget {
+  const _EditorHelp({super.key});
+
+  @override
+  Widget build(BuildContext context) {
+    return Scaffold(
+      backgroundColor: mainDark,
+      appBar: AppBar(
+        elevation: 0.0,
+        backgroundColor: mainDark,
+        leading: IconButton(
+          icon: Icon(
+            Icons.chevron_left_rounded,
+            color: theme,
+            size: 26.r,
+          ),
+          onPressed: () => Navigator.of(context).pop(),
+          splashRadius: 0.01,
+        ),
+        title: Text(
+          "Editor",
+          style: context.textTheme.headlineSmall!.copyWith(color: theme),
+        ),
+      ),
+      body: SafeArea(
+        child: Padding(
+          padding: EdgeInsets.symmetric(horizontal: 15.w),
+          child: SingleChildScrollView(
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                SizedBox(
+                  height: 20.h,
+                ),
+                Text(
+                  "The Shade Code Editor is a versatile tool that will significantly make your 'Shade-ing' "
+                  "adventure easier. So just sit back and have fun.",
+                  style: context.textTheme.bodyLarge!.copyWith(color: theme),
+                ),
+                SizedBox(
+                  height: 50.h,
+                ),
+                Text(
+                  "Scene",
+                  style: context.textTheme.bodyLarge!
+                      .copyWith(color: theme, fontWeight: FontWeight.w700),
+                ),
+                SizedBox(
+                  height: 10.h,
+                ),
+                Text(
+                  "A scene file is a configuration file that configures Shade and initializes "
+                  "all necessary things. Unless explicitly specified in the settings, a new scene "
+                  "file will be created whenever your open Shade. You can choose to auto-save your scene "
+                  "after a certain duration. You can also instruct Shade to always load up the last scene"
+                  " instead of creating a new scene each time.",
+                  style: context.textTheme.bodyLarge!.copyWith(color: theme),
+                ),
+                SizedBox(
+                  height: 15.h,
+                ),
+                Row(
+                  mainAxisAlignment: MainAxisAlignment.center,
+                  children: [
+                    const Bullet(color: neutral4),
+                    SizedBox(
+                      width: 20.w,
+                    ),
+                    const Bullet(color: neutral4),
+                    SizedBox(
+                      width: 20.w,
+                    ),
+                    const Bullet(color: neutral4)
+                  ],
+                ),
+                SizedBox(
+                  height: 15.h,
+                ),
+                Text(
+                  "Code Blocks",
+                  style: context.textTheme.bodyLarge!
+                      .copyWith(color: theme, fontWeight: FontWeight.w700),
+                ),
+                SizedBox(
+                  height: 10.h,
+                ),
+                Text(
+                  "Code Blocks are simple, modular blocks of code. They remove distractions from the "
+                  "other parts of your code and allow you to focus solely "
+                  "on writing a single piece of code at a time. \n\nFor example, here is a function 'max' "
+                  "that finds the maximum of two integers.",
+                  style: context.textTheme.bodyLarge!.copyWith(color: theme),
+                ),
+                SizedBox(
+                  height: 30.h,
+                ),
+                CodeBlock(
+                  color: appYellow,
+                  config: CodeBlockConfig(
+                      name: "getMax",
+                      returnType: "int",
+                      returnVariable: "max",
+                      parameters: ["int first", "int second"],
+                      body: "max = first > second ? first : second;",
+                      documentation:
+                          "Return the maximum between 'first' and 'second'."),
+                  disable: true,
+                ),
+                SizedBox(
+                  height: 30.h,
+                ),
+                Text(
+                  "Every code block looks distinct and makes your code look clean and portable.",
+                  style: context.textTheme.bodyLarge!.copyWith(color: theme),
+                ),
+                SizedBox(
+                  height: 15.h,
+                ),
+                Text(
+                  "A code block can be broken down into several individual components. \n\n"
+                  "In the top left corner is the name of the function and the type of data it "
+                  "returns separated by a colon. The name of a code block and its return type must "
+                  "be unique so as not to cause compile errors.",
+                  style: context.textTheme.bodyLarge!.copyWith(color: theme),
+                ),
+                SizedBox(
+                  height: 15.h,
+                ),
+                Wrap(
+                  spacing: 5.w,
+                  crossAxisAlignment: WrapCrossAlignment.center,
+                  children: [
+                    Text(
+                      "The",
+                      style: context.textTheme.bodyLarge!
+                          .copyWith(color: theme, fontWeight: FontWeight.w600),
+                    ),
+                    Icon(Icons.question_mark_rounded,
+                        color: appYellow, size: 16.r),
+                    Text(
+                      "icon",
+                      style: context.textTheme.bodyLarge!
+                          .copyWith(color: theme, fontWeight: FontWeight.w600),
+                    ),
+                  ],
+                ),
+                SizedBox(
+                  height: 5.h,
+                ),
+                Text(
+                  "It is used to check the documentation of a function. By default, it returns "
+                  "the documentation attached to this code block if defined. However, it can also return "
+                  "documentation of another function on which the cursor is located if defined also.",
+                  style: context.textTheme.bodyLarge!.copyWith(color: theme),
+                ),
+                SizedBox(
+                  height: 10.h,
+                ),
+                Wrap(
+                  spacing: 5.w,
+                  crossAxisAlignment: WrapCrossAlignment.center,
+                  children: [
+                    Text(
+                      "The",
+                      style: context.textTheme.bodyLarge!
+                          .copyWith(color: theme, fontWeight: FontWeight.w600),
+                    ),
+                    Icon(Icons.edit_rounded, color: appYellow, size: 16.r),
+                    Text(
+                      "icon",
+                      style: context.textTheme.bodyLarge!
+                          .copyWith(color: theme, fontWeight: FontWeight.w600),
+                    ),
+                  ],
+                ),
+                SizedBox(
+                  height: 5.h,
+                ),
+                Text(
+                  "It is used to edit the name, parameters, return type or documentation of a function.",
+                  style: context.textTheme.bodyLarge!.copyWith(color: theme),
+                ),
+                SizedBox(
+                  height: 10.h,
+                ),
+                Wrap(
+                  spacing: 5.w,
+                  crossAxisAlignment: WrapCrossAlignment.center,
+                  children: [
+                    Text(
+                      "The",
+                      style: context.textTheme.bodyLarge!
+                          .copyWith(color: theme, fontWeight: FontWeight.w600),
+                    ),
+                    Icon(Boxicons.bx_x, color: appYellow, size: 20.r),
+                    Text(
+                      "icon",
+                      style: context.textTheme.bodyLarge!
+                          .copyWith(color: theme, fontWeight: FontWeight.w600),
+                    ),
+                  ],
+                ),
+                SizedBox(
+                  height: 5.h,
+                ),
+                Text(
+                  "Obviously, this deletes a code block  :)",
+                  style: context.textTheme.bodyLarge!.copyWith(color: theme),
+                ),
+                SizedBox(
+                  height: 20.h,
+                ),
+                Text(
+                  "Below the action icons are the list of parameters this function accepts and the value it returns. "
+                  "The return value should be assigned a value otherwise, the function would return a "
+                  "default value. If the return type of the function is 'void', then assigning a value to "
+                  "the return value is not required.",
+                  style: context.textTheme.bodyLarge!.copyWith(color: theme),
+                ),
+                SizedBox(
+                  height: 20.h,
+                ),
+                Text(
+                  "Finally, we have the code section. This is where you write the actual contents of your function."
+                  " Line numbers are automatically generated as you type unless disabled. The background color of "
+                  "the code section can turned transparent if desired. \n\nFor example, this is a code block with"
+                  " no parameters, no documentation and a transparent code background.",
+                  style: context.textTheme.bodyLarge!.copyWith(color: theme),
+                ),
+                SizedBox(
+                  height: 20.h,
+                ),
+                CodeBlock(
+                  color: appYellow,
+                  config: CodeBlockConfig(name: "empty", transparent: true),
+                  disable: true,
+                ),
+                SizedBox(
+                  height: 20.h,
+                ),
+                Text(
+                  "Lastly, every code block has a random color but a unique "
+                  "color can be specified in the global settings.",
+                  style: context.textTheme.bodyLarge!.copyWith(color: theme),
+                ),
+                SizedBox(
+                  height: 50.h,
+                ),
+              ],
+            ),
+          ),
+        ),
+      ),
+    );
+  }
+}
+
+class _PreviewHelp extends StatelessWidget {
+  const _PreviewHelp({super.key});
+
+  @override
+  Widget build(BuildContext context) {
+    return Scaffold(
+      backgroundColor: mainDark,
+      appBar: AppBar(
+        elevation: 0.0,
+        backgroundColor: mainDark,
+        leading: IconButton(
+          icon: Icon(
+            Icons.chevron_left_rounded,
+            color: theme,
+            size: 26.r,
+          ),
+          onPressed: () => Navigator.of(context).pop(),
+          splashRadius: 0.01,
+        ),
+        title: Text(
+          "Preview",
+          style: context.textTheme.headlineSmall!.copyWith(color: theme),
+        ),
+      ),
+      body: SafeArea(
+        child: Padding(
+          padding: EdgeInsets.symmetric(horizontal: 15.w),
+          child: SingleChildScrollView(
+            child: Column(
+              children: [
+                SizedBox(
+                  height: 20.h,
+                ),
+                Text(
+                  "Shade's Preview is where all your creativity gets showcased. So what are you waiting for? "
+                  "Start Shading.",
+                  style: context.textTheme.bodyLarge!.copyWith(color: theme),
+                ),
+                SizedBox(
+                  height: 50.h,
                 ),
               ],
             ),

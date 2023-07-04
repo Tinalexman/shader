@@ -161,43 +161,13 @@ switch( int(ID) ) {
     return SingleChildScrollView(
       child: Column(
         children: [
-          // Container(
-          //   color: neutral2.withOpacity(0.2),
-          //   child: Row(
-          //     mainAxisAlignment: MainAxisAlignment.spaceAround,
-          //     crossAxisAlignment: CrossAxisAlignment.center,
-          //     children: [
-          //       IconButton(
-          //         onPressed: () {
-          //           unFocus();
-          //           ref.watch(newCodeBlockProvider.notifier).state = true;
-          //         },
-          //         icon: Icon(Icons.add_rounded,
-          //             color: containerGreen, size: 20.r),
-          //         splashRadius: 0.01,
-          //       ),
-          //       IconButton(
-          //         onPressed: () {},
-          //         icon:
-          //             Icon(Boxicons.bx_file, color: selectedWhite, size: 18.r),
-          //         splashRadius: 0.01,
-          //       ),
-          //     ],
-          //   ),
-          // ),
-          Text(
-            "Fragment Shader",
-            style: context.textTheme.bodyLarge!
-                .copyWith(fontWeight: FontWeight.w600, color: theme),
-          ),
           SizedBox(
-            height: 10.h,
+            height: 25.h,
           ),
           Padding(
             padding: EdgeInsets.symmetric(horizontal: 20.w),
             child: Column(
               children: [
-                SizedBox(height: 10.h),
                 SizedBox(
                   height: 650.h,
                   child: ListView.separated(
