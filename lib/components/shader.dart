@@ -67,52 +67,52 @@ class DreamShader
 
     dynamic value = pair.v;
     if(value is Vector2) {
-      _loadVector2(gl, name, value);
+      loadVector2(gl, name, value);
       value.hasChanged = false;
     } else if(value is Vector3) {
-      _loadVector3(gl, name, value);
+      loadVector3(gl, name, value);
       value.hasChanged = false;
     } else if(value is Vector4) {
-      _loadVector4(gl, name, value);
+      loadVector4(gl, name, value);
       value.hasChanged = false;
     } else if(value is DreamDouble) {
-      _loadDouble(gl, name, value);
+      loadDouble(gl, name, value);
       value.hasChanged = false;
     } else if(value is DreamInt) {
-      _loadInt(gl, name, value);
+      loadInt(gl, name, value);
       value.hasChanged = false;
     }
   }
 
-  void _loadVector2(dynamic gl, String name, Vector2 vector) {
+  void loadVector2(dynamic gl, String name, Vector2 vector) {
     Pair<int, dynamic>? variable = uniforms[name];
     if(variable != null) {
       gl.uniform2f(variable.k, vector.x, vector.y);
     }
   }
 
-  void _loadVector3(dynamic gl, String name, Vector3 vector) {
+  void loadVector3(dynamic gl, String name, Vector3 vector) {
     Pair<int, dynamic>? variable = uniforms[name];
     if(variable != null) {
       gl.uniform3f(variable.k, vector.x, vector.y, vector.z);
     }
   }
 
-  void _loadVector4(dynamic gl, String name, Vector4 vector) {
+  void loadVector4(dynamic gl, String name, Vector4 vector) {
     Pair<int, dynamic>? variable = uniforms[name];
     if(variable != null) {
       gl.uniform4f(variable.k, vector.x, vector.y, vector.z, vector.w);
     }
   }
 
-  void _loadDouble(dynamic gl, String name, DreamDouble val) {
+  void loadDouble(dynamic gl, String name, DreamDouble val) {
     Pair<int, dynamic>? variable = uniforms[name];
     if(variable != null) {
       gl.uniform1f(variable.k, val.value);
     }
   }
 
-  void _loadInt(dynamic gl, String name, DreamInt val) {
+  void loadInt(dynamic gl, String name, DreamInt val) {
     Pair<int, dynamic>? variable = uniforms[name];
     if(variable != null) {
       gl.uniform1i(variable.k, val.value);

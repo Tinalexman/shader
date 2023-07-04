@@ -11,6 +11,7 @@ import 'package:shade/utils/constants.dart';
 import 'package:shade/utils/functions.dart';
 import 'package:shade/utils/providers.dart';
 import 'package:shade/utils/theme.dart';
+import 'package:shade/utils/widgets.dart';
 
 const List<Widget> pages = [CodeEditor(), ShaderPreview(), SceneParameters()];
 
@@ -196,32 +197,37 @@ class _SceneEditorState extends ConsumerState<SceneEditor> {
         ],
         onTap: (index) => ref.watch(tabProvider.notifier).state = index,
       ),
-      floatingActionButton: page == 1
-          ? FloatingActionButton(
-              elevation: 2.0,
-              tooltip: 'Start/Stop Render',
-              child: Icon(
-                (ref.watch(renderProvider) == 2
-                    ? Icons.stop_rounded
-                    : ref.watch(renderProvider) == 1
-                        ? Boxicons.bx_loader
-                        : Icons.play_arrow_rounded),
-                color: mainDark,
-                size: 26.r,
-              ),
-              onPressed: () {
-                unFocus();
+      floatingActionButton: FloatingActionButton(
+        elevation: 2.0,
+        child: Icon(
+          (page == 0 || page == 2) ? Icons.add_rounded :
+          (ref.watch(renderProvider) == 2
+              ? Icons.stop_rounded
+              : ref.watch(renderProvider) == 1
+              ? Boxicons.bx_loader
+              : Icons.play_arrow_rounded),
+          color: mainDark,
+          size: 26.r,
+        ),
+        onPressed: () {
+          unFocus();
 
-                int lastState = ref.watch(renderProvider.notifier).state;
-                int newState = lastState == 0 ? 1 : 0;
-                ref.watch(renderProvider.notifier).state = newState;
+          if(page == 0) {
+            ref.watch(newCodeBlockProvider.notifier).state = true;
+          }
+          else if (page == 1) {
+            int lastState = ref.watch(renderProvider.notifier).state;
+            int newState = lastState == 0 ? 1 : 0;
+            ref.watch(renderProvider.notifier).state = newState;
 
-                if (newState == 0) {
-                  ref.watch(renderStateProvider.notifier).state = "Stopped";
-                }
-              },
-            )
-          : null,
+            if (newState == 0) {
+              ref.watch(renderStateProvider.notifier).state = "Stopped";
+            }
+          } else {
+            ref.watch(uniformProvider.notifier).state = true;
+          }
+        },
+      ),
     );
   }
 }

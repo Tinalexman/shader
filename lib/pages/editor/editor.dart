@@ -5,6 +5,7 @@ import 'package:flutter_boxicons/flutter_boxicons.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
 import 'package:shade/components/sdf.dart';
+import 'package:shade/pages/editor/shade.dart';
 import 'package:shade/utils/constants.dart';
 import 'package:shade/utils/functions.dart';
 import 'package:shade/utils/providers.dart';
@@ -137,7 +138,7 @@ switch( int(ID) ) {
     if (addNewBlock) {
       setState(() {
         fragmentConfigs.add(
-          CodeBlockConfig(name: "empty ${fragmentConfigs.length - 1}"),
+          CodeBlockConfig(name: "SDF ${fragmentConfigs.length - 1}"),
         );
       });
 
@@ -169,7 +170,7 @@ switch( int(ID) ) {
             child: Column(
               children: [
                 SizedBox(
-                  height: 650.h,
+                  height: 700.h,
                   child: ListView.separated(
                     itemBuilder: (context, index) {
                       if (index == fragmentConfigs.length) {
@@ -184,7 +185,7 @@ switch( int(ID) ) {
                         onEdit: () => Navigator.of(context)
                             .push(
                               MaterialPageRoute(
-                                builder: (_) => FunctionCreator(
+                                builder: (_) => _EditFunction(
                                   config: fragmentConfigs[index],
                                 ),
                               ),
@@ -210,16 +211,18 @@ switch( int(ID) ) {
   bool get wantKeepAlive => true;
 }
 
-class FunctionCreator extends StatefulWidget {
+class _EditFunction extends StatefulWidget {
   final CodeBlockConfig config;
 
-  const FunctionCreator({super.key, required this.config});
+  const _EditFunction({super.key, required this.config});
 
   @override
-  State<FunctionCreator> createState() => _FunctionCreatorState();
+  State<_EditFunction> createState() => _EditFunctionState();
 }
 
-class _FunctionCreatorState extends State<FunctionCreator> {
+class _EditFunctionState extends State<_EditFunction>
+{
+
   late TextEditingController nameController, paramController;
   late String initial;
   final GlobalKey<ReturnTypesState> returnKey = GlobalKey();
@@ -251,9 +254,17 @@ class _FunctionCreatorState extends State<FunctionCreator> {
       appBar: AppBar(
         elevation: 0.0,
         backgroundColor: mainDark,
-        automaticallyImplyLeading: false,
+        leading: IconButton(
+          icon: Icon(
+            Icons.chevron_left_rounded,
+            color: theme,
+            size: 26.r,
+          ),
+          onPressed: () => Navigator.of(context).pop(),
+          splashRadius: 0.01,
+        ),
         title: Text(
-          "Edit Function Block",
+          "Edit Code Block",
           style: context.textTheme.headlineSmall!.copyWith(color: theme),
         ),
       ),
@@ -264,7 +275,7 @@ class _FunctionCreatorState extends State<FunctionCreator> {
             child: Column(
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
-                SizedBox(height: 50.h),
+                SizedBox(height: 20.h),
                 Text(
                   "Name",
                   style: context.textTheme.bodyMedium!
@@ -290,10 +301,10 @@ class _FunctionCreatorState extends State<FunctionCreator> {
                   spacing: 5.0,
                   children: List.generate(
                     params.length,
-                    (index) => Chip(
+                        (index) => Chip(
                       onDeleted: () => setState(() => params.removeAt(index)),
                       deleteIcon:
-                          Icon(Boxicons.bx_x, color: headerColor, size: 18.r),
+                      Icon(Boxicons.bx_x, color: headerColor, size: 18.r),
                       label: Text(
                         params[index].toString(),
                         style: context.textTheme.bodyMedium!.copyWith(

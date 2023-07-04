@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_boxicons/flutter_boxicons.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
+import 'package:shade/components/sdf.dart';
 import 'package:shade/utils/constants.dart';
 import 'package:shade/utils/theme.dart';
 import 'package:shade/utils/widgets.dart';
@@ -38,22 +39,24 @@ class _HelpState extends State<Help> {
       HelpContent(
         header: "Editor",
         description: "Learn all about Shade's code editor.",
-        contents: ["Scene", "Code Blocks"],
-        onClick: () => Navigator.of(context).push(
-          MaterialPageRoute(
-            builder: (_) => const _EditorHelp(),
-          ),
-        ),
+        contents: ["Scene", "Code Blocks", "Basic Building Blocks: SDFs"],
+        onClick: () =>
+            Navigator.of(context).push(
+              MaterialPageRoute(
+                builder: (_) => const _EditorHelp(),
+              ),
+            ),
       ),
       HelpContent(
         header: "Preview",
         description: "Watch your shadings come to life in Shade's preview.",
         contents: ['Moving Around'],
-        onClick: () => Navigator.of(context).push(
-          MaterialPageRoute(
-            builder: (_) => const _PreviewHelp(),
-          ),
-        ),
+        onClick: () =>
+            Navigator.of(context).push(
+              MaterialPageRoute(
+                builder: (_) => const _PreviewHelp(),
+              ),
+            ),
       ),
     ];
   }
@@ -122,11 +125,12 @@ class _HelpState extends State<Help> {
                               crossAxisAlignment: CrossAxisAlignment.start,
                               children: List.generate(
                                 _contents[index].contents.length,
-                                (pos) => Text(
-                                  "- ${_contents[index].contents[pos]}",
-                                  style: context.textTheme.bodyMedium!
-                                      .copyWith(color: appYellow),
-                                ),
+                                    (pos) =>
+                                    Text(
+                                      "- ${_contents[index].contents[pos]}",
+                                      style: context.textTheme.bodyMedium!
+                                          .copyWith(color: appYellow),
+                                    ),
                               ),
                             ),
                             SizedBox(height: 50.h),
@@ -154,8 +158,9 @@ class _HelpState extends State<Help> {
                     alignment: WrapAlignment.center,
                     children: List.generate(
                       2,
-                      (index) => Bullet(
-                          color: current == index ? appYellow : neutral3),
+                          (index) =>
+                          Bullet(
+                              color: current == index ? appYellow : neutral3),
                     ),
                   ),
                 ),
@@ -168,8 +173,21 @@ class _HelpState extends State<Help> {
   }
 }
 
-class _EditorHelp extends StatelessWidget {
+class _EditorHelp extends StatefulWidget {
   const _EditorHelp({super.key});
+
+  @override
+  State<_EditorHelp> createState() => _EditorHelpState();
+}
+
+class _EditorHelpState extends State<_EditorHelp> {
+  late List<String> primitives;
+
+  @override
+  void initState() {
+    super.initState();
+    primitives = hgPrimitives.keys.toList();
+  }
 
   @override
   Widget build(BuildContext context) {
@@ -204,7 +222,7 @@ class _EditorHelp extends StatelessWidget {
                 ),
                 Text(
                   "The Shade Code Editor is a versatile tool that will significantly make your 'Shade-ing' "
-                  "adventure easier. So just sit back and have fun.",
+                      "adventure easier. So just sit back and have fun.",
                   style: context.textTheme.bodyLarge!.copyWith(color: theme),
                 ),
                 SizedBox(
@@ -220,14 +238,14 @@ class _EditorHelp extends StatelessWidget {
                 ),
                 Text(
                   "A scene file is a configuration file that configures Shade and initializes "
-                  "all necessary things. Unless explicitly specified in the settings, a new scene "
-                  "file will be created whenever your open Shade. You can choose to auto-save your scene "
-                  "after a certain duration. You can also instruct Shade to always load up the last scene"
-                  " instead of creating a new scene each time.",
+                      "all necessary things. Unless explicitly specified in the settings, a new scene "
+                      "file will be created whenever your open Shade. You can choose to auto-save your scene "
+                      "after a certain duration. You can also instruct Shade to always load up the last scene"
+                      " instead of creating a new scene each time.",
                   style: context.textTheme.bodyLarge!.copyWith(color: theme),
                 ),
                 SizedBox(
-                  height: 15.h,
+                  height: 20.h,
                 ),
                 Row(
                   mainAxisAlignment: MainAxisAlignment.center,
@@ -244,7 +262,7 @@ class _EditorHelp extends StatelessWidget {
                   ],
                 ),
                 SizedBox(
-                  height: 15.h,
+                  height: 20.h,
                 ),
                 Text(
                   "Code Blocks",
@@ -256,9 +274,9 @@ class _EditorHelp extends StatelessWidget {
                 ),
                 Text(
                   "Code Blocks are simple, modular blocks of code. They remove distractions from the "
-                  "other parts of your code and allow you to focus solely "
-                  "on writing a single piece of code at a time. \n\nFor example, here is a function 'max' "
-                  "that finds the maximum of two integers.",
+                      "other parts of your code and allow you to focus solely "
+                      "on writing a single piece of code at a time. \n\nFor example, here is a function 'max' "
+                      "that finds the maximum of two integers.",
                   style: context.textTheme.bodyLarge!.copyWith(color: theme),
                 ),
                 SizedBox(
@@ -273,7 +291,7 @@ class _EditorHelp extends StatelessWidget {
                       parameters: ["int first", "int second"],
                       body: "max = first > second ? first : second;",
                       documentation:
-                          "Return the maximum between 'first' and 'second'."),
+                      "Return the maximum between 'first' and 'second'."),
                   disable: true,
                 ),
                 SizedBox(
@@ -288,9 +306,9 @@ class _EditorHelp extends StatelessWidget {
                 ),
                 Text(
                   "A code block can be broken down into several individual components. \n\n"
-                  "In the top left corner is the name of the function and the type of data it "
-                  "returns separated by a colon. The name of a code block and its return type must "
-                  "be unique so as not to cause compile errors.",
+                      "In the top left corner is the name of the function and the type of data it "
+                      "returns separated by a colon. The name of a code block and its return type must "
+                      "be unique so as not to cause compile errors.",
                   style: context.textTheme.bodyLarge!.copyWith(color: theme),
                 ),
                 SizedBox(
@@ -319,8 +337,8 @@ class _EditorHelp extends StatelessWidget {
                 ),
                 Text(
                   "It is used to check the documentation of a function. By default, it returns "
-                  "the documentation attached to this code block if defined. However, it can also return "
-                  "documentation of another function on which the cursor is located if defined also.",
+                      "the documentation attached to this code block if defined. However, it can also return "
+                      "documentation of another function on which the cursor is located if defined also.",
                   style: context.textTheme.bodyLarge!.copyWith(color: theme),
                 ),
                 SizedBox(
@@ -382,9 +400,9 @@ class _EditorHelp extends StatelessWidget {
                 ),
                 Text(
                   "Below the action icons are the list of parameters this function accepts and the value it returns. "
-                  "The return value should be assigned a value otherwise, the function would return a "
-                  "default value. If the return type of the function is 'void', then assigning a value to "
-                  "the return value is not required.",
+                      "The return value should be assigned a value otherwise, the function would return a "
+                      "default value. If the return type of the function is 'void', then assigning a value to "
+                      "the return value is not required.",
                   style: context.textTheme.bodyLarge!.copyWith(color: theme),
                 ),
                 SizedBox(
@@ -392,9 +410,9 @@ class _EditorHelp extends StatelessWidget {
                 ),
                 Text(
                   "Finally, we have the code section. This is where you write the actual contents of your function."
-                  " Line numbers are automatically generated as you type unless disabled. The background color of "
-                  "the code section can turned transparent if desired. \n\nFor example, this is a code block with"
-                  " no parameters, no documentation and a transparent code background.",
+                      " Line numbers are automatically generated as you type unless disabled. The background color of "
+                      "the code section can turned transparent if desired. \n\nFor example, this is a code block with"
+                      " no parameters, no documentation and a transparent code background.",
                   style: context.textTheme.bodyLarge!.copyWith(color: theme),
                 ),
                 SizedBox(
@@ -410,11 +428,163 @@ class _EditorHelp extends StatelessWidget {
                 ),
                 Text(
                   "Lastly, every code block has a random color but a unique "
-                  "color can be specified in the global settings.",
+                      "color can be specified in the global settings.",
                   style: context.textTheme.bodyLarge!.copyWith(color: theme),
                 ),
                 SizedBox(
-                  height: 50.h,
+                  height: 20.h,
+                ),
+                Row(
+                  mainAxisAlignment: MainAxisAlignment.center,
+                  children: [
+                    const Bullet(color: neutral4),
+                    SizedBox(
+                      width: 20.w,
+                    ),
+                    const Bullet(color: neutral4),
+                    SizedBox(
+                      width: 20.w,
+                    ),
+                    const Bullet(color: neutral4)
+                  ],
+                ),
+                SizedBox(
+                  height: 20.h,
+                ),
+                Text(
+                  "Basic Building Blocks: SDFs",
+                  style: context.textTheme.bodyLarge!
+                      .copyWith(color: theme, fontWeight: FontWeight.w700),
+                ),
+                SizedBox(
+                  height: 10.h,
+                ),
+                Text(
+                  "Signed Distance Functions, also called SDFs, are the main building blocks of Shade."
+                      " They allow you to represent simple shapes as just pure functions. To "
+                      "create any shape in Shade, you need tp have an SDF for it. SDFs are very "
+                      "easy to make. Similar to Lego pieces, you can combine multiple SDFs together to "
+                      "create another SDF.",
+                  style: context.textTheme.bodyLarge!.copyWith(color: theme),
+                ),
+                SizedBox(height: 15.h),
+                Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: List.generate(
+                    primitives.length,
+                        (index) =>
+                        Text(
+                          "- ${primitives[index]}",
+                          style: context.textTheme.bodyLarge!
+                              .copyWith(
+                              color: theme, fontWeight: FontWeight.w700),
+                        ),
+                  ),
+                ),
+                SizedBox(height: 15.h),
+                Text(
+                  "Each of these SDFs can be combined in various ways, either by the 'join', 'remove' or "
+                      "difference operators. In addition, they can also be rotated, translated, mirrored and repeated"
+                      " in any of the three axes.",
+                  style: context.textTheme.bodyLarge!.copyWith(color: theme),
+                ),
+                SizedBox(height: 15.h),
+                Text(
+                  "Inorder to create anything in Shade, you need to define two functions: 'build' and 'material'. "
+                      "The build function is where your whole scene is constructed. This function takes in the current "
+                      "position of the ray into consideration and it returns the smallest distance to the nearest object "
+                      "in your scene. You also need to assign an ID to each shape in your scene as this would be needed "
+                      "in the material function. Let us define our first SDF that joins a sphere and a plane.",
+                  style: context.textTheme.bodyLarge!.copyWith(color: theme),
+                ),
+                SizedBox(
+                  height: 20.h,
+                ),
+                CodeBlock(
+                  color: appYellow,
+                  config: CodeBlockConfig(
+                    name: "build",
+                    returnVariable: 'data',
+                    returnType: 'vec2',
+                    parameters: ["vec3 pos"],
+                    body: """
+vec2 res = vec2(sphere(pos, 1.0), 1.0);
+data = vec2(plane(pos, vec3(0.0, 1.0, 0.0), 1.0), 2.0);
+data = join(res, data);""",
+                    documentation:
+                    "Construct a sphere of radius 1.0 and a plane and join them together.",
+                  ),
+                  disable: true,
+                ),
+                SizedBox(
+                  height: 20.h,
+                ),
+                Text(
+                  "Rendering any shape in Shade requires you to define two main functions: 'build' "
+                      "and 'material'. If either or both functions are not defined, you will get a black "
+                      "screen in your preview. Since we have defined the build function above, let's go "
+                      "ahead and define the material function.",
+                  style: context.textTheme.bodyLarge!.copyWith(color: theme),
+                ),
+
+                SizedBox(
+                  height: 20.h,
+                ),
+                CodeBlock(
+                  color: appYellow,
+                  config: CodeBlockConfig(
+                    name: "material",
+                    returnVariable: "color",
+                    returnType: "vec3",
+                    parameters: ['vec3 pos', 'float ID'],
+                    body: """
+switch( int(ID) ) {
+  case 1: color = vec3(0.5); break;
+  case 2: color = checkerboard(pos); break;
+}""",
+                    documentation:
+                    "Gives the sphere a gray color and the plane, a checkerboard pattern.",
+                  ),
+                  disable: true,
+                ),
+                SizedBox(
+                  height: 20.h,
+                ),
+                Text(
+                  "The material function takes in two parameters: the current 'position' of the ray and the 'ID' of "
+                      "the object it intersected. The color of the object is then assigned based on its ID. Similarly, "
+                      "texturing an object also happens in the material function.",
+                  style: context.textTheme.bodyLarge!.copyWith(color: theme),
+                ),
+                SizedBox(
+                  height: 15.h,
+                ),
+                Text(
+                  "As you can see, SDFs are very powerful and simple to use. Feel free to try out various combinations"
+                  " of SDFs. Your imagination is your only limit.",
+                  style: context.textTheme.bodyLarge!.copyWith(color: theme),
+                ),
+
+
+                SizedBox(
+                  height: 20.h,
+                ),
+                Row(
+                  mainAxisAlignment: MainAxisAlignment.center,
+                  children: [
+                    const Bullet(color: neutral4),
+                    SizedBox(
+                      width: 20.w,
+                    ),
+                    const Bullet(color: neutral4),
+                    SizedBox(
+                      width: 20.w,
+                    ),
+                    const Bullet(color: neutral4)
+                  ],
+                ),
+                SizedBox(
+                  height: 20.h,
                 ),
               ],
             ),
@@ -460,7 +630,7 @@ class _PreviewHelp extends StatelessWidget {
                 ),
                 Text(
                   "Shade's Preview is where all your creativity gets showcased. So what are you waiting for? "
-                  "Start Shading.",
+                      "Start Shading.",
                   style: context.textTheme.bodyLarge!.copyWith(color: theme),
                 ),
                 SizedBox(

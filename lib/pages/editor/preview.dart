@@ -39,6 +39,8 @@ class _ShaderPreviewState extends ConsumerState<ShaderPreview> {
   late DreamMesh dreamMesh;
   Timer? timer;
 
+  Vector2 mouse = Vector2();
+
   @override
   void dispose() {
     flutterGlPlugin.dispose();
@@ -55,6 +57,8 @@ class _ShaderPreviewState extends ConsumerState<ShaderPreview> {
       width = query[0];
       height = query[1];
       devicePixelRatio = query[2];
+
+      mouse = Vector2(x: width * 0.5, y: height * 0.5);
 
       flutterGlPlugin = FlutterGlPlugin();
 
@@ -149,12 +153,14 @@ class _ShaderPreviewState extends ConsumerState<ShaderPreview> {
               return flutterGlPlugin.isInitialized
                   ? GestureDetector(
                       onHorizontalDragUpdate: (details) {
-                        double x = max(details.localPosition.dx, 0.0);
-                        ref.watch(mouseProvider).x = x;
+                        double x = min(max(details.localPosition.dx, 0.0), width);
+                        setState(() => mouse.x = x);
+                        //uploadToShader();
                       },
                       onVerticalDragUpdate: (details) {
                         double y = min(max(details.localPosition.dy, 0.0), height);
-                        ref.watch(mouseProvider).y = y;
+                        setState(() => mouse.y = y);
+                        //uploadToShader();
                       },
                       child: Texture(
                         textureId: flutterGlPlugin.textureId!,
@@ -167,6 +173,12 @@ class _ShaderPreviewState extends ConsumerState<ShaderPreview> {
         ],
       ),
     );
+  }
+
+  void uploadToShader() {
+    dynamic gl = ref.watch(glProvider.notifier).state;
+    DreamShader shader = ref.watch(shaderProvider.notifier).state;
+    shader.loadVector2(gl, 'mouse', mouse);
   }
 
   void animate(timer) => render();

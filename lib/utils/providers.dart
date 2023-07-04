@@ -11,7 +11,7 @@ final StateProvider<int> renderProvider = StateProvider((ref) => 0);
 final StateProvider<int> tabProvider = StateProvider((ref) => 0);
 
 final StateProvider<List<double>> openGlConfigurationsProvider =
-    StateProvider((ref) => []);
+StateProvider((ref) => []);
 
 final StateProvider<DreamShader> shaderProvider = StateProvider((ref) {
   DreamShader shader = DreamShader();
@@ -19,7 +19,15 @@ final StateProvider<DreamShader> shaderProvider = StateProvider((ref) {
   dynamic gl = ref.watch(glProvider);
   shader.create(gl, defaultVertexShader, fragment);
 
-  Map<String, Pair<int, dynamic>> uniforms = ref.watch(uniformsProvider);
+  List<double> configs = ref.watch(openGlConfigurationsProvider);
+  Pair<int, dynamic> resolution = Pair(k: -1, v: Vector2(x: configs[0], y: configs[1]));
+  Pair<int, dynamic> mouse = Pair(k: -1, v: Vector2(x: configs[0] * 0.5, y: configs[1] * 0.5));
+
+  shader.add(gl, 'resolution', resolution);
+  shader.add(gl, 'mouse', mouse);
+
+
+  Map<String, Pair<int, dynamic>> uniforms = ref.read(shaderUniformsProvider);
   shader.uniforms = uniforms;
   for (String key in uniforms.keys) {
     Pair<int, dynamic> pair = uniforms[key]!;
@@ -33,32 +41,19 @@ final StateProvider<DreamShader> shaderProvider = StateProvider((ref) {
 
 final StateProvider<dynamic> glProvider = StateProvider((ref) => null);
 final StateProvider<String> fragmentShaderProvider =
-    StateProvider((ref) => defaultFs);
+StateProvider((ref) => defaultFs);
 
 final StateProvider<bool> newCodeBlockProvider = StateProvider((ref) => false);
+final StateProvider<bool> uniformProvider = StateProvider((ref) => false);
 final StateProvider<bool> randomBlockColorProvider =
-    StateProvider((ref) => true);
+StateProvider((ref) => true);
 final StateProvider<Color> fixedCodeBlockColorProvider =
-    StateProvider((ref) => theme);
+StateProvider((ref) => theme);
 
 final StateProvider<String> renderStateProvider =
-    StateProvider((ref) => "Stopped");
+StateProvider((ref) => "Stopped");
 
 final StateProvider<bool> highPrecisionProvider = StateProvider((ref) => true);
 
-final StateProvider<Vector2> mouseProvider = StateProvider((ref) {
-  List<double> configs = ref.watch(openGlConfigurationsProvider);
-  return Vector2(x: configs[0] * 0.5, y: configs[1] * 0.5);
-});
-
-final StateProvider<Map<String, Pair<int, dynamic>>> uniformsProvider =
-    StateProvider((ref) {
-  List<double> configs = ref.watch(openGlConfigurationsProvider);
-  Pair<int, dynamic> resolution = Pair(k: -1, v: Vector2(x: configs[0], y: configs[1]));
-  Pair<int, dynamic> mouse = Pair(k: -1, v: ref.watch(mouseProvider));
-  log("Updating uniforms");
-  return {
-    "resolution": resolution,
-    "mouse": mouse,
-  };
-});
+final StateProvider<Map<String, Pair<int, dynamic>>> shaderUniformsProvider =
+StateProvider((ref) => {});
