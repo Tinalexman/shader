@@ -215,8 +215,7 @@ Map<String, CodeBlockConfig> hgManipulators = {
     body: """
 void rotate(inout vec2 pos, float a) {
   pos = (cos(a) * pos) + (sin(a) * vec2(pos.y, -pos.x));
-}
-      """,
+}""",
     documentation:
         "Rotates a value 'pos' by a angle of 'a' about a coordinate axis. "
         "Note that the value 'pos' is modified immediately. Normally, your position is a vector3, "
@@ -289,6 +288,19 @@ float mirror(inout float pos, float d) {
   ),
 };
 
+Map<String, CodeBlockConfig> hgMaterials = {
+  "checkerboard": CodeBlockConfig(
+    name: "checkerboard",
+    parameters: ["vec3 pos"],
+    returnType: "vec3",
+    body: """
+vec3 checkerboard(vec3 pos) {
+  return vec3(0.2 + 0.4 * mod(floor(pos.x) + floor(pos.z), 2.0));
+}""",
+    documentation: "Returns a checkerboard pattern.",
+  ),
+};
+
 List<String> allHGKeys = [];
 
 List<String> getAllHGKeys() {
@@ -296,6 +308,7 @@ List<String> getAllHGKeys() {
     allHGKeys.addAll(hgOperators.keys);
     allHGKeys.addAll(hgManipulators.keys);
     allHGKeys.addAll(hgPrimitives.keys);
+    allHGKeys.addAll(hgMaterials.keys);
   }
 
   return allHGKeys;
@@ -310,6 +323,8 @@ String getHGCode(String key) {
     return hgManipulators[key]!.body;
   } else if (hgPrimitives.containsKey(key)) {
     return hgPrimitives[key]!.body;
+  } else if (hgMaterials.containsKey(key)) {
+    return hgMaterials[key]!.body;
   }
   return "";
 }
@@ -321,6 +336,8 @@ CodeBlockConfig? getBlock(String key) {
     return hgManipulators[key];
   } else if (hgPrimitives.containsKey(key)) {
     return hgPrimitives[key];
+  } else if (hgMaterials.containsKey(key)) {
+    return hgMaterials[key];
   }
   return null;
 }

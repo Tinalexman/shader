@@ -110,11 +110,8 @@ class _SettingsPageState extends ConsumerState<SettingsPage> {
                     colorPickerDialog(ref.read(fixedCodeBlockColorProvider)),
               ),
             ),
-            const Divider(color: neutral3,),
 
-            // Editor Font Size
-
-
+            // Font Size
 
             const Divider(color: neutral3,),
             ListTile(

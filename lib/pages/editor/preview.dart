@@ -1,11 +1,13 @@
 import 'dart:async';
 import 'dart:developer' as d;
+import 'dart:math';
 
 import 'package:flutter/material.dart';
 import 'package:flutter_gl/flutter_gl.dart';
 import 'package:flutter_gl/native-array/NativeArray.app.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
+import 'package:shade/components/math.dart';
 import 'package:shade/components/mesh.dart';
 import 'package:shade/components/shader.dart';
 import 'package:shade/utils/constants.dart';
@@ -145,9 +147,19 @@ class _ShaderPreviewState extends ConsumerState<ShaderPreview> {
               }
 
               return flutterGlPlugin.isInitialized
-                  ? Texture(
-                      textureId: flutterGlPlugin.textureId!,
-                      filterQuality: FilterQuality.medium,
+                  ? GestureDetector(
+                      onHorizontalDragUpdate: (details) {
+                        double x = max(details.localPosition.dx, 0.0);
+                        ref.watch(mouseProvider).x = x;
+                      },
+                      onVerticalDragUpdate: (details) {
+                        double y = min(max(details.localPosition.dy, 0.0), height);
+                        ref.watch(mouseProvider).y = y;
+                      },
+                      child: Texture(
+                        textureId: flutterGlPlugin.textureId!,
+                        filterQuality: FilterQuality.medium,
+                      ),
                     )
                   : const SizedBox();
             }),
@@ -159,14 +171,13 @@ class _ShaderPreviewState extends ConsumerState<ShaderPreview> {
 
   void animate(timer) => render();
 
-
   void clear(dynamic gl, {bool stop = false}) {
-     gl.viewport(0, 0, (width * devicePixelRatio).toInt(),
+    gl.viewport(0, 0, (width * devicePixelRatio).toInt(),
         (height * devicePixelRatio).toInt());
     gl.clearColor(0.0, 0.0, 0.0, 1.0);
     gl.clear(gl.COLOR_BUFFER_BIT);
 
-    if(stop) {
+    if (stop) {
       gl.finish();
       flutterGlPlugin.updateTexture(sourceTexture);
     }

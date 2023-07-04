@@ -25,6 +25,9 @@ String get defaultFs => "$defaultDeclarations \n\n"
     "$rayMarch \n\n"
     "$normal \n\n"
     "$lighting \n\n"
+    "$rotate \n\n"
+    "$mouseUpdate \n\n"
+    "$camera \n\n"
     "$render \n\n"
     "$uv \n\n"
     "$mainFragment \n\n";
@@ -33,8 +36,8 @@ String defaultDeclarations = """
 #version 300 es
 
 #define PI 3.14159265
-#define TAU (2*PI)
-#define PHI (sqrt(5)*0.5 + 0.5)
+#define TAU (2.0 * PI)
+#define PHI ((sqrt(5) * 0.5) + 0.5)
 
 #define gl_FragColor pc_fragColor
 
@@ -51,8 +54,8 @@ const float MAXIMUM_DISTANCE = 500.0;
 const float EPSILON = 0.001;
 
 uniform vec2 resolution;
-//uniform vec2 mouse;
-//uniform time;
+uniform vec2 mouse;
+//uniform float time;
 """;
 
 const String buildScene = """
@@ -60,6 +63,11 @@ vec2 build(mediump vec3 ray) {
   return vec2(0.0);
 }
 """;
+
+const String rotate = """
+void rotate(inout vec2 pos, float a) {
+  pos = (cos(a) * pos) + (sin(a) * vec2(pos.y, -pos.x));
+}""";
 
 const String lighting = """
 vec3 light(vec3 ray, vec3 rayDirection, vec3 color) {
@@ -97,6 +105,23 @@ const String shadow = """
 
 """;
 
+
+const String mouseUpdate = """
+void mouseUpdate(inout vec3 rayOrigin) {
+  vec2 m = mouse / resolution;
+  rotate(rayOrigin.yz, (m.y * PI * 0.5) - 0.5);
+  rotate(rayOrigin.xz, m.x * TAU); 
+}""";
+
+
+const String camera = """
+mat3 camera(vec3 rayOrigin, vec3 lookAt) {
+  vec3 camF = normalize(vec3(lookAt - rayOrigin));
+  vec3 camR = normalize(cross(vec3(0.0, 1.0, 0.0), camF));
+  vec3 camU = cross(camF, camR);
+  return mat3(camR, camU, camF);
+}""";
+
 const String rayMarch = """
 vec2 rayMarch(vec3 rayOrigin, vec3 rayDirection) {
   vec2 hit = vec2(0.0);
@@ -116,8 +141,10 @@ vec2 rayMarch(vec3 rayOrigin, vec3 rayDirection) {
 
 const String render = """
 vec3 render(vec2 uv) {
-  vec3 rayOrigin = vec3(0.0, 0.0, -3.0);
-  vec3 rayDirection = normalize(vec3(uv, FIELD_OF_VIEW));
+  vec3 rayOrigin = vec3(3.0, 3.0, -3.0);
+  mouseUpdate(rayOrigin);
+  vec3 lookAt = vec3(0.0); 
+  vec3 rayDirection = camera(rayOrigin, lookAt) * normalize(vec3(uv, FIELD_OF_VIEW));
   
   vec2 object = rayMarch(rayOrigin, rayDirection);
   vec3 color = vec3(0.0);
@@ -129,7 +156,7 @@ vec3 render(vec2 uv) {
     color = light(ray, rayDirection, m);
     color = mix(color, background, 1.0 - exp(-0.00008 * object.x * object.x));
   } else {
-    color.xyz = background - max((rayDirection.y * 0.95), 0.0);
+    color.xyz = background - max(rayDirection.y * 0.95, 0.0);
   }
   
   return color;

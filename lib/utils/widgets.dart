@@ -328,17 +328,18 @@ class _CodeBlockState extends ConsumerState<CodeBlock> {
     int cursor = _controller.selection.baseOffset;
 
     RegExp wordMatcher = RegExp(r'\w+');
-    List<String?> words = wordMatcher.allMatches(text).map((e) => e.group(0)).toList();
+    List<String?> words =
+        wordMatcher.allMatches(text).map((e) => e.group(0)).toList();
 
-    for(String? word in words) {
-      if(cursor >= text.indexOf(word!) && cursor <= text.indexOf(word) + word.length) {
+    for (String? word in words) {
+      if (cursor >= text.indexOf(word!) &&
+          cursor <= text.indexOf(word) + word.length) {
         return word;
       }
     }
 
     return '';
   }
-
 
   void showDocumentation(CodeBlockConfig config) {
     unFocus();
@@ -419,7 +420,8 @@ class _CodeBlockState extends ConsumerState<CodeBlock> {
                         IconButton(
                           onPressed: () {
                             String word = getCurrentWord();
-                            CodeBlockConfig config = getBlock(word) ?? widget.config;
+                            CodeBlockConfig config =
+                                getBlock(word) ?? widget.config;
                             showDocumentation(config);
                           },
                           splashRadius: 0.01,
@@ -1217,4 +1219,20 @@ class CodeView extends StatelessWidget {
       textStyle: context.textTheme.bodyMedium!.copyWith(color: theme),
     );
   }
+}
+
+class Bullet extends StatelessWidget {
+  final Color color;
+
+  const Bullet({Key? key, this.color = neu}) : super(key: key);
+
+  @override
+  Widget build(BuildContext context) => Container(
+        width: 5.r,
+        height: 5.r,
+        decoration: BoxDecoration(
+          color: color,
+          shape: BoxShape.circle
+        ),
+      );
 }

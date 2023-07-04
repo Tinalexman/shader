@@ -38,8 +38,8 @@ class _CodeEditorState extends ConsumerState<CodeEditor>
         fixed: true,
         body: """
 vec2 res = vec2(sphere(pos, 1.0), 1.0);
-data = join(res, vec2(plane(pos, vec3(0.0, 1.0, 0.0), 1.0), 2.0));
-        """,
+data = vec2(plane(pos, vec3(0.0, 1.0, 0.0), 1.0), 2.0);
+data = join(res, data);""",
         documentation:
             "This is the method in which your entire scene is built. "
             "This method returns the 'data' which contains the shortest "
@@ -55,9 +55,8 @@ data = join(res, vec2(plane(pos, vec3(0.0, 1.0, 0.0), 1.0), 2.0));
         body: """
 switch( int(ID) ) {
   case 1: color = vec3(0.5); break;
-  case 2: color = vec3(0.2 + 0.4 * mod(floor(pos.x) + floor(pos.y), 2.0)); break;
-}
-        """,
+  case 2: color = checkerboard(pos); break;
+}""",
         documentation: "This is the method in which lighting and textures are "
             "applied to your scene. This method should return the final "
             "'color' information calculated for this 'ray' based on the value of 'ID'. ",
@@ -67,33 +66,24 @@ switch( int(ID) ) {
 
   Future<String> _assembleShader() async {
     StringBuffer buffer = StringBuffer();
-    buffer.write(defaultDeclarations);
-    buffer.write("\n\n");
+    buffer.write("$defaultDeclarations \n\n");
 
     String buildCode = fragmentConfigs[0].getCode();
     String materialCode = fragmentConfigs[1].getCode();
-
     String importedFunctions = _analyze(buildCode, materialCode);
 
-    buffer.write(importedFunctions);
-    buffer.write("\n\n");
-
-    buffer.write(buildCode);
-    buffer.write("\n\n");
-    buffer.write(materialCode);
-    buffer.write("\n\n");
-    buffer.write(rayMarch);
-    buffer.write("\n\n");
-    buffer.write(normal);
-    buffer.write("\n\n");
-    buffer.write(lighting);
-    buffer.write("\n\n");
-    buffer.write(render);
-    buffer.write("\n\n");
-    buffer.write(uv);
-    buffer.write("\n\n");
-    buffer.write(mainFragment);
-    buffer.write("\n\n");
+    buffer.write("$importedFunctions \n\n");
+    buffer.write("$buildCode \n\n");
+    buffer.write("$materialCode \n\n");
+    buffer.write("$rayMarch \n\n");
+    buffer.write("$normal \n\n");
+    buffer.write("$lighting \n\n");
+    buffer.write("$rotate \n\n");
+    buffer.write("$mouseUpdate \n\n");
+    buffer.write("$camera \n\n");
+    buffer.write("$render \n\n");
+    buffer.write("$uv \n\n");
+    buffer.write("$mainFragment \n\n");
 
     log(buffer.toString());
 
@@ -131,10 +121,9 @@ switch( int(ID) ) {
         }
       }
     }
-
+    
     for (String key in processed.keys) {
-      buffer.write(getHGCode(key));
-      buffer.write("\n\n");
+      buffer.write("${getHGCode(key)} \n\n");
     }
 
     return buffer.toString();

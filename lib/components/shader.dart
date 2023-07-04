@@ -68,23 +68,18 @@ class DreamShader
     dynamic value = pair.v;
     if(value is Vector2) {
       _loadVector2(gl, name, value);
-      value.onChange = (gl, name) => _loadVector2(gl, name, value);
       value.hasChanged = false;
     } else if(value is Vector3) {
       _loadVector3(gl, name, value);
-      value.onChange = (gl, name) => _loadVector3(gl, name, value);
       value.hasChanged = false;
     } else if(value is Vector4) {
       _loadVector4(gl, name, value);
-      value.onChange = (gl, name) => _loadVector4(gl, name, value);
       value.hasChanged = false;
     } else if(value is DreamDouble) {
       _loadDouble(gl, name, value);
-      value.onChange = (gl, name) => _loadDouble(gl, name, value);
       value.hasChanged = false;
     } else if(value is DreamInt) {
       _loadInt(gl, name, value);
-      value.onChange = (gl, name) => _loadInt(gl, name, value);
       value.hasChanged = false;
     }
   }
