@@ -130,8 +130,15 @@ class _SceneEditorState extends ConsumerState<SceneEditor> {
         title: Row(
           crossAxisAlignment: CrossAxisAlignment.center,
           children: [
-            Image.asset('assets/icon.png', width: 50.r, height: 50.r,),
-            Text("Shade", style: context.textTheme.headlineSmall!.copyWith(color: theme),)
+            Image.asset(
+              'assets/icon.png',
+              width: 50.r,
+              height: 50.r,
+            ),
+            Text(
+              "Shade",
+              style: context.textTheme.headlineSmall!.copyWith(color: theme),
+            )
           ],
         ),
         actions: [
