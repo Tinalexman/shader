@@ -15,7 +15,6 @@ dependencies:
     sdk: flutter
 
 
-
   file_picker:
   flutter_boxicons:
   flutter_launcher_icons:

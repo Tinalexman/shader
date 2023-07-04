@@ -121,9 +121,9 @@ class _SceneSettingsState extends ConsumerState<SceneParameters> {
           elevation: 0.0,
           content: SizedBox(
             width: 250.w,
-            height: 250.h,
             child: Column(
               crossAxisAlignment: CrossAxisAlignment.start,
+              mainAxisSize: MainAxisSize.min,
               children: [
                 Center(
                   child: Text(
@@ -154,7 +154,6 @@ class _SceneSettingsState extends ConsumerState<SceneParameters> {
                 ),
                 ComboBox(
                   //key: comboKey,
-                  height: 45.h,
                   width: 200.w,
                   hint: "Uniform Type",
                   items: const [
