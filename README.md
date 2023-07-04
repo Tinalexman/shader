@@ -9,6 +9,5 @@ With Shade, we are making it possible for anyone to create massive virtual world
 <img src="https://github.com/Frankdroid7/shader/assets/30746679/4991766f-2c2c-44ab-a5e3-f1f3147e613d" width="300"/>  &nbsp;  &nbsp;  &nbsp;
 <img src="https://github.com/Frankdroid7/shader/assets/30746679/40bc4b72-336a-441a-857c-3c53d56d6e6b" width="300"/> &nbsp;  &nbsp;  &nbsp; <br> <br> 
 <img src="https://github.com/Frankdroid7/shader/assets/30746679/ba65daca-56e3-4f2f-b996-8bf1a360d7ad" width="300"/> &nbsp;  &nbsp;  &nbsp; 
-<br> <br> 
 <img src="https://github.com/Frankdroid7/shader/assets/30746679/cca36273-acfc-4ef1-8a0e-bc970a01661e" width="300"/>
 
