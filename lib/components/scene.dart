@@ -9,4 +9,10 @@ class Scene {
     this.configs = const [],
   });
 
+  Map<String, dynamic> toJson() => {
+    "name" : name,
+    "configs" : configs
+  };
+
+  factory Scene.fromJson(Map<String, dynamic> map) => Scene(name: map["name"], configs: map["configs"]);
 }

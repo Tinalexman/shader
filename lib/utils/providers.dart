@@ -5,6 +5,8 @@ import 'package:shade/components/math.dart';
 import 'package:shade/utils/constants.dart';
 import 'package:shade/utils/theme.dart';
 
+import 'dart:developer';
+
 final StateProvider<int> renderProvider = StateProvider((ref) => 0);
 final StateProvider<int> tabProvider = StateProvider((ref) => 0);
 
@@ -24,6 +26,8 @@ final StateProvider<DreamShader> shaderProvider = StateProvider((ref) {
     shader.add(gl, key, pair);
   }
 
+  log("Updating shader");
+
   return shader;
 });
 
@@ -40,14 +44,21 @@ final StateProvider<Color> fixedCodeBlockColorProvider =
 final StateProvider<String> renderStateProvider =
     StateProvider((ref) => "Stopped");
 
+final StateProvider<bool> highPrecisionProvider = StateProvider((ref) => true);
+
+final StateProvider<Vector2> mouseProvider = StateProvider((ref) {
+  List<double> configs = ref.watch(openGlConfigurationsProvider);
+  return Vector2(x: configs[0] * 0.5, y: configs[1] * 0.5);
+});
+
 final StateProvider<Map<String, Pair<int, dynamic>>> uniformsProvider =
     StateProvider((ref) {
   List<double> configs = ref.watch(openGlConfigurationsProvider);
-  Pair<int, dynamic> resolution =
-      Pair(k: -1, v: Vector2(x: configs[0], y: configs[1]));
+  Pair<int, dynamic> resolution = Pair(k: -1, v: Vector2(x: configs[0], y: configs[1]));
+  Pair<int, dynamic> mouse = Pair(k: -1, v: ref.watch(mouseProvider));
+  log("Updating uniforms");
   return {
     "resolution": resolution,
-    // "time": Pair<int, dynamic>(k: -1, v: DreamDouble()),
-    // "mouse": Pair<int, dynamic>(k: -1, v: DreamInt()),
+    "mouse": mouse,
   };
 });

@@ -59,6 +59,5 @@ class DreamInt extends Changeable {
 
 
 class Changeable {
-  late Function onChange;
   bool hasChanged = true;
 }

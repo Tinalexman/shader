@@ -5,6 +5,7 @@ import 'package:flutter_highlight/themes/github.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
 import 'package:shade/components/math.dart';
+import 'package:shade/components/sdf.dart';
 import 'package:shade/utils/constants.dart';
 import 'package:shade/utils/functions.dart';
 import 'package:shade/utils/providers.dart';
@@ -105,7 +106,7 @@ class ComboBox extends StatefulWidget {
   final Widget? prefix;
   final Function? onChanged;
   final double width;
-  final double? height;
+  final double height;
   final Function? onValidate;
   final String? initial;
 
@@ -113,7 +114,7 @@ class ComboBox extends StatefulWidget {
       {Key? key,
       this.hint = "",
       this.items,
-      this.height,
+      required this.height,
       required this.width,
       this.onValidate,
       this.prefix,
@@ -215,6 +216,30 @@ class CodeBlockConfig {
     this.returnType = "void",
   });
 
+  factory CodeBlockConfig.fromJson(Map<String, dynamic> map) => CodeBlockConfig(
+        name: map['name'],
+        returnVariable: map['returnVariable'],
+        parameters: map["parameters"],
+        returnType: map['returnType'],
+        body: map['body'],
+        transparent: map['transparent'],
+        declaration: map['declaration'],
+        documentation: map['documentation'],
+        fixed: map['fixed'],
+      );
+
+  Map<String, dynamic> toJson() => {
+        'name': name,
+        'returnVariable': returnVariable,
+        'returnType': returnType,
+        'parameters': parameters,
+        'body': body,
+        'transparent': transparent,
+        'fixed': fixed,
+        'declaration': declaration,
+        'documentation': documentation,
+      };
+
   String getCode() => _functionCode();
 
   String _functionCode() {
@@ -298,8 +323,25 @@ class _CodeBlockState extends ConsumerState<CodeBlock> {
     super.dispose();
   }
 
-  void showDocumentation() {
-    CodeBlockConfig config = widget.config;
+  String getCurrentWord() {
+    String text = _controller.text;
+    int cursor = _controller.selection.baseOffset;
+
+    RegExp wordMatcher = RegExp(r'\w+');
+    List<String?> words =
+        wordMatcher.allMatches(text).map((e) => e.group(0)).toList();
+
+    for (String? word in words) {
+      if (cursor >= text.indexOf(word!) &&
+          cursor <= text.indexOf(word) + word.length) {
+        return word;
+      }
+    }
+
+    return '';
+  }
+
+  void showDocumentation(CodeBlockConfig config) {
     unFocus();
     showModalBottomSheet(
       context: context,
@@ -317,14 +359,18 @@ class _CodeBlockState extends ConsumerState<CodeBlock> {
                 style: context.textTheme.bodyLarge!
                     .copyWith(fontWeight: FontWeight.w700, color: theme),
               ),
-              SizedBox(
-                height: 10.h,
-              ),
               Text(
-                "${config.parameters.isEmpty ? "" : "${config.parameters.length} parameter${config.parameters.length == 1 ? "" : "s"} : "}"
-                "returns ${config.returnType}",
+                config.parameters.isEmpty
+                    ? ""
+                    : "Parameter${config.parameters.length == 1 ? "" : "s"}: ${config.parameters}",
                 style: context.textTheme.bodyMedium!.copyWith(color: theme),
               ),
+              if (config.returnType != "void" &&
+                  config.returnVariable.isNotEmpty)
+                Text(
+                  "Return: ${config.returnType} ${config.returnVariable}",
+                  style: context.textTheme.bodyMedium!.copyWith(color: theme),
+                ),
               SizedBox(height: 50.h),
               Text(
                 config.documentation,
@@ -372,7 +418,12 @@ class _CodeBlockState extends ConsumerState<CodeBlock> {
                       crossAxisAlignment: CrossAxisAlignment.center,
                       children: [
                         IconButton(
-                          onPressed: showDocumentation,
+                          onPressed: () {
+                            String word = getCurrentWord();
+                            CodeBlockConfig config =
+                                getBlock(word) ?? widget.config;
+                            showDocumentation(config);
+                          },
                           splashRadius: 0.01,
                           icon: Icon(Icons.question_mark_rounded,
                               color: _color, size: 16.r),
@@ -396,24 +447,51 @@ class _CodeBlockState extends ConsumerState<CodeBlock> {
                   ],
                 ),
                 SizedBox(height: 5.h),
-                if (widget.config.parameters.isNotEmpty)
-                  Text(
-                    "Parameters",
-                    style: context.textTheme.bodyMedium!
-                        .copyWith(color: _color, fontWeight: FontWeight.w500),
-                  ),
-                if (widget.config.parameters.isNotEmpty) SizedBox(height: 2.h),
-                Column(
-                  crossAxisAlignment: CrossAxisAlignment.start,
-                  children: List.generate(
-                    widget.config.parameters.length,
-                    (index) => Text(
-                      "- ${widget.config.parameters[index]}",
-                      style: context.textTheme.bodyMedium!
-                          .copyWith(color: _color, fontWeight: FontWeight.w300),
+                Row(
+                  mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                  crossAxisAlignment: CrossAxisAlignment.center,
+                  children: [
+                    Column(
+                      children: [
+                        if (widget.config.parameters.isNotEmpty)
+                          Text(
+                            "Parameters",
+                            style: context.textTheme.bodyMedium!.copyWith(
+                                color: _color, fontWeight: FontWeight.w600),
+                          ),
+                        if (widget.config.parameters.isNotEmpty)
+                          SizedBox(height: 2.h),
+                        Column(
+                          crossAxisAlignment: CrossAxisAlignment.start,
+                          children: List.generate(
+                            widget.config.parameters.length,
+                            (index) => Text(
+                              "- ${widget.config.parameters[index]}",
+                              style: context.textTheme.bodyMedium!.copyWith(
+                                  color: _color, fontWeight: FontWeight.w300),
+                            ),
+                          ),
+                        ),
+                      ],
                     ),
-                  ),
-                ),
+                    Column(
+                      mainAxisAlignment: MainAxisAlignment.start,
+                      children: [
+                        Text(
+                          "Return Value",
+                          style: context.textTheme.bodyMedium!.copyWith(
+                              color: _color, fontWeight: FontWeight.w600),
+                        ),
+                        if (widget.config.returnType != 'void')
+                          Text(
+                            "${widget.config.returnType} ${widget.config.returnVariable}",
+                            style: context.textTheme.bodyMedium!.copyWith(
+                                color: _color, fontWeight: FontWeight.w300),
+                          ),
+                      ],
+                    ),
+                  ],
+                )
               ],
             ),
           ),
@@ -999,7 +1077,7 @@ class _Vector2InputState extends State<Vector2Input> {
               ],
             ),
             separatorBuilder: (_, __) => SizedBox(
-              width: 20.w,
+              width: 30.w,
             ),
             itemCount: 2,
             scrollDirection: Axis.horizontal,
@@ -1141,4 +1219,20 @@ class CodeView extends StatelessWidget {
       textStyle: context.textTheme.bodyMedium!.copyWith(color: theme),
     );
   }
+}
+
+class Bullet extends StatelessWidget {
+  final Color color;
+
+  const Bullet({Key? key, this.color = neu}) : super(key: key);
+
+  @override
+  Widget build(BuildContext context) => Container(
+        width: 5.r,
+        height: 5.r,
+        decoration: BoxDecoration(
+          color: color,
+          shape: BoxShape.circle
+        ),
+      );
 }

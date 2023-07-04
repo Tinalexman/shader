@@ -79,7 +79,7 @@ class _SceneSettingsState extends ConsumerState<SceneParameters> {
                         for (String key in shaderKeys) {
                           dynamic value = uniforms[key]!.v;
                           if (value is Changeable && value.hasChanged) {
-                            value.onChange(ref.read(glProvider), key);
+                            //value.onChange(ref.read(glProvider), key);
                             value.hasChanged = false;
                           }
                         }

@@ -17,29 +17,32 @@ void main()
 }
 """;
 
-String get defaultFs =>
-    "$defaultDeclarations \n\n"
-    "$join \n\n"
+String precision = "highp";
+
+String get defaultFs => "$defaultDeclarations \n\n"
     "$buildScene \n\n"
     "$material \n\n"
     "$rayMarch \n\n"
     "$normal \n\n"
     "$lighting \n\n"
+    "$rotate \n\n"
+    "$mouseUpdate \n\n"
+    "$camera \n\n"
     "$render \n\n"
     "$uv \n\n"
-    "$mainFragment \n\n"
-;
+    "$mainFragment \n\n";
 
-const String defaultDeclarations = """
+String defaultDeclarations = """
 #version 300 es
+
+#define PI 3.14159265
+#define TAU (2.0 * PI)
+#define PHI ((sqrt(5) * 0.5) + 0.5)
+
 #define gl_FragColor pc_fragColor
 
-precision mediump float;
-precision mediump int;
-// precision mediump vec2;
-// precision mediump vec3;
-// precision mediump vec4;
-
+precision $precision float;
+precision $precision int;
 
 
 out highp vec4 pc_fragColor;
@@ -51,27 +54,20 @@ const float MAXIMUM_DISTANCE = 500.0;
 const float EPSILON = 0.001;
 
 uniform vec2 resolution;
-//uniform vec2 mouse;
-//uniform time;
+uniform vec2 mouse;
+//uniform float time;
 """;
 
 const String buildScene = """
 vec2 build(mediump vec3 ray) {
-  vec2 data = vec2(0.0);
-  
-  float sD = length(ray) - 1.0;
-  float sID = 1.0;
-  vec2 s = vec2(sD, sID);
- 
-  float pD = dot(ray, vec3(0.0, 1.0, 0.0)) + 1.0;
-  float pID = 2.0;
-  vec2 p = vec2(pD, pID);
-  
-  data = join(p, s);
-  
-  return data;
+  return vec2(0.0);
 }
 """;
+
+const String rotate = """
+void rotate(inout vec2 pos, float a) {
+  pos = (cos(a) * pos) + (sin(a) * vec2(pos.y, -pos.x));
+}""";
 
 const String lighting = """
 vec3 light(vec3 ray, vec3 rayDirection, vec3 color) {
@@ -101,21 +97,7 @@ vec3 normal(vec3 ray) {
 
 const String material = """
 vec3 material(vec3 ray, float ID) {
-  vec3 color = vec3(0.0);
-  
-  // switch(int(ID)) {
-  //   case 1: color = vec3(0.9, 0.9, 0.0); break; // PLANE CHECKERBOARD
-  //   case 2: color = vec3(0.0, 0.5, 0.5); break;
-  // }
-  //
-  
-  if(ID == 1.0) {
-    color = vec3(0.9, 0.9, 0.0);
-  } else if(ID == 2.0) {
-    color = vec3(0.0, 0.5, 0.5);
-  }
-
-  return color;
+  return vec3(0.0);
 }
 """;
 
@@ -123,23 +105,22 @@ const String shadow = """
 
 """;
 
-const String join = """
-vec2 join(vec2 first, vec2 second) {
-  return (first.x < second.x) ? first : second;
-}
-""";
 
-const String intersect = """
-vec2 intersect(vec2 first, vec2 second) {
-  return (first.x > second.x) ? first : second;
-}
-""";
+const String mouseUpdate = """
+void mouseUpdate(inout vec3 rayOrigin) {
+  vec2 m = mouse / resolution;
+  rotate(rayOrigin.yz, (m.y * PI * 0.5) - 0.5);
+  rotate(rayOrigin.xz, m.x * TAU); 
+}""";
 
-const String remove = """
-vec2 remove(vec2 first, vec2 second) {
-  return (first.x > -second.x) ? first : vec2(second.x, second.y);
-}
-""";
+
+const String camera = """
+mat3 camera(vec3 rayOrigin, vec3 lookAt) {
+  vec3 camF = normalize(vec3(lookAt - rayOrigin));
+  vec3 camR = normalize(cross(vec3(0.0, 1.0, 0.0), camF));
+  vec3 camU = cross(camF, camR);
+  return mat3(camR, camU, camF);
+}""";
 
 const String rayMarch = """
 vec2 rayMarch(vec3 rayOrigin, vec3 rayDirection) {
@@ -160,8 +141,10 @@ vec2 rayMarch(vec3 rayOrigin, vec3 rayDirection) {
 
 const String render = """
 vec3 render(vec2 uv) {
-  vec3 rayOrigin = vec3(0.0, 0.0, -3.0);
-  vec3 rayDirection = normalize(vec3(uv, FIELD_OF_VIEW));
+  vec3 rayOrigin = vec3(3.0, 3.0, -3.0);
+  mouseUpdate(rayOrigin);
+  vec3 lookAt = vec3(0.0); 
+  vec3 rayDirection = camera(rayOrigin, lookAt) * normalize(vec3(uv, FIELD_OF_VIEW));
   
   vec2 object = rayMarch(rayOrigin, rayDirection);
   vec3 color = vec3(0.0);
@@ -173,7 +156,7 @@ vec3 render(vec2 uv) {
     color = light(ray, rayDirection, m);
     color = mix(color, background, 1.0 - exp(-0.00008 * object.x * object.x));
   } else {
-    color.xyz = background - max((rayDirection.y * 0.95), 0.0);
+    color.xyz = background - max(rayDirection.y * 0.95, 0.0);
   }
   
   return color;
