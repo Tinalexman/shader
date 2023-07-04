@@ -40,6 +40,9 @@ final StateProvider<Color> fixedCodeBlockColorProvider =
 final StateProvider<String> renderStateProvider =
     StateProvider((ref) => "Stopped");
 
+final StateProvider<bool> highPrecisionProvider =
+StateProvider((ref) => true);
+
 final StateProvider<Map<String, Pair<int, dynamic>>> uniformsProvider =
     StateProvider((ref) {
   List<double> configs = ref.watch(openGlConfigurationsProvider);

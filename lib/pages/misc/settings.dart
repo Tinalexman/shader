@@ -113,6 +113,28 @@ class _SettingsPageState extends ConsumerState<SettingsPage> {
             const Divider(color: neutral3,),
 
             // Editor Font Size
+
+
+
+            const Divider(color: neutral3,),
+            ListTile(
+              title: Text("Enable High Precision",
+                  style: context.textTheme.bodyMedium!
+                      .copyWith(color: theme, fontWeight: FontWeight.w600)),
+              subtitle: Text("Better render quality at the cost of performance",
+                  style: context.textTheme.bodyMedium!
+                      .copyWith(color: theme, fontWeight: FontWeight.w300)),
+              trailing: Checkbox(
+                value: precision == 'highp',
+                onChanged: (val) {
+                  if(val == null) return;
+
+                },
+                checkColor: mainDark,
+                fillColor: MaterialStateProperty.all(appYellow),
+              ),
+            ),
+
           ],
         )),
       ),

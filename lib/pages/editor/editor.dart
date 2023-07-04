@@ -4,6 +4,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter_boxicons/flutter_boxicons.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
+import 'package:shade/components/sdf.dart';
 import 'package:shade/utils/constants.dart';
 import 'package:shade/utils/functions.dart';
 import 'package:shade/utils/providers.dart';
@@ -32,42 +33,34 @@ class _CodeEditorState extends ConsumerState<CodeEditor>
       CodeBlockConfig(
         name: "build",
         returnVariable: "data",
-        body: """
-float sD = length(ray) - 1.0;
-float sID = 1.0;
-vec2 s = vec2(sD, sID);
-
-float pD = dot(ray, vec3(0.0, 1.0, 0.0)) + 1.0;
-float pID = 2.0;
-vec2 p = vec2(pD, pID);
-
-data = join(p, s);
-""",
         returnType: "vec2",
-        parameters: ["vec3 ray"],
+        parameters: ["vec3 pos"],
         fixed: true,
+        body: """
+vec2 res = vec2(sphere(pos, 1.0), 1.0);
+data = join(res, vec2(plane(pos, vec3(0.0, 1.0, 0.0), 1.0), 2.0));
+        """,
         documentation:
             "This is the method in which your entire scene is built. "
-            "This method returns the data which contains the shortest "
-            "distance from this 'ray' to any shape in your scene as well "
-            "as the ID needed to color it appropriately in the material function.",
+            "This method returns the 'data' which contains the shortest "
+            "distance from this position 'pos' to any shape in your scene as well "
+            "as the 'ID' needed to color it appropriately in the material function.",
       ),
       CodeBlockConfig(
         name: "material",
         returnVariable: "color",
         returnType: "vec3",
-        parameters: ['vec3 ray', 'float ID'],
+        parameters: ['vec3 pos', 'float ID'],
         fixed: true,
         body: """
-if(ID == 1.0) {
-    color = vec3(0.9, 0.9, 0.0);
-} else if(ID == 2.0) {
-    color = vec3(0.0, 0.5, 0.5);
+switch( int(ID) ) {
+  case 1: color = vec3(0.5); break;
+  case 2: color = vec3(0.2 + 0.4 * mod(floor(pos.x) + floor(pos.y), 2.0)); break;
 }
-""",
+        """,
         documentation: "This is the method in which lighting and textures are "
             "applied to your scene. This method should return the final "
-            "color information calculated for this 'ray' based on the value of 'ID'. ",
+            "'color' information calculated for this 'ray' based on the value of 'ID'. ",
       ),
     ];
   }
@@ -76,11 +69,18 @@ if(ID == 1.0) {
     StringBuffer buffer = StringBuffer();
     buffer.write(defaultDeclarations);
     buffer.write("\n\n");
-    buffer.write(join);
+
+    String buildCode = fragmentConfigs[0].getCode();
+    String materialCode = fragmentConfigs[1].getCode();
+
+    String importedFunctions = _analyze(buildCode, materialCode);
+
+    buffer.write(importedFunctions);
     buffer.write("\n\n");
-    buffer.write(fragmentConfigs[0].getCode());
+
+    buffer.write(buildCode);
     buffer.write("\n\n");
-    buffer.write(fragmentConfigs[1].getCode());
+    buffer.write(materialCode);
     buffer.write("\n\n");
     buffer.write(rayMarch);
     buffer.write("\n\n");
@@ -100,6 +100,46 @@ if(ID == 1.0) {
     return buffer.toString();
   }
 
+  String _analyze(String buildCode, String materialCode) {
+    List<String> keys = getAllHGKeys();
+    Map<String, bool> processed = {};
+
+    for (String key in keys) {
+      RegExp pattern = RegExp(key);
+      if (pattern.firstMatch(buildCode) != null) {
+        processed[key] = true;
+      }
+    }
+
+    for (String key in keys) {
+      RegExp pattern = RegExp(key);
+      if (pattern.hasMatch(materialCode)) {
+        processed[key] = true;
+      }
+    }
+
+    StringBuffer buffer = StringBuffer();
+    Iterable<String> operators = getOperators();
+
+    for (String key in processed.keys) {
+      String code = getHGCode(key);
+
+      for (String operator in operators) {
+        RegExp pattern = RegExp(operator);
+        if (processed[operator] == null && pattern.hasMatch(code)) {
+          processed[operator] = true;
+        }
+      }
+    }
+
+    for (String key in processed.keys) {
+      buffer.write(getHGCode(key));
+      buffer.write("\n\n");
+    }
+
+    return buffer.toString();
+  }
+
   @override
   Widget build(BuildContext context) {
     super.build(context);
@@ -108,7 +148,7 @@ if(ID == 1.0) {
     if (addNewBlock) {
       setState(() {
         fragmentConfigs.add(
-          CodeBlockConfig(name: "empty ${fragmentConfigs.length}"),
+          CodeBlockConfig(name: "empty ${fragmentConfigs.length - 1}"),
         );
       });
 
@@ -132,29 +172,34 @@ if(ID == 1.0) {
     return SingleChildScrollView(
       child: Column(
         children: [
-          Container(
-            color: neutral2.withOpacity(0.2),
-            child: Row(
-              mainAxisAlignment: MainAxisAlignment.spaceAround,
-              crossAxisAlignment: CrossAxisAlignment.center,
-              children: [
-                IconButton(
-                  onPressed: () {
-                    unFocus();
-                    ref.watch(newCodeBlockProvider.notifier).state = true;
-                  },
-                  icon: Icon(Icons.add_rounded,
-                      color: containerGreen, size: 20.r),
-                  splashRadius: 0.01,
-                ),
-                IconButton(
-                  onPressed: () {},
-                  icon:
-                      Icon(Boxicons.bx_file, color: selectedWhite, size: 18.r),
-                  splashRadius: 0.01,
-                ),
-              ],
-            ),
+          // Container(
+          //   color: neutral2.withOpacity(0.2),
+          //   child: Row(
+          //     mainAxisAlignment: MainAxisAlignment.spaceAround,
+          //     crossAxisAlignment: CrossAxisAlignment.center,
+          //     children: [
+          //       IconButton(
+          //         onPressed: () {
+          //           unFocus();
+          //           ref.watch(newCodeBlockProvider.notifier).state = true;
+          //         },
+          //         icon: Icon(Icons.add_rounded,
+          //             color: containerGreen, size: 20.r),
+          //         splashRadius: 0.01,
+          //       ),
+          //       IconButton(
+          //         onPressed: () {},
+          //         icon:
+          //             Icon(Boxicons.bx_file, color: selectedWhite, size: 18.r),
+          //         splashRadius: 0.01,
+          //       ),
+          //     ],
+          //   ),
+          // ),
+          Text(
+            "Fragment Shader",
+            style: context.textTheme.bodyLarge!
+                .copyWith(fontWeight: FontWeight.w600, color: theme),
           ),
           SizedBox(
             height: 10.h,
