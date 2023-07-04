@@ -181,7 +181,7 @@ class _OnboardScreenState extends State<_OnboardScreen> {
         ),
         onDone: () => Navigator.of(context).pushReplacement(
           MaterialPageRoute(
-            builder: (_) => const Help(),
+            builder: (_) => const SceneEditor(),
           ),
         ),
         dotsContainerDecorator: const BoxDecoration(color: mainDark),
