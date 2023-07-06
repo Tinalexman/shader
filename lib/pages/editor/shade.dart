@@ -2,16 +2,15 @@ import 'package:flutter/material.dart';
 import 'package:flutter_boxicons/flutter_boxicons.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
-import 'package:shade/pages/misc/help.dart';
 import 'package:shade/pages/editor/editor.dart';
-import 'package:shade/pages/editor/preview.dart';
 import 'package:shade/pages/editor/parameters.dart';
+import 'package:shade/pages/editor/preview.dart';
+import 'package:shade/pages/misc/help.dart';
 import 'package:shade/pages/misc/settings.dart';
 import 'package:shade/utils/constants.dart';
 import 'package:shade/utils/functions.dart';
 import 'package:shade/utils/providers.dart';
 import 'package:shade/utils/theme.dart';
-import 'package:shade/utils/widgets.dart';
 
 const List<Widget> pages = [CodeEditor(), ShaderPreview(), SceneParameters()];
 
@@ -88,9 +87,11 @@ class _SceneEditorState extends ConsumerState<SceneEditor> {
                   ),
                   onTap: () {
                     Navigator.pop(context);
-                    Navigator.of(context).push(MaterialPageRoute(
-                      builder: (_) => const Help(),
-                    ));
+                    Navigator.of(context).push(
+                      MaterialPageRoute(
+                        builder: (_) => const Help(),
+                      ),
+                    );
                   }),
               ListTile(
                   leading: SizedBox(
@@ -189,10 +190,10 @@ class _SceneEditorState extends ConsumerState<SceneEditor> {
           ),
           BottomNavigationBarItem(
             icon: Icon(
-              Icons.settings_rounded,
+              Boxicons.bx_paint,
               size: 20.r,
             ),
-            label: "Options",
+            label: "Parameters",
           ),
         ],
         onTap: (index) => ref.watch(tabProvider.notifier).state = index,
@@ -200,22 +201,22 @@ class _SceneEditorState extends ConsumerState<SceneEditor> {
       floatingActionButton: FloatingActionButton(
         elevation: 2.0,
         child: Icon(
-          (page == 0 || page == 2) ? Icons.add_rounded :
-          (ref.watch(renderProvider) == 2
-              ? Icons.stop_rounded
-              : ref.watch(renderProvider) == 1
-              ? Boxicons.bx_loader
-              : Icons.play_arrow_rounded),
+          (page == 0 || page == 2)
+              ? Icons.add_rounded
+              : (ref.watch(renderProvider) == 2
+                  ? Icons.stop_rounded
+                  : ref.watch(renderProvider) == 1
+                      ? Boxicons.bx_loader
+                      : Icons.play_arrow_rounded),
           color: mainDark,
           size: 26.r,
         ),
         onPressed: () {
           unFocus();
 
-          if(page == 0) {
+          if (page == 0) {
             ref.watch(newCodeBlockProvider.notifier).state = true;
-          }
-          else if (page == 1) {
+          } else if (page == 1) {
             int lastState = ref.watch(renderProvider.notifier).state;
             int newState = lastState == 0 ? 1 : 0;
             ref.watch(renderProvider.notifier).state = newState;

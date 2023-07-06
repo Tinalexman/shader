@@ -3,7 +3,6 @@ import 'package:flutter_boxicons/flutter_boxicons.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
 import 'package:shade/components/math.dart';
-import 'package:shade/pages/editor/shade.dart';
 import 'package:shade/utils/constants.dart';
 import 'package:shade/utils/functions.dart';
 import 'package:shade/utils/providers.dart';
@@ -28,7 +27,7 @@ class _SceneSettingsState extends ConsumerState<SceneParameters> {
           MaterialPageRoute(
             builder: (_) => const _AddUniform(),
           ),
-        );
+        ).then((_) => setState(() {}));
       });
     }
 
@@ -48,13 +47,14 @@ class _SceneSettingsState extends ConsumerState<SceneParameters> {
                 SizedBox(height: 20.h),
                 Center(
                   child: Text(
-                    "Shader Uniforms",
+                    "Shader Parameters",
                     style:
                         context.textTheme.headlineSmall!.copyWith(color: theme),
                   ),
                 ),
                 Text(
-                  "You need to register your uniforms before it can be loaded into to the shader.",
+                  "You need to create new shader parameters if you want to load textures or other "
+                  "values into your scene.",
                   textAlign: TextAlign.center,
                   style: context.textTheme.bodyMedium!.copyWith(color: theme),
                 ),
@@ -68,33 +68,34 @@ class _SceneSettingsState extends ConsumerState<SceneParameters> {
                   }),
                 ),
                 SizedBox(
-                  height: 30.h,
+                  height: 50.h,
                 ),
-                Center(
-                  child: ElevatedButton(
-                    onPressed: () {
-                      unFocus();
-                      for (String key in shaderKeys) {
-                        dynamic value = uniforms[key]!.v;
-                        if (value is Changeable && value.hasChanged) {
-                          //value.onChange(ref.read(glProvider), key);
-                          value.hasChanged = false;
+                if (shaderKeys.isNotEmpty)
+                  Center(
+                    child: ElevatedButton(
+                      onPressed: () {
+                        unFocus();
+                        for (String key in shaderKeys) {
+                          dynamic value = uniforms[key]!.v;
+                          if (value is Changeable && value.hasChanged) {
+                            //value.onChange(ref.read(glProvider), key);
+                            value.hasChanged = false;
+                          }
                         }
-                      }
-                      ref.watch(renderProvider.notifier).state = 1;
-                      ref.watch(tabProvider.notifier).state = 1;
-                    },
-                    style: ElevatedButton.styleFrom(
-                      backgroundColor: appYellow,
-                      minimumSize: Size(80.w, 30.h),
-                    ),
-                    child: Text(
-                      "Apply",
-                      style: context.textTheme.bodyLarge!.copyWith(
-                          color: mainDark, fontWeight: FontWeight.w500),
+                        ref.watch(renderProvider.notifier).state = 1;
+                        ref.watch(tabProvider.notifier).state = 1;
+                      },
+                      style: ElevatedButton.styleFrom(
+                        backgroundColor: appYellow,
+                        minimumSize: Size(80.w, 30.h),
+                      ),
+                      child: Text(
+                        "Apply",
+                        style: context.textTheme.bodyLarge!.copyWith(
+                            color: mainDark, fontWeight: FontWeight.w500),
+                      ),
                     ),
                   ),
-                ),
               ],
             ),
           ),
@@ -189,7 +190,7 @@ class _AddUniformState extends ConsumerState<_AddUniform> {
             splashRadius: 0.01,
           ),
           title: Text(
-            "Add Uniform",
+            "Add Shader Parameter",
             style: context.textTheme.headlineSmall!.copyWith(color: theme),
           ),
         ),
@@ -202,7 +203,7 @@ class _AddUniformState extends ConsumerState<_AddUniform> {
                 children: [
                   SizedBox(height: 20.h),
                   Text(
-                    'Uniform Name',
+                    'Parameter Name',
                     style: context.textTheme.bodyMedium!
                         .copyWith(color: theme, fontWeight: FontWeight.w700),
                   ),
@@ -210,19 +211,19 @@ class _AddUniformState extends ConsumerState<_AddUniform> {
                     controller: nameController,
                     width: 200.w,
                     height: 40.h,
-                    hint: "Uniform Name",
+                    hint: "Parameter Name",
                   ),
                   SizedBox(
                     height: 20.h,
                   ),
                   Text(
-                    'Uniform Type',
+                    'Parameter Type',
                     style: context.textTheme.bodyMedium!
                         .copyWith(color: theme, fontWeight: FontWeight.w700),
                   ),
                   ComboBox(
                     width: 200.w,
-                    hint: "Uniform Type",
+                    hint: "Parameter Type",
                     initial: type,
                     items: const [
                       "float",
@@ -246,7 +247,7 @@ class _AddUniformState extends ConsumerState<_AddUniform> {
                             SnackBar(
                               backgroundColor: mainDark,
                               content: Text(
-                                "You need to choose a uniform type.",
+                                "You need to choose a parameter type.",
                                 style: context.textTheme.bodyMedium!
                                     .copyWith(color: theme),
                               ),
@@ -267,7 +268,7 @@ class _AddUniformState extends ConsumerState<_AddUniform> {
                               .watch(shaderUniformsProvider.notifier)
                               .state
                               .putIfAbsent(
-                              name, () => Pair(k: -1, v: Vector3()));
+                                  name, () => Pair(k: -1, v: Vector3()));
                         }
 
                         Navigator.of(context).pop();

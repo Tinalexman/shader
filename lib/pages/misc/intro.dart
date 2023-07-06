@@ -70,7 +70,7 @@ class _SplashState extends ConsumerState<Splash>
     ref.watch(openGlConfigurationsProvider.notifier).state = [
       query.size.width,
       query.size.width,
-      // query.size.height,
+      //query.size.height,
       query.devicePixelRatio
     ];
   }

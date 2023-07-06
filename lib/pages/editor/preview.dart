@@ -11,8 +11,8 @@ import 'package:shade/components/math.dart';
 import 'package:shade/components/mesh.dart';
 import 'package:shade/components/shader.dart';
 import 'package:shade/utils/constants.dart';
-import 'package:shade/utils/theme.dart';
 import 'package:shade/utils/providers.dart';
+import 'package:shade/utils/theme.dart';
 
 class ShaderPreview extends ConsumerStatefulWidget {
   const ShaderPreview({Key? key}) : super(key: key);
@@ -151,20 +151,25 @@ class _ShaderPreviewState extends ConsumerState<ShaderPreview> {
               }
 
               return flutterGlPlugin.isInitialized
-                  ? GestureDetector(
-                      onHorizontalDragUpdate: (details) {
-                        double x = min(max(details.localPosition.dx, 0.0), width);
-                        setState(() => mouse.x = x);
-                        //uploadToShader();
-                      },
-                      onVerticalDragUpdate: (details) {
-                        double y = min(max(details.localPosition.dy, 0.0), height);
-                        setState(() => mouse.y = y);
-                        //uploadToShader();
-                      },
-                      child: Texture(
-                        textureId: flutterGlPlugin.textureId!,
-                        filterQuality: FilterQuality.medium,
+                  ? RotatedBox(
+                      quarterTurns: 0, // or 3 for other landscape mode,
+                      child: GestureDetector(
+                        onHorizontalDragUpdate: (details) {
+                          double x =
+                              min(max(details.localPosition.dx, 0.0), width);
+                          //setState(() => mouse.x = x);
+                          uploadToShader();
+                        },
+                        onVerticalDragUpdate: (details) {
+                          double y =
+                              min(max(details.localPosition.dy, 0.0), height);
+                          //setState(() => mouse.y = y);
+                          uploadToShader();
+                        },
+                        child: Texture(
+                          textureId: flutterGlPlugin.textureId!,
+                          filterQuality: FilterQuality.medium,
+                        ),
                       ),
                     )
                   : const SizedBox();
@@ -176,9 +181,8 @@ class _ShaderPreviewState extends ConsumerState<ShaderPreview> {
   }
 
   void uploadToShader() {
-    dynamic gl = ref.watch(glProvider.notifier).state;
-    DreamShader shader = ref.watch(shaderProvider.notifier).state;
-    shader.loadVector2(gl, 'mouse', mouse);
+    //dynamic gl = ref.watch(glProvider.notifier).state;
+    //DreamShader shader = ref.watch(shaderProvider.notifier).state;
   }
 
   void animate(timer) => render();
@@ -202,6 +206,8 @@ class _ShaderPreviewState extends ConsumerState<ShaderPreview> {
 
     final gl = ref.watch(glProvider);
     DreamShader shader = ref.watch(shaderProvider);
+    //uploadToShader();
+
     clear(gl);
 
     gl.bindVertexArray(dreamMesh.vertexArrayObject);

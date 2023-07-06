@@ -297,7 +297,7 @@ Map<String, CodeBlockConfig> hgMaterials = {
 vec3 checkerboard(vec3 pos) {
   return vec3(0.2 + 0.4 * mod(floor(pos.x) + floor(pos.z), 2.0));
 }""",
-    documentation: "Returns a checkerboard pattern.",
+    documentation: "Creates a checkerboard pattern.",
   ),
 };
 
