@@ -18,18 +18,22 @@ void main()
 """;
 
 String precision = "highp";
+String renderGroup = "vec3 color = render4XAA();";   //"vec2 uv = getUV(vec2(0.0));\nvec3 color = render(uv);";
 
 String get defaultFs => "$defaultDeclarations \n\n"
     "$buildScene \n\n"
     "$material \n\n"
     "$rayMarch \n\n"
     "$normal \n\n"
+    "$ambientOcclusion \n\n"
+    "$shadow \n\n"
     "$lighting \n\n"
     "$rotate \n\n"
     "$mouseUpdate \n\n"
     "$camera \n\n"
     "$render \n\n"
     "$uv \n\n"
+    "$render4XAA \n\n"
     "$mainFragment \n\n";
 
 String defaultDeclarations = """
@@ -53,6 +57,8 @@ const int MAXIMUM_STEPS = 256;
 const float MAXIMUM_DISTANCE = 500.0;
 const float EPSILON = 0.001;
 
+const vec3 lightPosition = vec3(20.0, 40.0, -30.0);
+
 uniform vec2 resolution;
 uniform vec2 mouse;
 //uniform float time;
@@ -71,7 +77,6 @@ void rotate(inout vec2 pos, float a) {
 
 const String lighting = """
 vec3 light(vec3 ray, vec3 rayDirection, vec3 color) {
-  vec3 lightPosition = vec3(20.0, 40.0, -30.0);
   vec3 L = normalize(lightPosition - ray);
   vec3 N = normal(ray); 
   vec3 R = reflect(-L, N);
@@ -79,32 +84,63 @@ vec3 light(vec3 ray, vec3 rayDirection, vec3 color) {
   vec3 specular = vec3(0.5) * pow(clamp(dot(R, -rayDirection), 0.0, 1.0), 10.0);
   vec3 diffuse = color * clamp(dot(L, N), 0.0, 1.0);
   vec3 ambient = color * 0.05;
+  vec3 fresnel = color * pow((1.0 + dot(rayDirection, N)), 3.0);
   
-  float d = rayMarch(ray + (N * 0.02), normalize(lightPosition)).x;
-  if(d < length(lightPosition - ray)) return ambient;
+  float shadow = softShadow(ray + (N * 0.02), normalize(lightPosition));
+  float occlusion = ambientOcclusion(ray, N);
+  vec3 backLight = color * 0.05 * clamp(dot(N, -L), 0.0, 1.0);
   
-  return ambient + diffuse + specular;
+  return (backLight + ambient + fresnel) * occlusion 
+        + (diffuse + (specular * occlusion)) * shadow;
 } 
 """;
 
 const String normal = """
 vec3 normal(vec3 ray) {
   vec2 e = vec2(EPSILON, 0.0);
-  vec3 n = vec3(build(ray).x) - vec3(build(ray - e.xyy).x, build(ray - e.yxy).x, build(ray - e.yxx).x);
+  vec3 n = vec3(build(ray).x) - vec3(build(ray - e.xyy).x, 
+        build(ray - e.yxy).x, build(ray - e.yxx).x);
   return normalize(n);
 }
 """;
 
 const String material = """
-vec3 material(vec3 ray, float ID) {
+vec3 material(vec3 ray, vec3 normal, float ID) {
   return vec3(0.0);
 }
 """;
 
+const String ambientOcclusion = """
+float ambientOcclusion(vec3 pos, vec3 normal) {
+  float occlusion = 0.0;
+  float weight = 1.0;
+  
+  for(int i = 0; i < 8; ++i) {
+    float length = 0.01 + (0.02 * float(i * i));
+    float distance = build(pos + (normal * length)).x;
+    occlusion += (length - distance) * weight;
+    weight *= 0.85;
+  }
+  
+  return 1.0 - clamp(occlusion * 0.6, 0.0, 1.0);
+}""";
+
 const String shadow = """
-
+float softShadow(vec3 pos, vec3 lightPos) {
+  float shadow = 1.0;
+  float distance = 0.01;
+  float lightSize = 0.03;
+  
+  for(int i = 0; i < MAXIMUM_STEPS; ++i) {
+    float hit = build(pos + (lightPos * distance)).x;
+    shadow = min(shadow, hit / (distance * lightSize));
+    distance += hit;
+    if (hit < 0.0001 || distance > 60.0) break;
+  }
+  
+  return clamp(shadow, 0.0, 1.0);
+}
 """;
-
 
 const String mouseUpdate = """
 void mouseUpdate(inout vec3 rayOrigin) {
@@ -113,7 +149,6 @@ void mouseUpdate(inout vec3 rayOrigin) {
   rotate(rayOrigin.xz, m.x * TAU); 
 }""";
 
-
 const String camera = """
 mat3 camera(vec3 rayOrigin, vec3 lookAt) {
   vec3 camF = normalize(vec3(lookAt - rayOrigin));
@@ -121,6 +156,14 @@ mat3 camera(vec3 rayOrigin, vec3 lookAt) {
   vec3 camU = cross(camF, camR);
   return mat3(camR, camU, camF);
 }""";
+
+const String render4XAA = """
+vec3 render4XAA() {
+  vec4 e = vec4(0.125, -0.125, 0.375, -0.375);
+  vec3 color = render(getUV(e.xz)) + render(getUV(e.yw)) + render(getUV(e.wx)) + render(getUV(e.zy));
+  return color * 0.25;
+}
+""";
 
 const String rayMarch = """
 vec2 rayMarch(vec3 rayOrigin, vec3 rayDirection) {
@@ -142,21 +185,23 @@ vec2 rayMarch(vec3 rayOrigin, vec3 rayDirection) {
 const String render = """
 vec3 render(vec2 uv) {
   vec3 rayOrigin = vec3(3.0, 3.0, -3.0);
-  mouseUpdate(rayOrigin);
-  vec3 lookAt = vec3(0.0); 
-  vec3 rayDirection = camera(rayOrigin, lookAt) * normalize(vec3(uv, FIELD_OF_VIEW));
-  
-  vec2 object = rayMarch(rayOrigin, rayDirection);
   vec3 color = vec3(0.0);
   vec3 background = vec3(0.5, 0.8, 0.9);
   
+  mouseUpdate(rayOrigin);
+  vec3 lookAt = vec3(0.0); 
+  
+  vec3 rayDirection = camera(rayOrigin, lookAt) * normalize(vec3(uv, FIELD_OF_VIEW));
+  
+  vec2 object = rayMarch(rayOrigin, rayDirection);
+  
+  
   if(object.x < MAXIMUM_DISTANCE) {
     vec3 ray = rayOrigin + (rayDirection * object.x);
-    vec3 m = material(ray, object.y);
-    color = light(ray, rayDirection, m);
+    color = light(ray, rayDirection, material(ray, vec3(0.0, 1.0, 0.0), object.y));
     color = mix(color, background, 1.0 - exp(-0.00008 * object.x * object.x));
   } else {
-    color.xyz = background - max(rayDirection.y * 0.95, 0.0);
+    color.xyz = background - max(rayDirection.y * 0.9, 0.0);
   }
   
   return color;
@@ -169,11 +214,9 @@ vec2 getUV(vec2 offset) {
 }
 """;
 
-const String mainFragment = """
+String mainFragment = """
 void main() {
-  vec2 uv = getUV(vec2(0.0));
-  vec3 color = render(uv);
-  
+  $renderGroup
   color = pow(color, vec3(0.4545));
   gl_FragColor = vec4(color, 1.0);
 }

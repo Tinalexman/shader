@@ -113,7 +113,9 @@ class _SettingsPageState extends ConsumerState<SettingsPage> {
 
             // Font Size
 
-            const Divider(color: neutral3,),
+            const Divider(
+              color: neutral3,
+            ),
             ListTile(
               title: Text("Enable High Precision",
                   style: context.textTheme.bodyMedium!
@@ -122,16 +124,28 @@ class _SettingsPageState extends ConsumerState<SettingsPage> {
                   style: context.textTheme.bodyMedium!
                       .copyWith(color: theme, fontWeight: FontWeight.w300)),
               trailing: Checkbox(
-                value: precision == 'highp',
-                onChanged: (val) {
-                  if(val == null) return;
-
-                },
+                value: ref.watch(highPrecisionProvider),
+                onChanged: (val) =>
+                    ref.watch(highPrecisionProvider.notifier).state = val!,
                 checkColor: mainDark,
                 fillColor: MaterialStateProperty.all(appYellow),
               ),
             ),
-
+            ListTile(
+              title: Text("Enable 4xAA Rendering",
+                  style: context.textTheme.bodyMedium!
+                      .copyWith(color: theme, fontWeight: FontWeight.w600)),
+              subtitle: Text("Reduce antialiasing at the cost of performance",
+                  style: context.textTheme.bodyMedium!
+                      .copyWith(color: theme, fontWeight: FontWeight.w300)),
+              trailing: Checkbox(
+                value: ref.watch(antiAliasProvider),
+                onChanged: (val) =>
+                    ref.watch(antiAliasProvider.notifier).state = val!,
+                checkColor: mainDark,
+                fillColor: MaterialStateProperty.all(appYellow),
+              ),
+            ),
           ],
         )),
       ),

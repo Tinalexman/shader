@@ -45,6 +45,7 @@ final StateProvider<String> renderStateProvider =
     StateProvider((ref) => "Stopped");
 
 final StateProvider<bool> highPrecisionProvider = StateProvider((ref) => true);
+final StateProvider<bool> antiAliasProvider = StateProvider((ref) => false);
 
 final StateProvider<Map<String, Pair<int, dynamic>>> shaderUniformsProvider =
     StateProvider((ref) {

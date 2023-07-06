@@ -51,12 +51,13 @@ data = join(res, data);""",
         name: "material",
         returnVariable: "color",
         returnType: "vec3",
-        parameters: ['vec3 pos', 'float ID'],
+        parameters: ['vec3 pos', 'vec3 normal', 'float ID'],
         fixed: true,
         body: """
 switch( int(ID) ) {
   case 1: color = vec3(0.5); break;
   case 2: color = checkerboard(pos); break;
+  case 3: color = grid(pos);
 }""",
         documentation: "This is the method in which lighting and textures are "
             "applied to your scene. This method should return the final "
@@ -67,6 +68,14 @@ switch( int(ID) ) {
 
   Future<String> _assembleShader() async {
     StringBuffer buffer = StringBuffer();
+    // bool precisionType = ref.watch(highPrecisionProvider);
+    // precision = precisionType ? "highp" : 'mediump';
+    //
+    // bool aliasType = ref.watch(antiAliasProvider);
+    // renderGroup = aliasType
+    //     ? "vec3 color = render4XAA()"
+    //     : "vec2 uv = getUV(vec2(0.0));\n\tvec3 color = render(uv);";
+
     buffer.write("$defaultDeclarations \n\n");
 
     String buildCode = fragmentConfigs[0].getCode();
@@ -78,12 +87,15 @@ switch( int(ID) ) {
     buffer.write("$materialCode \n\n");
     buffer.write("$rayMarch \n\n");
     buffer.write("$normal \n\n");
+    buffer.write("$ambientOcclusion \n\n");
+    buffer.write("$shadow \n\n");
     buffer.write("$lighting \n\n");
     buffer.write("$rotate \n\n");
     buffer.write("$mouseUpdate \n\n");
     buffer.write("$camera \n\n");
     buffer.write("$render \n\n");
     buffer.write("$uv \n\n");
+    buffer.write("$render4XAA \n\n");
     buffer.write("$mainFragment \n\n");
 
     log(buffer.toString());
@@ -122,7 +134,7 @@ switch( int(ID) ) {
         }
       }
     }
-    
+
     for (String key in processed.keys) {
       buffer.write("${getHGCode(key)} \n\n");
     }
@@ -220,9 +232,7 @@ class _EditFunction extends StatefulWidget {
   State<_EditFunction> createState() => _EditFunctionState();
 }
 
-class _EditFunctionState extends State<_EditFunction>
-{
-
+class _EditFunctionState extends State<_EditFunction> {
   late TextEditingController nameController, paramController;
   late String initial;
   final GlobalKey<ReturnTypesState> returnKey = GlobalKey();
@@ -301,10 +311,10 @@ class _EditFunctionState extends State<_EditFunction>
                   spacing: 5.0,
                   children: List.generate(
                     params.length,
-                        (index) => Chip(
+                    (index) => Chip(
                       onDeleted: () => setState(() => params.removeAt(index)),
                       deleteIcon:
-                      Icon(Boxicons.bx_x, color: headerColor, size: 18.r),
+                          Icon(Boxicons.bx_x, color: headerColor, size: 18.r),
                       label: Text(
                         params[index].toString(),
                         style: context.textTheme.bodyMedium!.copyWith(

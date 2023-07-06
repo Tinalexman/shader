@@ -299,6 +299,17 @@ vec3 checkerboard(vec3 pos) {
 }""",
     documentation: "Creates a checkerboard pattern.",
   ),
+  "grid" : CodeBlockConfig(
+    name: "grid",
+    parameters: ["vec3 pos"],
+    returnType: "vec3",
+    body: """
+vec3 grid(vec3 pos) {
+  vec2 i = step(fract(pos.xz * 0.5), vec2(1.0 / 10.0));
+  return vec3(0.37, 0.12, 0.12) * ((1.0 - i.x) * (1.0 - i.y));
+}""",
+    documentation: "Creates a grid pattern.",
+  )
 };
 
 List<String> allHGKeys = [];
