@@ -1004,12 +1004,14 @@ class Vector2Input extends StatefulWidget {
   final Vector2 vector;
   final double minValue;
   final double maxValue;
+  final VoidCallback onDelete;
 
   const Vector2Input({
     super.key,
     this.fixed = false,
     this.minValue = -100.0,
     this.maxValue = 100.0,
+    required this.onDelete,
     required this.vector,
     required this.label,
   });
@@ -1037,69 +1039,90 @@ class _Vector2InputState extends State<Vector2Input> {
 
   @override
   Widget build(BuildContext context) {
-    return Row(
-      crossAxisAlignment: CrossAxisAlignment.center,
-      children: [
-        Text(
-          "${widget.label}:",
-          style: context.textTheme.bodyMedium!.copyWith(color: theme),
-        ),
-        SizedBox(
-          width: 20.w,
-        ),
-        SizedBox(
-          width: 200.w,
-          height: 30.h,
-          child: ListView.separated(
-            itemBuilder: (_, index) => Row(
-              mainAxisSize: MainAxisSize.min,
-              crossAxisAlignment: CrossAxisAlignment.center,
-              children: [
-                Text(
-                  index == 0 ? 'X' : "Y",
-                  style: context.textTheme.bodyLarge!.copyWith(
-                    color: index == 0 ? percentRed : percentGreen,
-                    fontWeight: FontWeight.bold,
-                  ),
+    return Container(
+      width: 390.w,
+      padding: EdgeInsets.only(top: 5.h, left: 10.w, right: 10.w, bottom: 15.h),
+      decoration: BoxDecoration(
+        border: Border.all(color: appYellow, width: 2.0),
+        borderRadius: BorderRadius.circular(10.r),
+      ),
+      child: Column(
+        children: [
+          Row(
+            mainAxisAlignment: MainAxisAlignment.spaceBetween,
+            children: [
+              Text(
+                "${widget.label} (vec2)",
+                style: context.textTheme.bodyLarge!.copyWith(color: appYellow, fontWeight: FontWeight.w700),
+              ),
+              IconButton(
+                iconSize: 20.r,
+                onPressed: widget.onDelete,
+                icon: const Icon(
+                  Boxicons.bx_x,
+                  color: appYellow,
                 ),
-                SizedBox(
-                  width: 5.w,
-                ),
-                SpecialForm(
-                  controller: _controllers[index],
-                  width: 70.w,
-                  height: 30.h,
-                  readOnly: widget.fixed,
-                  type: TextInputType.number,
-                  onChange: (val) {
-                    Vector2 vector = widget.vector;
-                    double number = double.parse(val);
-
-                    if (number < widget.minValue) {
-                      number = widget.minValue;
-                    } else if (number > widget.maxValue) {
-                      number = widget.maxValue;
-                    }
-
-                    if (index == 0) {
-                      vector.x = number;
-                    } else {
-                      vector.y = number;
-                    }
-
-                    vector.hasChanged = true;
-                  },
-                ),
-              ],
-            ),
-            separatorBuilder: (_, __) => SizedBox(
-              width: 20.w,
-            ),
-            itemCount: 2,
-            scrollDirection: Axis.horizontal,
+                splashRadius: 0.01,
+              )
+            ],
           ),
-        )
-      ],
+          SizedBox(
+            height: 20.h,
+          ),
+          SizedBox(
+            width: 200.w,
+            height: 30.h,
+            child: ListView.separated(
+              itemBuilder: (_, index) => Row(
+                mainAxisSize: MainAxisSize.min,
+                crossAxisAlignment: CrossAxisAlignment.center,
+                children: [
+                  Text(
+                    index == 0 ? 'X' : "Y",
+                    style: context.textTheme.bodyLarge!.copyWith(
+                      color: index == 0 ? percentRed : percentGreen,
+                      fontWeight: FontWeight.bold,
+                    ),
+                  ),
+                  SizedBox(
+                    width: 5.w,
+                  ),
+                  SpecialForm(
+                    controller: _controllers[index],
+                    width: 70.w,
+                    height: 30.h,
+                    readOnly: widget.fixed,
+                    type: TextInputType.number,
+                    onChange: (val) {
+                      Vector2 vector = widget.vector;
+                      double number = double.parse(val);
+
+                      if (number < widget.minValue) {
+                        number = widget.minValue;
+                      } else if (number > widget.maxValue) {
+                        number = widget.maxValue;
+                      }
+
+                      if (index == 0) {
+                        vector.x = number;
+                      } else {
+                        vector.y = number;
+                      }
+
+                      vector.hasChanged = true;
+                    },
+                  ),
+                ],
+              ),
+              separatorBuilder: (_, __) => SizedBox(
+                width: 20.w,
+              ),
+              itemCount: 2,
+              scrollDirection: Axis.horizontal,
+            ),
+          )
+        ],
+      ),
     );
   }
 }

@@ -23,11 +23,13 @@ class _SceneSettingsState extends ConsumerState<SceneParameters> {
     if (addNewUniform) {
       Future.delayed(const Duration(milliseconds: 100), () {
         ref.watch(uniformProvider.notifier).state = false;
-        Navigator.of(context).push(
-          MaterialPageRoute(
-            builder: (_) => const _AddUniform(),
-          ),
-        ).then((_) => setState(() {}));
+        Navigator.of(context)
+            .push(
+              MaterialPageRoute(
+                builder: (_) => const _AddUniform(),
+              ),
+            )
+            .then((_) => setState(() {}));
       });
     }
 
@@ -38,66 +40,61 @@ class _SceneSettingsState extends ConsumerState<SceneParameters> {
     return Scaffold(
       backgroundColor: mainDark,
       body: SafeArea(
-        child: SingleChildScrollView(
-          child: Padding(
-            padding: EdgeInsets.symmetric(horizontal: 10.w),
-            child: Column(
-              crossAxisAlignment: CrossAxisAlignment.start,
-              children: [
-                SizedBox(height: 20.h),
-                Center(
-                  child: Text(
-                    "Shader Parameters",
-                    style:
-                        context.textTheme.headlineSmall!.copyWith(color: theme),
-                  ),
+        child: Padding(
+          padding: EdgeInsets.symmetric(horizontal: 10.w),
+          child: Column(
+            crossAxisAlignment: CrossAxisAlignment.start,
+            children: [
+              SizedBox(height: 20.h),
+              Center(
+                child: Text(
+                  "Shader Parameters",
+                  style:
+                      context.textTheme.headlineSmall!.copyWith(color: theme),
                 ),
-                Text(
-                  "You need to create new shader parameters if you want to load textures or other "
-                  "values into your scene.",
-                  textAlign: TextAlign.center,
-                  style: context.textTheme.bodyMedium!.copyWith(color: theme),
-                ),
-                SizedBox(height: 50.h),
-                Column(
-                  crossAxisAlignment: CrossAxisAlignment.start,
-                  children: List.generate(shaderKeys.length, (index) {
+              ),
+              Text(
+                "You need to create new shader parameters if you want to load textures or other "
+                "values into your scene.",
+                textAlign: TextAlign.center,
+                style: context.textTheme.bodyMedium!.copyWith(color: theme),
+              ),
+              SizedBox(height: 50.h),
+              Expanded(
+                child: ListView.separated(
+                  itemBuilder: (_, index) {
+                    if (index == shaderKeys.length) {
+                      return Center(
+                        child: ElevatedButton(
+                          onPressed: () {
+                            unFocus();
+                            ref.watch(renderProvider.notifier).state = 1;
+                            ref.watch(tabProvider.notifier).state = 1;
+                          },
+                          style: ElevatedButton.styleFrom(
+                            backgroundColor: appYellow,
+                            minimumSize: Size(80.w, 30.h),
+                          ),
+                          child: Text(
+                            "Apply",
+                            style: context.textTheme.bodyLarge!.copyWith(
+                                color: mainDark, fontWeight: FontWeight.w500),
+                          ),
+                        ),
+                      );
+                    }
+
                     String name = shaderKeys[index];
                     dynamic value = uniforms[name]!;
                     return determineType(name, value);
-                  }),
-                ),
-                SizedBox(
-                  height: 50.h,
-                ),
-                if (shaderKeys.isNotEmpty)
-                  Center(
-                    child: ElevatedButton(
-                      onPressed: () {
-                        unFocus();
-                        for (String key in shaderKeys) {
-                          dynamic value = uniforms[key]!.v;
-                          if (value is Changeable && value.hasChanged) {
-                            //value.onChange(ref.read(glProvider), key);
-                            value.hasChanged = false;
-                          }
-                        }
-                        ref.watch(renderProvider.notifier).state = 1;
-                        ref.watch(tabProvider.notifier).state = 1;
-                      },
-                      style: ElevatedButton.styleFrom(
-                        backgroundColor: appYellow,
-                        minimumSize: Size(80.w, 30.h),
-                      ),
-                      child: Text(
-                        "Apply",
-                        style: context.textTheme.bodyLarge!.copyWith(
-                            color: mainDark, fontWeight: FontWeight.w500),
-                      ),
-                    ),
+                  },
+                  separatorBuilder: (_, __) => SizedBox(
+                    height: 30.h,
                   ),
-              ],
-            ),
+                  itemCount: shaderKeys.isEmpty ? 0 : shaderKeys.length + 1,
+                ),
+              ),
+            ],
           ),
         ),
       ),
@@ -107,49 +104,13 @@ class _SceneSettingsState extends ConsumerState<SceneParameters> {
   Widget determineType(String name, Pair<int, dynamic> pair) {
     dynamic value = pair.v;
     if (value is Vector2) {
-      return Padding(
-        padding: EdgeInsets.symmetric(horizontal: 10.w),
-        child: Row(
-          mainAxisAlignment: MainAxisAlignment.spaceBetween,
-          children: [
-            Vector2Input(vector: value, label: name),
-            IconButton(
-              onPressed: () {
-                ref.watch(shaderUniformsProvider).remove(name);
-                setState(() {});
-              },
-              icon: Icon(
-                Boxicons.bx_x,
-                color: appYellow,
-                size: 20.r,
-              ),
-              splashRadius: 0.01,
-            )
-          ],
-        ),
-      );
-    } else if (value is Vector3) {
-      return Padding(
-        padding: EdgeInsets.symmetric(horizontal: 10.w),
-        child: Row(
-          mainAxisAlignment: MainAxisAlignment.spaceBetween,
-          children: [
-            Vector3Input(vector: value, label: name),
-            IconButton(
-              onPressed: () {
-                ref.watch(shaderUniformsProvider).remove(name);
-                setState(() {});
-              },
-              icon: Icon(
-                Boxicons.bx_x,
-                color: appYellow,
-                size: 20.r,
-              ),
-              splashRadius: 0.01,
-            )
-          ],
-        ),
-      );
+      return Vector2Input(
+          vector: value,
+          label: name,
+          onDelete: () {
+            ref.watch(shaderUniformsProvider).remove(name);
+            setState(() {});
+          });
     }
     return const SizedBox();
   }
