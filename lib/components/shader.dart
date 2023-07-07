@@ -61,7 +61,10 @@ class DreamShader {
     int location = gl.getUniformLocation(_glProgram, name);
     pair.k = location;
     dynamic value = pair.v;
+    load(gl, location, value);
+  }
 
+  void load(dynamic gl, int location, dynamic value) {
     if (value is Vector2) {
       loadVector2(gl, location, value);
     } else if (value is Vector3) {

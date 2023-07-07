@@ -39,8 +39,6 @@ class _ShaderPreviewState extends ConsumerState<ShaderPreview> {
   late DreamMesh dreamMesh;
   Timer? timer;
 
-  Vector2 mouse = Vector2();
-
   @override
   void dispose() {
     flutterGlPlugin.dispose();
@@ -57,8 +55,6 @@ class _ShaderPreviewState extends ConsumerState<ShaderPreview> {
       width = query[0];
       height = query[1];
       devicePixelRatio = query[2];
-
-      mouse = Vector2(x: width * 0.5, y: height * 0.5);
 
       flutterGlPlugin = FlutterGlPlugin();
 
@@ -142,7 +138,7 @@ class _ShaderPreviewState extends ConsumerState<ShaderPreview> {
               if (initialized) {
                 if (renderState == 2 && timer == null) {
                   timer =
-                      Timer.periodic(const Duration(milliseconds: 33), animate);
+                      Timer.periodic(const Duration(milliseconds: 16), animate);
                 } else {
                   clear(ref.read(glProvider), stop: true);
                   timer?.cancel();
@@ -155,16 +151,10 @@ class _ShaderPreviewState extends ConsumerState<ShaderPreview> {
                       quarterTurns: 0, // or 3 for other landscape mode,
                       child: GestureDetector(
                         onHorizontalDragUpdate: (details) {
-                          double x =
-                              min(max(details.localPosition.dx, 0.0), width);
-                          //setState(() => mouse.x = x);
-                          uploadToShader();
+                          uploadToShader(x: min(max(details.localPosition.dx, 0.0), width));
                         },
                         onVerticalDragUpdate: (details) {
-                          double y =
-                              min(max(details.localPosition.dy, 0.0), height);
-                          //setState(() => mouse.y = y);
-                          uploadToShader();
+                          uploadToShader(y: min(max(details.localPosition.dy, 0.0), height));
                         },
                         child: Texture(
                           textureId: flutterGlPlugin.textureId!,
@@ -180,9 +170,20 @@ class _ShaderPreviewState extends ConsumerState<ShaderPreview> {
     );
   }
 
-  void uploadToShader() {
-    //dynamic gl = ref.watch(glProvider.notifier).state;
-    //DreamShader shader = ref.watch(shaderProvider.notifier).state;
+  void uploadToShader({double x = -1.0, double y = -1.0}) {
+    Map<String, Pair<int, dynamic>> uniforms = ref.read(shaderUniformsProvider);
+    Pair<int, dynamic> pair = uniforms['mouse']!;
+    Vector2 mouse = pair.v as Vector2;
+    mouse.x = x > -1.0 ? x : mouse.x;
+    mouse.y = y > -1.0 ? y : mouse.y;
+  }
+
+  void loadUniforms(DreamShader shader, dynamic gl) {
+    Map<String, Pair<int, dynamic>> uniforms = ref.watch(shaderUniformsProvider.notifier).state;
+    for(String key in uniforms.keys) {
+      Pair<int, dynamic> pair = uniforms[key]!;
+      shader.load(gl, pair.k, pair.v);
+    }
   }
 
   void animate(timer) => render();
@@ -206,12 +207,11 @@ class _ShaderPreviewState extends ConsumerState<ShaderPreview> {
 
     final gl = ref.watch(glProvider);
     DreamShader shader = ref.watch(shaderProvider);
-    //uploadToShader();
-
     clear(gl);
 
     gl.bindVertexArray(dreamMesh.vertexArrayObject);
     gl.useProgram(shader.program);
+    loadUniforms(shader, gl);
     gl.drawArrays(gl.TRIANGLES, 0, dreamMesh.count);
     gl.bindVertexArray(0);
     gl.useProgram(0);

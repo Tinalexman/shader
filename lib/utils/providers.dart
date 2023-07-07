@@ -52,9 +52,7 @@ final StateProvider<Map<String, Pair<int, dynamic>>> shaderUniformsProvider =
   List<double> configs = ref.watch(openGlConfigurationsProvider);
   Pair<int, dynamic> resolution =
       Pair(k: -1, v: Vector2(x: configs[0], y: configs[1]));
-  Pair<int, dynamic> mouse =
-      Pair(k: -1, v: Vector2(x: configs[0] * 0.5, y: configs[1] * 0.5));
+  Pair<int, dynamic> mouse = Pair(k: -1, v: Vector2(x: 100.0, y: 50.0));
 
   return {'resolution': resolution, 'mouse': mouse};
 });
-

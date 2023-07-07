@@ -18,7 +18,7 @@ void main()
 """;
 
 String precision = "highp";
-String renderGroup = "vec3 color = render4XAA();";   //"vec2 uv = getUV(vec2(0.0));\nvec3 color = render(uv);";
+String renderGroup = "vec2 uv = getUV(vec2(0.0));\n\tvec3 color = render(uv);";
 
 String get defaultFs => "$defaultDeclarations \n\n"
     "$buildScene \n\n"
