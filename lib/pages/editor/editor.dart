@@ -75,7 +75,9 @@ switch( int(ID) ) {
     //     ? "vec3 color = render4XAA()"
     //     : "vec2 uv = getUV(vec2(0.0));\n\tvec3 color = render(uv);";
 
+    buffer.write("$definitions \n\n");
     buffer.write("$defaultDeclarations \n\n");
+    buffer.write("$uniforms \n\n");
 
     String buildCode = fragmentConfigs[0].getCode();
     String materialCode = fragmentConfigs[1].getCode();

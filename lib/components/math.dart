@@ -56,8 +56,14 @@ class DreamInt extends Changeable {
   DreamInt({this.value = 0});
 }
 
+class DreamTexture extends Changeable {
+  String path;
+  bool loaded;
+  dynamic id;
 
+  DreamTexture({this.path = "", this.loaded = false});
+}
 
-class Changeable {
+abstract class Changeable {
   bool hasChanged = true;
 }

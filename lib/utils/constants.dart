@@ -18,9 +18,12 @@ void main()
 """;
 
 String precision = "highp";
-String renderGroup = "vec2 uv = getUV(vec2(0.0));\n\tvec3 color = render(uv);";
+String renderGroup = "vec2 uv = getUV(vec2(0.0));\nvec3 color = render(uv);";
 
-String get defaultFs => "$defaultDeclarations \n\n"
+String get defaultFs =>
+    "$definitions \n\n"
+    "$defaultDeclarations \n\n"
+    "$uniforms \n\n"
     "$buildScene \n\n"
     "$material \n\n"
     "$rayMarch \n\n"
@@ -37,6 +40,28 @@ String get defaultFs => "$defaultDeclarations \n\n"
     "$mainFragment \n\n";
 
 String defaultDeclarations = """
+precision $precision float;
+precision $precision int;
+
+out highp vec4 pc_fragColor;
+
+const float FIELD_OF_VIEW = 1.0;
+const int MAXIMUM_STEPS = 256;
+const float MAXIMUM_DISTANCE = 500.0;
+const float EPSILON = 0.001;
+const vec3 lightPosition = vec3(20.0, 40.0, -30.0);
+""";
+
+
+String uniforms = """
+uniform vec2 resolution;
+uniform vec2 mouse;
+uniform vec3 cameraPosition;
+//uniform float time;
+""";
+
+
+String definitions = """
 #version 300 es
 
 #define PI 3.14159265
@@ -44,24 +69,6 @@ String defaultDeclarations = """
 #define PHI ((sqrt(5) * 0.5) + 0.5)
 
 #define gl_FragColor pc_fragColor
-
-precision $precision float;
-precision $precision int;
-
-
-out highp vec4 pc_fragColor;
-
-
-const float FIELD_OF_VIEW = 1.0;
-const int MAXIMUM_STEPS = 256;
-const float MAXIMUM_DISTANCE = 500.0;
-const float EPSILON = 0.001;
-
-const vec3 lightPosition = vec3(20.0, 40.0, -30.0);
-
-uniform vec2 resolution;
-uniform vec2 mouse;
-//uniform float time;
 """;
 
 const String buildScene = """
@@ -184,7 +191,7 @@ vec2 rayMarch(vec3 rayOrigin, vec3 rayDirection) {
 
 const String render = """
 vec3 render(vec2 uv) {
-  vec3 rayOrigin = vec3(3.0, 3.0, -3.0);
+  vec3 rayOrigin = cameraPosition;
   vec3 color = vec3(0.0);
   vec3 background = vec3(0.5, 0.8, 0.9);
   

@@ -1,5 +1,8 @@
+import 'dart:io';
+
 import 'package:flutter/material.dart';
 import 'package:flutter_boxicons/flutter_boxicons.dart';
+import 'package:flutter_gl/openGL/opengl-desktop/src/opengl_header.dart';
 import 'package:flutter_highlight/flutter_highlight.dart';
 import 'package:flutter_highlight/themes/github.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
@@ -10,6 +13,8 @@ import 'package:shade/utils/constants.dart';
 import 'package:shade/utils/functions.dart';
 import 'package:shade/utils/providers.dart';
 import 'package:shade/utils/theme.dart';
+
+import 'file_handler.dart';
 
 class Slide extends StatefulWidget {
   final Widget content;
@@ -417,8 +422,8 @@ class _CodeBlockState extends ConsumerState<CodeBlock> {
                       width: 180.w,
                       child: Text(
                         "${widget.config.name}: ${widget.config.returnType}",
-                        style: context.textTheme.bodyLarge!
-                            .copyWith(fontWeight: FontWeight.w700, color: _color),
+                        style: context.textTheme.bodyLarge!.copyWith(
+                            fontWeight: FontWeight.w700, color: _color),
                       ),
                     ),
                     Row(
@@ -1052,8 +1057,9 @@ class _Vector2InputState extends State<Vector2Input> {
             mainAxisAlignment: MainAxisAlignment.spaceBetween,
             children: [
               Text(
-                "${widget.label} (vec2)",
-                style: context.textTheme.bodyLarge!.copyWith(color: appYellow, fontWeight: FontWeight.w700),
+                "${widget.label}: Vector2",
+                style: context.textTheme.bodyLarge!
+                    .copyWith(color: appYellow, fontWeight: FontWeight.w700),
               ),
               IconButton(
                 iconSize: 20.r,
@@ -1108,8 +1114,6 @@ class _Vector2InputState extends State<Vector2Input> {
                       } else {
                         vector.y = number;
                       }
-
-                      vector.hasChanged = true;
                     },
                   ),
                 ],
@@ -1133,6 +1137,7 @@ class Vector3Input extends StatefulWidget {
   final Vector3 vector;
   final double minValue;
   final double maxValue;
+  final VoidCallback onDelete;
 
   const Vector3Input({
     super.key,
@@ -1141,6 +1146,7 @@ class Vector3Input extends StatefulWidget {
     this.maxValue = 100.0,
     required this.vector,
     required this.label,
+    required this.onDelete,
   });
 
   @override
@@ -1168,80 +1174,376 @@ class _Vector3InputState extends State<Vector3Input> {
 
   @override
   Widget build(BuildContext context) {
-    return Row(
-      mainAxisSize: MainAxisSize.min,
-      crossAxisAlignment: CrossAxisAlignment.center,
-      children: [
-        Text(
-          "${widget.label}:",
-          style: context.textTheme.bodyMedium!.copyWith(color: theme),
-        ),
-        SizedBox(
-          width: 20.w,
-        ),
-        SizedBox(
-          width: 290.w,
-          height: 30.h,
-          child: ListView.separated(
-            itemBuilder: (_, index) => Row(
-              mainAxisSize: MainAxisSize.min,
-              crossAxisAlignment: CrossAxisAlignment.center,
-              children: [
-                Text(
-                  index == 0
-                      ? 'X'
-                      : (index == 1)
-                          ? "Y"
-                          : "Z",
-                  style: context.textTheme.bodyLarge!.copyWith(
-                    color: index == 0
-                        ? percentRed
-                        : (index == 1)
-                            ? percentGreen
-                            : headerBlue,
-                    fontWeight: FontWeight.bold,
-                  ),
+    return Container(
+      width: 390.w,
+      padding: EdgeInsets.only(top: 5.h, left: 10.w, right: 10.w, bottom: 15.h),
+      decoration: BoxDecoration(
+        border: Border.all(color: appYellow, width: 2.0),
+        borderRadius: BorderRadius.circular(10.r),
+      ),
+      child: Column(
+        children: [
+          Row(
+            mainAxisAlignment: MainAxisAlignment.spaceBetween,
+            children: [
+              Text(
+                "${widget.label}: Vector3",
+                style: context.textTheme.bodyLarge!
+                    .copyWith(color: appYellow, fontWeight: FontWeight.w700),
+              ),
+              IconButton(
+                iconSize: 20.r,
+                onPressed: widget.onDelete,
+                icon: const Icon(
+                  Boxicons.bx_x,
+                  color: appYellow,
                 ),
-                SizedBox(
-                  width: 5.w,
-                ),
-                SpecialForm(
-                  controller: _controllers[index],
-                  width: 70.w,
-                  height: 30.h,
-                  readOnly: widget.fixed,
-                  type: TextInputType.number,
-                  onChange: (val) {
-                    Vector3 vector = widget.vector;
-                    double number = double.parse(val);
-
-                    if (number < widget.minValue) {
-                      number = widget.minValue;
-                    } else if (number > widget.maxValue) {
-                      number = widget.maxValue;
-                    }
-
-                    if (index == 0) {
-                      vector.x = number;
-                    } else if (index == 1) {
-                      vector.y = number;
-                    } else {
-                      vector.z = number;
-                    }
-
-                    vector.hasChanged = true;
-                  },
-                ),
-              ],
-            ),
-            separatorBuilder: (_, __) => SizedBox(
-              width: 20.w,
-            ),
-            itemCount: 3,
-            scrollDirection: Axis.horizontal,
+                splashRadius: 0.01,
+              )
+            ],
           ),
-        )
-      ],
+          SizedBox(
+            height: 20.h,
+          ),
+          SizedBox(
+            width: 300.w,
+            height: 30.h,
+            child: ListView.separated(
+              itemBuilder: (_, index) => Row(
+                mainAxisSize: MainAxisSize.min,
+                crossAxisAlignment: CrossAxisAlignment.center,
+                children: [
+                  Text(
+                    index == 0
+                        ? 'X'
+                        : (index == 1)
+                            ? "Y"
+                            : "Z",
+                    style: context.textTheme.bodyLarge!.copyWith(
+                      color: index == 0
+                          ? percentRed
+                          : (index == 1)
+                              ? percentGreen
+                              : linkBlue,
+                      fontWeight: FontWeight.bold,
+                    ),
+                  ),
+                  SizedBox(
+                    width: 5.w,
+                  ),
+                  SpecialForm(
+                    controller: _controllers[index],
+                    width: 70.w,
+                    height: 30.h,
+                    readOnly: widget.fixed,
+                    type: TextInputType.number,
+                    onChange: (val) {
+                      Vector3 vector = widget.vector;
+                      double number = double.parse(val);
+
+                      if (number < widget.minValue) {
+                        number = widget.minValue;
+                      } else if (number > widget.maxValue) {
+                        number = widget.maxValue;
+                      }
+
+                      if (index == 0) {
+                        vector.x = number;
+                      } else if (index == 1) {
+                        vector.y = number;
+                      } else {
+                        vector.z = number;
+                      }
+                    },
+                  ),
+                ],
+              ),
+              separatorBuilder: (_, __) => SizedBox(
+                width: 20.w,
+              ),
+              itemCount: 3,
+              scrollDirection: Axis.horizontal,
+            ),
+          )
+        ],
+      ),
+    );
+  }
+}
+
+
+
+
+
+class Vector4Input extends StatefulWidget {
+  final String label;
+  final bool fixed;
+  final Vector4 vector;
+  final double minValue;
+  final double maxValue;
+  final VoidCallback onDelete;
+
+  const Vector4Input({
+    super.key,
+    this.fixed = false,
+    this.minValue = -100.0,
+    this.maxValue = 100.0,
+    required this.vector,
+    required this.label,
+    required this.onDelete,
+  });
+
+  @override
+  State<Vector4Input> createState() => _Vector4InputState();
+}
+
+class _Vector4InputState extends State<Vector4Input> {
+  final List<TextEditingController> _controllers = [];
+
+  @override
+  void initState() {
+    super.initState();
+    _controllers.add(TextEditingController(text: "${widget.vector.x}"));
+    _controllers.add(TextEditingController(text: "${widget.vector.y}"));
+    _controllers.add(TextEditingController(text: "${widget.vector.z}"));
+    _controllers.add(TextEditingController(text: "${widget.vector.w}"));
+  }
+
+  @override
+  void dispose() {
+    _controllers[3].dispose();
+    _controllers[2].dispose();
+    _controllers[1].dispose();
+    _controllers[0].dispose();
+    super.dispose();
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    return Container(
+      width: 390.w,
+      padding: EdgeInsets.only(top: 5.h, left: 10.w, right: 10.w, bottom: 15.h),
+      decoration: BoxDecoration(
+        border: Border.all(color: appYellow, width: 2.0),
+        borderRadius: BorderRadius.circular(10.r),
+      ),
+      child: Column(
+        children: [
+          Row(
+            mainAxisAlignment: MainAxisAlignment.spaceBetween,
+            children: [
+              Text(
+                "${widget.label}: Vector4",
+                style: context.textTheme.bodyLarge!
+                    .copyWith(color: appYellow, fontWeight: FontWeight.w700),
+              ),
+              IconButton(
+                iconSize: 20.r,
+                onPressed: widget.onDelete,
+                icon: const Icon(
+                  Boxicons.bx_x,
+                  color: appYellow,
+                ),
+                splashRadius: 0.01,
+              )
+            ],
+          ),
+          SizedBox(
+            height: 20.h,
+          ),
+          SizedBox(
+            width: 390.w,
+            height: 30.h,
+            child: ListView.separated(
+              itemBuilder: (_, index) => Row(
+                mainAxisSize: MainAxisSize.min,
+                crossAxisAlignment: CrossAxisAlignment.center,
+                children: [
+                  Text(
+                    index == 0
+                        ? 'X'
+                        : (index == 1)
+                        ? "Y" : (index == 2)
+                        ? "Z" : "W",
+                    style: context.textTheme.bodyLarge!.copyWith(
+                      color: index == 0
+                          ? percentRed
+                          : (index == 1)
+                          ? percentGreen
+                          : (index == 2) ? linkBlue : appYellow,
+                      fontWeight: FontWeight.bold,
+                    ),
+                  ),
+                  SizedBox(
+                    width: 5.w,
+                  ),
+                  SpecialForm(
+                    controller: _controllers[index],
+                    width: 70.w,
+                    height: 30.h,
+                    readOnly: widget.fixed,
+                    type: TextInputType.number,
+                    onChange: (val) {
+                      Vector4 vector = widget.vector;
+                      double number = double.parse(val);
+
+                      if (number < widget.minValue) {
+                        number = widget.minValue;
+                      } else if (number > widget.maxValue) {
+                        number = widget.maxValue;
+                      }
+
+                      if (index == 0) {
+                        vector.x = number;
+                      } else if (index == 1) {
+                        vector.y = number;
+                      } else if (index == 2)  {
+                        vector.z = number;
+                      } else {
+                        vector.w = number;
+                      }
+                    },
+                  ),
+                ],
+              ),
+              separatorBuilder: (_, __) => SizedBox(
+                width: 20.w,
+              ),
+              itemCount: 4,
+              scrollDirection: Axis.horizontal,
+            ),
+          )
+        ],
+      ),
+    );
+  }
+}
+
+
+
+class TextureInput extends ConsumerStatefulWidget {
+  final String label;
+  final DreamTexture texture;
+  final VoidCallback onDelete;
+
+  const TextureInput({
+    super.key,
+    required this.label,
+    required this.texture,
+    required this.onDelete,
+  });
+
+  @override
+  ConsumerState<TextureInput> createState() => _TextureInputState();
+}
+
+class _TextureInputState extends ConsumerState<TextureInput> {
+  String? path;
+
+
+  @override
+  void initState() {
+    super.initState();
+    //_load();
+  }
+
+
+  void _load() {
+    dynamic gl = ref.watch(glProvider);
+
+    if(widget.texture.loaded) {
+      gl.deleteTextures(widget.texture.id);
+    }
+
+    widget.texture.id = gl.createTexture();
+    gl.bindTexture(gl.TEXTURE_2D, widget.texture.id);
+    gl.pixelStorei(GL_UNPACK_ALIGNMENT, 1);
+    gl.texImage2D(gl.TEXTURE_2D, 0, gl.RGBA, 390.w, 390.w, 0, gl.RGBA,
+        gl.UNSIGNED_BYTE, null);
+    gl.texParameteri(gl.TEXTURE_2D, gl.TEXTURE_MIN_FILTER, gl.NEAREST);
+    gl.texParameteri(gl.TEXTURE_2D, gl.TEXTURE_MAG_FILTER, gl.LINEAR);
+    gl.texParameteri(gl.TEXTURE_2D, gl.TEXTURE_MIN_FILTER, gl.LINEAR_MIPMAP_LINEAR);
+    gl.texParameteri(gl.TEXTURE_2D, gl.TEXTURE_WRAP_S, gl.REPEAT);
+    gl.texParameteri(gl.TEXTURE_2D, gl.TEXTURE_WRAP_T, gl.REPEAT);
+    gl.generateMipmap(GL_TEXTURE_2D);
+
+    widget.texture.hasChanged = true;
+    widget.texture.loaded = true;
+  }
+
+
+  @override
+  Widget build(BuildContext context) {
+    return Container(
+      width: 390.w,
+      padding: EdgeInsets.only(top: 5.h, left: 10.w, right: 10.w, bottom: 15.h),
+      decoration: BoxDecoration(
+        border: Border.all(color: appYellow, width: 2.0),
+        borderRadius: BorderRadius.circular(10.r),
+      ),
+      child: Column(
+        children: [
+          Row(
+            mainAxisAlignment: MainAxisAlignment.spaceBetween,
+            children: [
+              Text(
+                "${widget.label}: Texture",
+                style: context.textTheme.bodyLarge!
+                    .copyWith(color: appYellow, fontWeight: FontWeight.w700),
+              ),
+              IconButton(
+                iconSize: 20.r,
+                onPressed: widget.onDelete,
+                icon: const Icon(
+                  Boxicons.bx_x,
+                  color: appYellow,
+                ),
+                splashRadius: 0.01,
+              )
+            ],
+          ),
+          SizedBox(
+            height: 20.h,
+          ),
+          Row(
+            mainAxisAlignment: MainAxisAlignment.spaceBetween,
+            crossAxisAlignment: CrossAxisAlignment.center,
+            children: [
+              ClipRRect(
+                borderRadius: BorderRadius.circular(10.r),
+                child: path == null
+                    ? Container(
+                  height: 160.w,
+                  width: 160.w,
+                  color: Colors.black,
+                )
+                    : Image.file(
+                        File(path!),
+                        height: 160.w,
+                        width: 160.w,
+                        fit: BoxFit.cover,
+                      ),
+              ),
+              ElevatedButton(
+                style: ElevatedButton.styleFrom(
+                    minimumSize: Size(160.w, 35.h), backgroundColor: appYellow),
+                onPressed: () {
+                  Future<String?> response = FileHandler.pickFile("jpeg");
+                  response.then((value) {
+                    setState(() => path = value);
+                    _load();
+                  });
+                },
+                child: Text(
+                  "Load Texture",
+                  style: context.textTheme.bodyLarge!
+                      .copyWith(color: mainDark, fontWeight: FontWeight.w600),
+                ),
+              ),
+            ],
+          ),
+        ],
+      ),
     );
   }
 }

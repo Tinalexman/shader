@@ -67,14 +67,19 @@ class DreamShader {
   void load(dynamic gl, int location, dynamic value) {
     if (value is Vector2) {
       loadVector2(gl, location, value);
+      value.hasChanged = false;
     } else if (value is Vector3) {
       loadVector3(gl, location, value);
-    } else if (value is Vector4) {
+      value.hasChanged = false;
+    } else if (value is Vector4 && value.hasChanged) {
       loadVector4(gl, location, value);
-    } else if (value is DreamDouble) {
+      value.hasChanged = false;
+    } else if (value is DreamDouble && value.hasChanged) {
       loadDouble(gl, location, value);
-    } else if (value is DreamInt) {
+      value.hasChanged = false;
+    } else if (value is DreamInt && value.hasChanged) {
       loadInt(gl, location, value);
+      value.hasChanged = false;
     }
   }
 
@@ -87,7 +92,9 @@ class DreamShader {
   void loadVector4(dynamic gl, int location, Vector4 vector) =>
       gl.uniform4f(location, vector.x, vector.y, vector.z, vector.w);
 
-  void loadDouble(dynamic gl, int location, DreamDouble val) => gl.uniform1f(location, val.value);
+  void loadDouble(dynamic gl, int location, DreamDouble val) =>
+      gl.uniform1f(location, val.value);
 
-  void loadInt(dynamic gl, int location, DreamInt val) => gl.uniform1i(location, val.value);
+  void loadInt(dynamic gl, int location, DreamInt val) =>
+      gl.uniform1i(location, val.value);
 }

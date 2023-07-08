@@ -53,6 +53,12 @@ final StateProvider<Map<String, Pair<int, dynamic>>> shaderUniformsProvider =
   Pair<int, dynamic> resolution =
       Pair(k: -1, v: Vector2(x: configs[0], y: configs[1]));
   Pair<int, dynamic> mouse = Pair(k: -1, v: Vector2(x: 100.0, y: 50.0));
+  Pair<int, dynamic> cameraPosition =
+      Pair(k: -1, v: Vector3(x: 0.0, y: 0.0, z: -3.0));
 
-  return {'resolution': resolution, 'mouse': mouse};
+  return {
+    'resolution': resolution,
+    'mouse': mouse,
+    'cameraPosition': cameraPosition,
+  };
 });

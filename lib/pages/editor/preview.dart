@@ -176,6 +176,7 @@ class _ShaderPreviewState extends ConsumerState<ShaderPreview> {
     Vector2 mouse = pair.v as Vector2;
     mouse.x = x > -1.0 ? x : mouse.x;
     mouse.y = y > -1.0 ? y : mouse.y;
+    mouse.hasChanged = true;
   }
 
   void loadUniforms(DreamShader shader, dynamic gl) {

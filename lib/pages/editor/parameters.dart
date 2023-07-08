@@ -1,8 +1,8 @@
 import 'package:flutter/material.dart';
-import 'package:flutter_boxicons/flutter_boxicons.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
 import 'package:shade/components/math.dart';
+import 'package:shade/components/shader.dart';
 import 'package:shade/utils/constants.dart';
 import 'package:shade/utils/functions.dart';
 import 'package:shade/utils/providers.dart';
@@ -17,6 +17,8 @@ class SceneParameters extends ConsumerStatefulWidget {
 }
 
 class _SceneSettingsState extends ConsumerState<SceneParameters> {
+  bool addedNew = false;
+
   @override
   Widget build(BuildContext context) {
     bool addNewUniform = ref.watch(uniformProvider);
@@ -29,7 +31,9 @@ class _SceneSettingsState extends ConsumerState<SceneParameters> {
                 builder: (_) => const _AddUniform(),
               ),
             )
-            .then((_) => setState(() {}));
+            .then((resp) => setState(() {
+                  addedNew = resp!;
+                }));
       });
     }
 
@@ -68,7 +72,22 @@ class _SceneSettingsState extends ConsumerState<SceneParameters> {
                         child: ElevatedButton(
                           onPressed: () {
                             unFocus();
-                            ref.watch(renderProvider.notifier).state = 1;
+                            if (addedNew) {
+                              setState(() => addedNew = false);
+                              ref.watch(renderProvider.notifier).state = 1;
+                            } else {
+                              DreamShader shader =
+                                  ref.watch(shaderProvider.notifier).state;
+                              dynamic gl = ref.watch(glProvider.notifier).state;
+
+                              Map<String, Pair<int, dynamic>> uniforms = ref
+                                  .watch(shaderUniformsProvider.notifier)
+                                  .state;
+                              for (String key in uniforms.keys) {
+                                Pair<int, dynamic> pair = uniforms[key]!;
+                                shader.load(gl, pair.k, pair.v);
+                              }
+                            }
                             ref.watch(tabProvider.notifier).state = 1;
                           },
                           style: ElevatedButton.styleFrom(
@@ -102,16 +121,42 @@ class _SceneSettingsState extends ConsumerState<SceneParameters> {
   }
 
   Widget determineType(String name, Pair<int, dynamic> pair) {
+    void delete() {
+      ref.watch(shaderUniformsProvider).remove(name);
+      setState(() {});
+    }
+
     dynamic value = pair.v;
     if (value is Vector2) {
       return Vector2Input(
-          vector: value,
-          label: name,
-          onDelete: () {
-            ref.watch(shaderUniformsProvider).remove(name);
-            setState(() {});
-          });
+        vector: value,
+        label: name,
+        onDelete: delete,
+      );
+    } else if (value is Vector3) {
+      return Vector3Input(
+        vector: value,
+        label: name,
+        onDelete: delete,
+      );
+    } else if (value is Vector4) {
+      return Vector4Input(
+        vector: value,
+        label: name,
+        onDelete: delete,
+      );
+    } else if (value is DreamTexture) {
+      return TextureInput(
+        label: name,
+        texture: value,
+        onDelete: delete,
+      );
+    } else if (value is DreamDouble) {
+      return const SizedBox();
+    } else if (value is DreamInt) {
+      return const SizedBox();
     }
+
     return const SizedBox();
   }
 }
@@ -147,7 +192,7 @@ class _AddUniformState extends ConsumerState<_AddUniform> {
               color: theme,
               size: 26.r,
             ),
-            onPressed: () => Navigator.of(context).pop(),
+            onPressed: () => Navigator.of(context).pop(false),
             splashRadius: 0.01,
           ),
           title: Text(
@@ -187,12 +232,12 @@ class _AddUniformState extends ConsumerState<_AddUniform> {
                     hint: "Parameter Type",
                     initial: type,
                     items: const [
-                      "float",
-                      "int",
-                      "vec2",
-                      "vec3",
-                      "vec4",
-                      "sampler2D"
+                      "Double",
+                      "Int",
+                      "Vector2",
+                      "Vector3",
+                      "Vector4",
+                      "Texture"
                     ],
                     onChanged: (val) => setState(() => type = val),
                   ),
@@ -218,21 +263,45 @@ class _AddUniformState extends ConsumerState<_AddUniform> {
                         }
 
                         String name = nameController.text.trim();
-                        if (type == "vec2") {
+                        if (type == "Vector2") {
                           ref
                               .watch(shaderUniformsProvider.notifier)
                               .state
                               .putIfAbsent(
                                   name, () => Pair(k: -1, v: Vector2()));
-                        } else if (type == "vec3") {
+                        } else if (type == "Vector3") {
                           ref
                               .watch(shaderUniformsProvider.notifier)
                               .state
                               .putIfAbsent(
                                   name, () => Pair(k: -1, v: Vector3()));
+                        } else if (type == "Vector4") {
+                          ref
+                              .watch(shaderUniformsProvider.notifier)
+                              .state
+                              .putIfAbsent(
+                                  name, () => Pair(k: -1, v: Vector4()));
+                        } else if (type == "Double") {
+                          ref
+                              .watch(shaderUniformsProvider.notifier)
+                              .state
+                              .putIfAbsent(
+                                  name, () => Pair(k: -1, v: DreamDouble()));
+                        } else if (type == "Int") {
+                          ref
+                              .watch(shaderUniformsProvider.notifier)
+                              .state
+                              .putIfAbsent(
+                                  name, () => Pair(k: -1, v: DreamInt()));
+                        } else if (type == "Texture") {
+                          ref
+                              .watch(shaderUniformsProvider.notifier)
+                              .state
+                              .putIfAbsent(
+                                  name, () => Pair(k: -1, v: DreamTexture()));
                         }
 
-                        Navigator.of(context).pop();
+                        Navigator.of(context).pop(true);
                       },
                       style: ElevatedButton.styleFrom(
                         backgroundColor: appYellow,
