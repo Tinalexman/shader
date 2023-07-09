@@ -31,14 +31,15 @@ class _SceneSettingsState extends ConsumerState<SceneParameters> {
                 builder: (_) => const _AddUniform(),
               ),
             )
-            .then((resp) => setState(() {
-                  addedNew = resp!;
-                }));
+            .then(
+              (resp) => setState(() {
+                addedNew = resp!;
+              }),
+            );
       });
     }
 
-    Map<String, Pair<int, dynamic>> uniforms =
-        ref.watch(shaderUniformsProvider);
+    Map<String, Pair<int, dynamic>> uniforms = ref.watch(userParameters);
     List<String> shaderKeys = uniforms.keys.toList();
 
     return Scaffold(
@@ -80,9 +81,8 @@ class _SceneSettingsState extends ConsumerState<SceneParameters> {
                                   ref.watch(shaderProvider.notifier).state;
                               dynamic gl = ref.watch(glProvider.notifier).state;
 
-                              Map<String, Pair<int, dynamic>> uniforms = ref
-                                  .watch(shaderUniformsProvider.notifier)
-                                  .state;
+                              Map<String, Pair<int, dynamic>> uniforms =
+                                  ref.watch(userParameters.notifier).state;
                               for (String key in uniforms.keys) {
                                 Pair<int, dynamic> pair = uniforms[key]!;
                                 shader.load(gl, pair.k, pair.v);
@@ -122,7 +122,7 @@ class _SceneSettingsState extends ConsumerState<SceneParameters> {
 
   Widget determineType(String name, Pair<int, dynamic> pair) {
     void delete() {
-      ref.watch(shaderUniformsProvider).remove(name);
+      ref.watch(userParameters).remove(name);
       setState(() {});
     }
 
@@ -264,41 +264,23 @@ class _AddUniformState extends ConsumerState<_AddUniform> {
 
                         String name = nameController.text.trim();
                         if (type == "Vector2") {
-                          ref
-                              .watch(shaderUniformsProvider.notifier)
-                              .state
-                              .putIfAbsent(
-                                  name, () => Pair(k: -1, v: Vector2()));
+                          ref.watch(userParameters.notifier).state.putIfAbsent(
+                              name, () => Pair(k: -1, v: Vector2()));
                         } else if (type == "Vector3") {
-                          ref
-                              .watch(shaderUniformsProvider.notifier)
-                              .state
-                              .putIfAbsent(
-                                  name, () => Pair(k: -1, v: Vector3()));
+                          ref.watch(userParameters.notifier).state.putIfAbsent(
+                              name, () => Pair(k: -1, v: Vector3()));
                         } else if (type == "Vector4") {
-                          ref
-                              .watch(shaderUniformsProvider.notifier)
-                              .state
-                              .putIfAbsent(
-                                  name, () => Pair(k: -1, v: Vector4()));
+                          ref.watch(userParameters.notifier).state.putIfAbsent(
+                              name, () => Pair(k: -1, v: Vector4()));
                         } else if (type == "Double") {
-                          ref
-                              .watch(shaderUniformsProvider.notifier)
-                              .state
-                              .putIfAbsent(
-                                  name, () => Pair(k: -1, v: DreamDouble()));
+                          ref.watch(userParameters.notifier).state.putIfAbsent(
+                              name, () => Pair(k: -1, v: DreamDouble()));
                         } else if (type == "Int") {
-                          ref
-                              .watch(shaderUniformsProvider.notifier)
-                              .state
-                              .putIfAbsent(
-                                  name, () => Pair(k: -1, v: DreamInt()));
+                          ref.watch(userParameters.notifier).state.putIfAbsent(
+                              name, () => Pair(k: -1, v: DreamInt()));
                         } else if (type == "Texture") {
-                          ref
-                              .watch(shaderUniformsProvider.notifier)
-                              .state
-                              .putIfAbsent(
-                                  name, () => Pair(k: -1, v: DreamTexture()));
+                          ref.watch(userParameters.notifier).state.putIfAbsent(
+                              name, () => Pair(k: -1, v: DreamTexture()));
                         }
 
                         Navigator.of(context).pop(true);

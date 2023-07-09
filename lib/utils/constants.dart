@@ -17,11 +17,11 @@ void main()
 }
 """;
 
-String precision = "highp";
 String renderGroup = "vec2 uv = getUV(vec2(0.0));\nvec3 color = render(uv);";
 
 String get defaultFs =>
     "$definitions \n\n"
+    '$precision \n\n'
     "$defaultDeclarations \n\n"
     "$uniforms \n\n"
     "$buildScene \n\n"
@@ -37,16 +37,17 @@ String get defaultFs =>
     "$render \n\n"
     "$uv \n\n"
     "$render4XAA \n\n"
-    "$mainFragment \n\n";
+    "$beginMain"
+    "$renderGroup\n\t"
+    "$endMain \n\n";
+
+String precision = "precision mediump float;";
 
 String defaultDeclarations = """
-precision $precision float;
-precision $precision int;
-
 out highp vec4 pc_fragColor;
 
-const float FIELD_OF_VIEW = 1.0;
 const int MAXIMUM_STEPS = 256;
+const float FIELD_OF_VIEW = 1.0;
 const float MAXIMUM_DISTANCE = 500.0;
 const float EPSILON = 0.001;
 const vec3 lightPosition = vec3(20.0, 40.0, -30.0);
@@ -221,9 +222,9 @@ vec2 getUV(vec2 offset) {
 }
 """;
 
-String mainFragment = """
-void main() {
-  $renderGroup
+const String beginMain = "void main() {\n\t";
+
+const String endMain = """
   color = pow(color, vec3(0.4545));
   gl_FragColor = vec4(color, 1.0);
 }

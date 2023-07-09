@@ -115,17 +115,17 @@ class ComboBox extends StatefulWidget {
   final Function? onValidate;
   final String? initial;
 
-  const ComboBox(
-      {Key? key,
-      this.hint = "",
-      this.items,
-      this.height,
-      required this.width,
-      this.onValidate,
-      this.prefix,
-      this.initial,
-      this.onChanged})
-      : super(key: key);
+  const ComboBox({
+    Key? key,
+    this.hint = "",
+    this.items,
+    this.height,
+    required this.width,
+    this.onValidate,
+    this.prefix,
+    this.initial,
+    this.onChanged,
+  }) : super(key: key);
 
   @override
   State<ComboBox> createState() => ComboBoxState();
@@ -144,9 +144,15 @@ class ComboBoxState extends State<ComboBox> {
 
   @override
   Widget build(BuildContext context) {
-    return SizedBox(
+    return Container(
+      decoration: BoxDecoration(
+        border: Border.all(width: 1, color: neutral3),
+        borderRadius: BorderRadius.circular(5.r),
+      ),
+      padding: EdgeInsets.only(left: 10.w, top: 2.h, right: 5.w),
       height: widget.height,
       width: widget.width,
+      alignment: Alignment.center,
       child: DropdownButtonFormField<String>(
         style: context.textTheme.bodyMedium!.copyWith(color: theme),
         hint: Text(widget.hint,
@@ -155,18 +161,7 @@ class ComboBoxState extends State<ComboBox> {
         dropdownColor: mainDark,
         decoration: InputDecoration(
           prefixIcon: widget.prefix,
-          border: OutlineInputBorder(
-            borderSide: const BorderSide(width: 1, color: neutral3),
-            borderRadius: BorderRadius.circular(5.r),
-          ),
-          enabledBorder: OutlineInputBorder(
-            borderSide: const BorderSide(width: 1, color: neutral3),
-            borderRadius: BorderRadius.circular(5.r),
-          ),
-          focusedBorder: OutlineInputBorder(
-            borderSide: const BorderSide(width: 1, color: neutral3),
-            borderRadius: BorderRadius.circular(5.r),
-          ),
+          border: InputBorder.none,
         ),
         validator: (val) {
           if (widget.onValidate == null) return null;
@@ -1271,10 +1266,6 @@ class _Vector3InputState extends State<Vector3Input> {
   }
 }
 
-
-
-
-
 class Vector4Input extends StatefulWidget {
   final String label;
   final bool fixed;
@@ -1363,14 +1354,18 @@ class _Vector4InputState extends State<Vector4Input> {
                     index == 0
                         ? 'X'
                         : (index == 1)
-                        ? "Y" : (index == 2)
-                        ? "Z" : "W",
+                            ? "Y"
+                            : (index == 2)
+                                ? "Z"
+                                : "W",
                     style: context.textTheme.bodyLarge!.copyWith(
                       color: index == 0
                           ? percentRed
                           : (index == 1)
-                          ? percentGreen
-                          : (index == 2) ? linkBlue : appYellow,
+                              ? percentGreen
+                              : (index == 2)
+                                  ? linkBlue
+                                  : appYellow,
                       fontWeight: FontWeight.bold,
                     ),
                   ),
@@ -1397,7 +1392,7 @@ class _Vector4InputState extends State<Vector4Input> {
                         vector.x = number;
                       } else if (index == 1) {
                         vector.y = number;
-                      } else if (index == 2)  {
+                      } else if (index == 2) {
                         vector.z = number;
                       } else {
                         vector.w = number;
@@ -1419,8 +1414,6 @@ class _Vector4InputState extends State<Vector4Input> {
   }
 }
 
-
-
 class TextureInput extends ConsumerStatefulWidget {
   final String label;
   final DreamTexture texture;
@@ -1440,37 +1433,34 @@ class TextureInput extends ConsumerStatefulWidget {
 class _TextureInputState extends ConsumerState<TextureInput> {
   String? path;
 
-
   @override
   void initState() {
     super.initState();
-    //_load();
+    _load();
   }
-
 
   void _load() {
-    dynamic gl = ref.watch(glProvider);
-
-    if(widget.texture.loaded) {
-      gl.deleteTextures(widget.texture.id);
-    }
-
-    widget.texture.id = gl.createTexture();
-    gl.bindTexture(gl.TEXTURE_2D, widget.texture.id);
-    gl.pixelStorei(GL_UNPACK_ALIGNMENT, 1);
-    gl.texImage2D(gl.TEXTURE_2D, 0, gl.RGBA, 390.w, 390.w, 0, gl.RGBA,
-        gl.UNSIGNED_BYTE, null);
-    gl.texParameteri(gl.TEXTURE_2D, gl.TEXTURE_MIN_FILTER, gl.NEAREST);
-    gl.texParameteri(gl.TEXTURE_2D, gl.TEXTURE_MAG_FILTER, gl.LINEAR);
-    gl.texParameteri(gl.TEXTURE_2D, gl.TEXTURE_MIN_FILTER, gl.LINEAR_MIPMAP_LINEAR);
-    gl.texParameteri(gl.TEXTURE_2D, gl.TEXTURE_WRAP_S, gl.REPEAT);
-    gl.texParameteri(gl.TEXTURE_2D, gl.TEXTURE_WRAP_T, gl.REPEAT);
-    gl.generateMipmap(GL_TEXTURE_2D);
-
-    widget.texture.hasChanged = true;
-    widget.texture.loaded = true;
+    // dynamic gl = ref.watch(glProvider);
+    //
+    // if(widget.texture.loaded) {
+    //   gl.deleteTextures(widget.texture.id);
+    // }
+    //
+    // widget.texture.id = gl.createTexture();
+    // gl.bindTexture(gl.TEXTURE_2D, widget.texture.id);
+    // gl.pixelStorei(GL_UNPACK_ALIGNMENT, 1);
+    // gl.texImage2D(gl.TEXTURE_2D, 0, gl.RGBA, 390.w, 390.w, 0, gl.RGBA,
+    //     gl.UNSIGNED_BYTE, null);
+    // gl.texParameteri(gl.TEXTURE_2D, gl.TEXTURE_MIN_FILTER, gl.NEAREST);
+    // gl.texParameteri(gl.TEXTURE_2D, gl.TEXTURE_MAG_FILTER, gl.LINEAR);
+    // gl.texParameteri(gl.TEXTURE_2D, gl.TEXTURE_MIN_FILTER, gl.LINEAR_MIPMAP_LINEAR);
+    // gl.texParameteri(gl.TEXTURE_2D, gl.TEXTURE_WRAP_S, gl.REPEAT);
+    // gl.texParameteri(gl.TEXTURE_2D, gl.TEXTURE_WRAP_T, gl.REPEAT);
+    // gl.generateMipmap(GL_TEXTURE_2D);
+    //
+    // widget.texture.hasChanged = true;
+    // widget.texture.loaded = true;
   }
-
 
   @override
   Widget build(BuildContext context) {
@@ -1513,10 +1503,10 @@ class _TextureInputState extends ConsumerState<TextureInput> {
                 borderRadius: BorderRadius.circular(10.r),
                 child: path == null
                     ? Container(
-                  height: 160.w,
-                  width: 160.w,
-                  color: Colors.black,
-                )
+                        height: 160.w,
+                        width: 160.w,
+                        color: Colors.black,
+                      )
                     : Image.file(
                         File(path!),
                         height: 160.w,

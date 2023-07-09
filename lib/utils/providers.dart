@@ -1,11 +1,11 @@
+import 'dart:developer';
+
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
-import 'package:shade/components/shader.dart';
 import 'package:shade/components/math.dart';
+import 'package:shade/components/shader.dart';
 import 'package:shade/utils/constants.dart';
 import 'package:shade/utils/theme.dart';
-
-import 'dart:developer';
 
 final StateProvider<int> renderProvider = StateProvider((ref) => 0);
 final StateProvider<int> tabProvider = StateProvider((ref) => 0);
@@ -20,6 +20,12 @@ final StateProvider<DreamShader> shaderProvider = StateProvider((ref) {
   shader.create(gl, defaultVertexShader, fragment);
 
   Map<String, Pair<int, dynamic>> uniforms = ref.watch(shaderUniformsProvider);
+  for (String key in uniforms.keys) {
+    Pair<int, dynamic> pair = uniforms[key]!;
+    shader.add(gl, key, pair);
+  }
+
+  uniforms = ref.watch(userParameters);
   for (String key in uniforms.keys) {
     Pair<int, dynamic> pair = uniforms[key]!;
     shader.add(gl, key, pair);
@@ -62,3 +68,8 @@ final StateProvider<Map<String, Pair<int, dynamic>>> shaderUniformsProvider =
     'cameraPosition': cameraPosition,
   };
 });
+
+final StateProvider<Map<String, Pair<int, dynamic>>> userParameters =
+    StateProvider((ref) => {});
+
+final StateProvider<String> raytraceStepsProvider = StateProvider((ref) => "256");

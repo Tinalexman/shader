@@ -5,6 +5,7 @@ import 'package:flutter_screenutil/flutter_screenutil.dart';
 import 'package:shade/utils/constants.dart';
 import 'package:shade/utils/providers.dart';
 import 'package:shade/utils/theme.dart';
+import 'package:shade/utils/widgets.dart';
 
 class SettingsPage extends ConsumerStatefulWidget {
   const SettingsPage({super.key});
@@ -78,76 +79,95 @@ class _SettingsPageState extends ConsumerState<SettingsPage> {
       ),
       body: SafeArea(
         child: SingleChildScrollView(
-            child: Column(
-          crossAxisAlignment: CrossAxisAlignment.start,
-          children: [
-            ListTile(
-              title: Text("Use Random Colors for Code Blocks",
-                  style: context.textTheme.bodyMedium!
-                      .copyWith(color: theme, fontWeight: FontWeight.w600)),
-              subtitle: Text("This will affect all visible blocks",
-                  style: context.textTheme.bodyMedium!
-                      .copyWith(color: theme, fontWeight: FontWeight.w300)),
-              trailing: Checkbox(
-                value: ref.watch(randomBlockColorProvider),
-                onChanged: (val) =>
-                    ref.watch(randomBlockColorProvider.notifier).state = val!,
-                checkColor: mainDark,
-                fillColor: MaterialStateProperty.all(appYellow),
+          child: Column(
+            crossAxisAlignment: CrossAxisAlignment.start,
+            children: [
+              ListTile(
+                title: Text("Use Random Colors for Code Blocks",
+                    style: context.textTheme.bodyMedium!
+                        .copyWith(color: theme, fontWeight: FontWeight.w600)),
+                subtitle: Text("This will affect all visible blocks",
+                    style: context.textTheme.bodyMedium!
+                        .copyWith(color: theme, fontWeight: FontWeight.w300)),
+                trailing: Checkbox(
+                  value: ref.watch(randomBlockColorProvider),
+                  onChanged: (val) =>
+                      ref.watch(randomBlockColorProvider.notifier).state = val!,
+                  checkColor: mainDark,
+                  fillColor: MaterialStateProperty.all(appYellow),
+                ),
               ),
-            ),
-            ListTile(
-              enabled: ref.watch(randomBlockColorProvider),
-              title: Text("Fixed Code Blocks Color",
-                  style: context.textTheme.bodyMedium!
-                      .copyWith(color: theme, fontWeight: FontWeight.w600)),
-              subtitle: Text("This will affect all visible blocks",
-                  style: context.textTheme.bodyMedium!
-                      .copyWith(color: theme, fontWeight: FontWeight.w300)),
-              trailing: ColorIndicator(
-                color: ref.watch(fixedCodeBlockColorProvider),
-                onSelect: () =>
-                    colorPickerDialog(ref.read(fixedCodeBlockColorProvider)),
+              ListTile(
+                enabled: ref.watch(randomBlockColorProvider),
+                title: Text("Fixed Code Blocks Color",
+                    style: context.textTheme.bodyMedium!
+                        .copyWith(color: theme, fontWeight: FontWeight.w600)),
+                subtitle: Text("This will affect all visible blocks",
+                    style: context.textTheme.bodyMedium!
+                        .copyWith(color: theme, fontWeight: FontWeight.w300)),
+                trailing: ColorIndicator(
+                  color: ref.watch(fixedCodeBlockColorProvider),
+                  onSelect: () =>
+                      colorPickerDialog(ref.read(fixedCodeBlockColorProvider)),
+                ),
               ),
-            ),
 
-            // Font Size
+              // Font Size
 
-            const Divider(
-              color: neutral3,
-            ),
-            ListTile(
-              title: Text("Enable High Precision",
-                  style: context.textTheme.bodyMedium!
-                      .copyWith(color: theme, fontWeight: FontWeight.w600)),
-              subtitle: Text("Better render quality at the cost of performance",
-                  style: context.textTheme.bodyMedium!
-                      .copyWith(color: theme, fontWeight: FontWeight.w300)),
-              trailing: Checkbox(
-                value: ref.watch(highPrecisionProvider),
-                onChanged: (val) =>
-                    ref.watch(highPrecisionProvider.notifier).state = val!,
-                checkColor: mainDark,
-                fillColor: MaterialStateProperty.all(appYellow),
+              const Divider(
+                color: neutral3,
               ),
-            ),
-            ListTile(
-              title: Text("Enable 4xAA Rendering",
-                  style: context.textTheme.bodyMedium!
-                      .copyWith(color: theme, fontWeight: FontWeight.w600)),
-              subtitle: Text("Reduce antialiasing at the cost of performance",
-                  style: context.textTheme.bodyMedium!
-                      .copyWith(color: theme, fontWeight: FontWeight.w300)),
-              trailing: Checkbox(
-                value: ref.watch(antiAliasProvider),
-                onChanged: (val) =>
-                    ref.watch(antiAliasProvider.notifier).state = val!,
-                checkColor: mainDark,
-                fillColor: MaterialStateProperty.all(appYellow),
+              ListTile(
+                title: Text("Enable High Precision",
+                    style: context.textTheme.bodyMedium!
+                        .copyWith(color: theme, fontWeight: FontWeight.w600)),
+                subtitle: Text(
+                    "Better render quality at the cost of performance",
+                    style: context.textTheme.bodyMedium!
+                        .copyWith(color: theme, fontWeight: FontWeight.w300)),
+                trailing: Checkbox(
+                  value: ref.watch(highPrecisionProvider),
+                  onChanged: (val) =>
+                      ref.watch(highPrecisionProvider.notifier).state = val!,
+                  checkColor: mainDark,
+                  fillColor: MaterialStateProperty.all(appYellow),
+                ),
               ),
-            ),
-          ],
-        )),
+              ListTile(
+                title: Text("Enable 4xAA Rendering",
+                    style: context.textTheme.bodyMedium!
+                        .copyWith(color: theme, fontWeight: FontWeight.w600)),
+                subtitle: Text(
+                    "Reduce antialiasing at the heavy of performance",
+                    style: context.textTheme.bodyMedium!
+                        .copyWith(color: theme, fontWeight: FontWeight.w300)),
+                trailing: Checkbox(
+                  value: ref.watch(antiAliasProvider),
+                  onChanged: (val) =>
+                      ref.watch(antiAliasProvider.notifier).state = val!,
+                  checkColor: mainDark,
+                  fillColor: MaterialStateProperty.all(appYellow),
+                ),
+              ),
+              ListTile(
+                  title: Text("Raytracing Steps",
+                      style: context.textTheme.bodyMedium!
+                          .copyWith(color: theme, fontWeight: FontWeight.w600)),
+                  subtitle: Text("Large steps reduces performance",
+                      style: context.textTheme.bodyMedium!
+                          .copyWith(color: theme, fontWeight: FontWeight.w300)),
+                  trailing: ComboBox(
+                    width: 70.w,
+                    height: 40.h,
+                    initial: ref.watch(raytraceStepsProvider),
+                    items: const ['128', '256', '512', '1024'],
+                    onChanged: (val) =>
+                        ref.watch(raytraceStepsProvider.notifier).state = val,
+                  ),
+              ),
+            ],
+          ),
+        ),
       ),
     );
   }

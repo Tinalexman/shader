@@ -4,6 +4,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter_boxicons/flutter_boxicons.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
+import 'package:shade/components/math.dart';
 import 'package:shade/components/sdf.dart';
 import 'package:shade/utils/constants.dart';
 import 'package:shade/utils/functions.dart';
@@ -56,7 +57,7 @@ data = join(res, data);""",
 switch( int(ID) ) {
   case 1: color = vec3(0.5); break;
   case 2: color = checkerboard(pos); break;
-  case 3: color = grid(pos);
+  case 3: color = grid(pos, vec3(0.53, 0.12, 0.74));
 }""",
         documentation: "This is the method in which lighting and textures are "
             "applied to your scene. This method should return the final "
@@ -67,17 +68,16 @@ switch( int(ID) ) {
 
   Future<String> _assembleShader() async {
     StringBuffer buffer = StringBuffer();
-    // bool precisionType = ref.watch(highPrecisionProvider);
-    // precision = precisionType ? "highp" : 'mediump';
-    //
-    // bool aliasType = ref.watch(antiAliasProvider);
-    // renderGroup = aliasType
-    //     ? "vec3 color = render4XAA()"
-    //     : "vec2 uv = getUV(vec2(0.0));\n\tvec3 color = render(uv);";
+    String precisionType = ref.watch(highPrecisionProvider)
+        ? 'precision highp float;'
+        : 'precision mediump float;';
+
+    //String steps = "const int MAXIMUM_STEPS = ${ref.watch(raytraceStepsProvider)};";
 
     buffer.write("$definitions \n\n");
+    buffer.write('$precisionType \n\n');
     buffer.write("$defaultDeclarations \n\n");
-    buffer.write("$uniforms \n\n");
+    buffer.write("${_getUniforms()} \n\n");
 
     String buildCode = fragmentConfigs[0].getCode();
     String materialCode = fragmentConfigs[1].getCode();
@@ -97,9 +97,66 @@ switch( int(ID) ) {
     buffer.write("$render \n\n");
     buffer.write("$uv \n\n");
     buffer.write("$render4XAA \n\n");
-    buffer.write("$mainFragment \n\n");
+
+    bool aliasType = ref.watch(antiAliasProvider);
+    String mode = aliasType
+        ? "vec3 color = render4XAA();"
+        : "vec2 uv = getUV(vec2(0.0));\n\tvec3 color = render(uv);\n\t";
+
+    buffer.write(beginMain);
+    buffer.write(mode);
+    buffer.write(endMain);
 
     log(buffer.toString());
+
+    return buffer.toString();
+  }
+
+  String _getUniforms() {
+    StringBuffer buffer = StringBuffer();
+
+    Map<String, Pair<int, dynamic>> parameters =
+        ref.watch(shaderUniformsProvider.notifier).state;
+    for (String key in parameters.keys) {
+      Pair<int, dynamic> pair = parameters[key]!;
+      String type = "";
+      if (pair.v is Vector2) {
+        type = "vec2";
+      } else if (pair.v is Vector3) {
+        type = "vec3";
+      } else if (pair.v is Vector4) {
+        type = "vec4";
+      } else if (pair.v is DreamInt) {
+        type = "int";
+      } else if (pair.v is DreamDouble) {
+        type = "float";
+      } else {
+        type = 'sampler2D';
+      }
+
+      buffer.write('uniform $type $key; \n');
+    }
+
+    parameters = ref.watch(userParameters.notifier).state;
+    for (String key in parameters.keys) {
+      Pair<int, dynamic> pair = parameters[key]!;
+      String type = "";
+      if (pair.v is Vector2) {
+        type = "vec2";
+      } else if (pair.v is Vector3) {
+        type = "vec3";
+      } else if (pair.v is Vector4) {
+        type = "vec4";
+      } else if (pair.v is DreamInt) {
+        type = "int";
+      } else if (pair.v is DreamDouble) {
+        type = "float";
+      } else {
+        type = 'sampler2D';
+      }
+
+      buffer.write('uniform $type $key; \n');
+    }
 
     return buffer.toString();
   }
