@@ -22,15 +22,13 @@ dependencies:
   flutter_screenutil:
   flutter_spinkit:
   flutter_gl:
-  flutter_prism:
   flutter_riverpod:
-  flutter_svg:
   flutter_highlight: 
   flex_color_picker:
   introduction_screen:
-  equatable:
   is_first_run:
-  autocomplete_textfield:
+  image:
+
 
 dev_dependencies:
   flutter_test:

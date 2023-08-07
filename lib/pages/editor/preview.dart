@@ -172,11 +172,10 @@ class _ShaderPreviewState extends ConsumerState<ShaderPreview> {
 
   void uploadToShader({double x = -1.0, double y = -1.0}) {
     Map<String, Pair<int, dynamic>> uniforms = ref.read(shaderUniformsProvider);
-    Pair<int, dynamic> pair = uniforms['mouse']!;
+    Pair<int, dynamic> pair = uniforms['MOUSE']!;
     Vector2 mouse = pair.v as Vector2;
     mouse.x = x > -1.0 ? x : mouse.x;
     mouse.y = y > -1.0 ? y : mouse.y;
-    mouse.hasChanged = true;
   }
 
   void loadUniforms(DreamShader shader, dynamic gl) {
@@ -187,7 +186,13 @@ class _ShaderPreviewState extends ConsumerState<ShaderPreview> {
     }
   }
 
-  void animate(timer) => render();
+  void animate(timer) {
+    Map<String, Pair<int, dynamic>> uniforms = ref.watch(shaderUniformsProvider.notifier).state;
+    Pair<int, dynamic> timePair = uniforms['TIME']!;
+    DreamDouble time = timePair.v as DreamDouble;
+    time.value = DateTime.now().millisecondsSinceEpoch * 0.001;
+    render();
+  }
 
   void clear(dynamic gl, {bool stop = false}) {
     gl.viewport(0, 0, (width * devicePixelRatio).toInt(),
@@ -209,6 +214,8 @@ class _ShaderPreviewState extends ConsumerState<ShaderPreview> {
     final gl = ref.watch(glProvider);
     DreamShader shader = ref.watch(shaderProvider);
     clear(gl);
+
+
 
     gl.bindVertexArray(dreamMesh.vertexArrayObject);
     gl.useProgram(shader.program);

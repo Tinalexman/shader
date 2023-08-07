@@ -67,19 +67,14 @@ class DreamShader {
   void load(dynamic gl, int location, dynamic value) {
     if (value is Vector2) {
       loadVector2(gl, location, value);
-      value.hasChanged = false;
     } else if (value is Vector3) {
       loadVector3(gl, location, value);
-      value.hasChanged = false;
-    } else if (value is Vector4 && value.hasChanged) {
+    } else if (value is Vector4) {
       loadVector4(gl, location, value);
-      value.hasChanged = false;
-    } else if (value is DreamDouble && value.hasChanged) {
+    } else if (value is DreamDouble) {
       loadDouble(gl, location, value);
-      value.hasChanged = false;
-    } else if (value is DreamInt && value.hasChanged) {
+    } else if (value is DreamInt) {
       loadInt(gl, location, value);
-      value.hasChanged = false;
     }
   }
 

@@ -39,7 +39,7 @@ class _CodeEditorState extends ConsumerState<CodeEditor>
         fixed: true,
         body: """
 vec2 res = vec2(sphere(pos, 1.0), 1.0);
-data = vec2(plane(pos, vec3(0.0, 1.0, 0.0), 1.0), 2.0);
+data = vec2(plane(pos, vec3(0.0, 1.0, 0.0), 1.0), 3.0);
 data = join(res, data);""",
         documentation:
             "This is the method in which your entire scene is built. "
@@ -57,7 +57,7 @@ data = join(res, data);""",
 switch( int(ID) ) {
   case 1: color = vec3(0.5); break;
   case 2: color = checkerboard(pos); break;
-  case 3: color = grid(pos, vec3(0.53, 0.12, 0.74));
+  case 3: color = lattice(pos, vec3(sin(2.0 * PI * TIME) * 0.53, 0.12, 0.74));
 }""",
         documentation: "This is the method in which lighting and textures are "
             "applied to your scene. This method should return the final "
@@ -130,7 +130,7 @@ switch( int(ID) ) {
         type = "int";
       } else if (pair.v is DreamDouble) {
         type = "float";
-      } else {
+      } else if(pair.v is DreamTexture) {
         type = 'sampler2D';
       }
 
@@ -151,7 +151,7 @@ switch( int(ID) ) {
         type = "int";
       } else if (pair.v is DreamDouble) {
         type = "float";
-      } else {
+      } else if(pair.v is DreamTexture) {
         type = 'sampler2D';
       }
 
@@ -220,7 +220,6 @@ switch( int(ID) ) {
       int renderFlag = ref.watch(renderProvider);
       if (renderFlag == 1) {
         ref.watch(renderStateProvider.notifier).state = "Compiling";
-
         _assembleShader().then((shader) {
           ref.watch(fragmentShaderProvider.notifier).state = shader;
           ref.watch(renderStateProvider.notifier).state = "Rendering";
@@ -284,7 +283,7 @@ switch( int(ID) ) {
 class _EditFunction extends StatefulWidget {
   final CodeBlockConfig config;
 
-  const _EditFunction({super.key, required this.config});
+  const _EditFunction({Key? key, required this.config}) : super(key: key);
 
   @override
   State<_EditFunction> createState() => _EditFunctionState();

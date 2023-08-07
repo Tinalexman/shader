@@ -1,4 +1,4 @@
-class Vector2 extends Changeable {
+class Vector2 {
   double x;
   double y;
 
@@ -11,7 +11,7 @@ class Vector2 extends Changeable {
   String toString() => "Vector( x : $x, y : $y )";
 }
 
-class Vector3 extends Changeable {
+class Vector3 {
   double x;
   double y;
   double z;
@@ -27,7 +27,7 @@ class Vector3 extends Changeable {
 }
 
 
-class Vector4 extends Changeable {
+class Vector4 {
   double x;
   double y;
   double z;
@@ -44,19 +44,19 @@ class Vector4 extends Changeable {
   String toString() => "Vector( x : $x, y : $y, z : $z, w : $w )";
 }
 
-class DreamDouble extends Changeable {
+class DreamDouble {
   double value;
 
   DreamDouble({this.value = 0.0});
 }
 
-class DreamInt extends Changeable {
+class DreamInt {
   int value;
 
   DreamInt({this.value = 0});
 }
 
-class DreamTexture extends Changeable {
+class DreamTexture {
   String path;
   bool loaded;
   dynamic id;
@@ -64,6 +64,3 @@ class DreamTexture extends Changeable {
   DreamTexture({this.path = "", this.loaded = false});
 }
 
-abstract class Changeable {
-  bool hasChanged = true;
-}

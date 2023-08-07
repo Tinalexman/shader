@@ -55,10 +55,10 @@ const vec3 lightPosition = vec3(20.0, 40.0, -30.0);
 
 
 String uniforms = """
-uniform vec2 resolution;
-uniform vec2 mouse;
-uniform vec3 cameraPosition;
-//uniform float time;
+uniform vec2 RESOLUTION;
+uniform vec2 MOUSE;
+uniform vec3 CAMERA_POS;
+uniform float TIME;
 """;
 
 
@@ -77,6 +77,17 @@ vec2 build(mediump vec3 ray) {
   return vec2(0.0);
 }
 """;
+
+
+const String triPlanar = """
+vec3 triPlanar(sampler2D tex, vec3 pos, vec3 normal) {
+  normal = abs(normal);
+  return (texture(tex, (pos.xy * 0.5) + 0.5) * normal.z + 
+      texture(tex, (pos.xz * 0.5) + 0.5) * normal.y + 
+      texture(tex, (pos.yz * 0.5) + 0.5) * normal.x).rgb; 
+}
+""";
+
 
 const String rotate = """
 void rotate(inout vec2 pos, float a) {
@@ -152,7 +163,7 @@ float softShadow(vec3 pos, vec3 lightPos) {
 
 const String mouseUpdate = """
 void mouseUpdate(inout vec3 rayOrigin) {
-  vec2 m = mouse / resolution;
+  vec2 m = MOUSE / RESOLUTION;
   rotate(rayOrigin.yz, (m.y * PI * 0.5) - 0.5);
   rotate(rayOrigin.xz, m.x * TAU); 
 }""";
@@ -192,7 +203,7 @@ vec2 rayMarch(vec3 rayOrigin, vec3 rayDirection) {
 
 const String render = """
 vec3 render(vec2 uv) {
-  vec3 rayOrigin = cameraPosition;
+  vec3 rayOrigin = CAMERA_POS;
   vec3 color = vec3(0.0);
   vec3 background = vec3(0.5, 0.8, 0.9);
   
@@ -218,7 +229,7 @@ vec3 render(vec2 uv) {
 
 const String uv = """
 vec2 getUV(vec2 offset) {
-  return (2.0 * (gl_FragCoord.xy + offset) - resolution.xy) / resolution.y;
+  return (2.0 * (gl_FragCoord.xy + offset) - RESOLUTION.xy) / RESOLUTION.y;
 }
 """;
 

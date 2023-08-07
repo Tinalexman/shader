@@ -174,7 +174,7 @@ class _HelpState extends State<Help> {
 }
 
 class _EditorHelp extends StatefulWidget {
-  const _EditorHelp({super.key});
+  const _EditorHelp({Key? key}) : super(key: key);
 
   @override
   State<_EditorHelp> createState() => _EditorHelpState();
@@ -596,7 +596,7 @@ switch( int(ID) ) {
 }
 
 class _PreviewHelp extends StatelessWidget {
-  const _PreviewHelp({super.key});
+  const _PreviewHelp({Key? key}) : super(key: key);
 
   @override
   Widget build(BuildContext context) {

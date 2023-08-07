@@ -299,16 +299,16 @@ vec3 checkerboard(vec3 pos) {
 }""",
     documentation: "Creates a checkerboard pattern.",
   ),
-  "grid" : CodeBlockConfig(
+  "lattice" : CodeBlockConfig(
     name: "grid",
     parameters: ["vec3 pos", "vec3 color"],
     returnType: "vec3",
     body: """
-vec3 grid(vec3 pos, vec3 color) {
+vec3 lattice(vec3 pos, vec3 color) {
   vec2 i = step(fract(pos.xz * 0.5), vec2(1.0 / 10.0));
   return color * ((1.0 - i.x) * (1.0 - i.y));
 }""",
-    documentation: "Creates a grid pattern with 'color' as the main color and black borders.",
+    documentation: "Creates a lattice pattern with 'color' as the main color and black borders.",
   )
 };
 

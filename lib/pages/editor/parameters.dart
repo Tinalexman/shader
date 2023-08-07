@@ -162,7 +162,7 @@ class _SceneSettingsState extends ConsumerState<SceneParameters> {
 }
 
 class _AddUniform extends ConsumerStatefulWidget {
-  const _AddUniform({super.key});
+  const _AddUniform({Key? key}) : super(key: key);
 
   @override
   ConsumerState<_AddUniform> createState() => _AddUniformState();

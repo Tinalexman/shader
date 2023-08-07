@@ -2,11 +2,14 @@ import 'dart:io';
 
 import 'package:flutter/material.dart';
 import 'package:flutter_boxicons/flutter_boxicons.dart';
+import 'package:flutter_gl/native-array/NativeArray.web.dart';
+import 'package:flutter_gl/native-array/index.dart';
 import 'package:flutter_gl/openGL/opengl-desktop/src/opengl_header.dart';
 import 'package:flutter_highlight/flutter_highlight.dart';
 import 'package:flutter_highlight/themes/github.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
+import 'package:image/image.dart' as img;
 import 'package:shade/components/math.dart';
 import 'package:shade/components/sdf.dart';
 import 'package:shade/utils/constants.dart';
@@ -1433,33 +1436,29 @@ class TextureInput extends ConsumerStatefulWidget {
 class _TextureInputState extends ConsumerState<TextureInput> {
   String? path;
 
-  @override
-  void initState() {
-    super.initState();
-    _load();
-  }
-
   void _load() {
-    // dynamic gl = ref.watch(glProvider);
-    //
-    // if(widget.texture.loaded) {
-    //   gl.deleteTextures(widget.texture.id);
-    // }
-    //
-    // widget.texture.id = gl.createTexture();
-    // gl.bindTexture(gl.TEXTURE_2D, widget.texture.id);
-    // gl.pixelStorei(GL_UNPACK_ALIGNMENT, 1);
-    // gl.texImage2D(gl.TEXTURE_2D, 0, gl.RGBA, 390.w, 390.w, 0, gl.RGBA,
-    //     gl.UNSIGNED_BYTE, null);
-    // gl.texParameteri(gl.TEXTURE_2D, gl.TEXTURE_MIN_FILTER, gl.NEAREST);
-    // gl.texParameteri(gl.TEXTURE_2D, gl.TEXTURE_MAG_FILTER, gl.LINEAR);
-    // gl.texParameteri(gl.TEXTURE_2D, gl.TEXTURE_MIN_FILTER, gl.LINEAR_MIPMAP_LINEAR);
-    // gl.texParameteri(gl.TEXTURE_2D, gl.TEXTURE_WRAP_S, gl.REPEAT);
-    // gl.texParameteri(gl.TEXTURE_2D, gl.TEXTURE_WRAP_T, gl.REPEAT);
-    // gl.generateMipmap(GL_TEXTURE_2D);
-    //
-    // widget.texture.hasChanged = true;
-    // widget.texture.loaded = true;
+    dynamic gl = ref.watch(glProvider);
+
+    if(widget.texture.loaded) {
+      gl.deleteTextures(widget.texture.id);
+    }
+
+    img.decodeImageFile(path!).then((i) {
+      NativeUint8Array arr = NativeUint8Array.from(i!.toUint8List());
+
+      widget.texture.id = gl.createTexture();
+      gl.bindTexture(gl.TEXTURE_2D, widget.texture.id);
+      gl.pixelStorei(GL_UNPACK_ALIGNMENT, 1);
+      gl.texImage2D(gl.TEXTURE_2D, 0, gl.RGBA, i.width, i.height, 0, gl.RGBA,
+          gl.UNSIGNED_BYTE, arr);
+      gl.texParameteri(gl.TEXTURE_2D, gl.TEXTURE_MIN_FILTER, gl.LINEAR);
+      gl.texParameteri(gl.TEXTURE_2D, gl.TEXTURE_MAG_FILTER, gl.LINEAR);
+      gl.texParameteri(gl.TEXTURE_2D, gl.TEXTURE_WRAP_S, gl.CLAMP_TO_EDGE);
+      gl.texParameteri(gl.TEXTURE_2D, gl.TEXTURE_WRAP_T, gl.CLAMP_TO_EDGE);
+      gl.generateMipmap(GL_TEXTURE_2D);
+
+      widget.texture.loaded = true;
+    });
   }
 
   @override
