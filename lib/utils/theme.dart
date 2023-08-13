@@ -46,7 +46,7 @@ const Map<int, Color> _swatchColors = {
 const MaterialColor materialColor = MaterialColor(0xFFBE5C01, _swatchColors);
 
 
-class KdeTheme
+class ShadeTheme
 {
 
 

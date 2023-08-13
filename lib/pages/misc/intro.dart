@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:introduction_screen/introduction_screen.dart';
 import 'package:is_first_run/is_first_run.dart';
+import 'package:shade/pages/editor/factory.dart';
 import 'package:shade/pages/misc/help.dart';
 import 'package:shade/pages/editor/shade.dart';
 import 'package:shade/utils/constants.dart';
@@ -45,24 +46,27 @@ class _SplashState extends ConsumerState<Splash>
       ),
     );
 
-    controller.forward().then(
-      (_) {
-        controller.reverse().then(
-          (__) {
-            assign();
-            IsFirstRun.isFirstCall().then(
-              (first) => Navigator.of(context).pushReplacement(
-                MaterialPageRoute(
-                  builder: (context) =>
-                      first ? _OnboardScreen() : const SceneEditor(),
-                ),
-              ),
-            );
-          },
-        );
-      },
-    );
     controller.addListener(refresh);
+
+    Future.delayed(
+        const Duration(milliseconds: 2500),
+        () => controller.forward().then(
+              (_) {
+                controller.reverse().then(
+                  (__) {
+                    assign();
+                    IsFirstRun.isFirstCall().then(
+                      (first) => Navigator.of(context).pushReplacement(
+                        MaterialPageRoute(
+                          builder: (context) =>
+                              first ? _OnboardScreen() : const SceneEditor(),
+                        ),
+                      ),
+                    );
+                  },
+                );
+              },
+            ));
   }
 
   void assign() {

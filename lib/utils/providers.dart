@@ -5,6 +5,7 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:shade/components/camera.dart';
 import 'package:shade/components/math.dart';
 import 'package:shade/components/shader.dart';
+import 'package:shade/components/shape_manager.dart';
 import 'package:shade/utils/constants.dart';
 import 'package:shade/utils/theme.dart';
 
@@ -106,3 +107,6 @@ final StateProvider<Map<String, Pair<int, dynamic>>> userParameters =
 
 final StateProvider<String> raytraceStepsProvider =
     StateProvider((ref) => "256");
+
+
+final StateProvider<ShapeManager> shapesProvider = StateProvider((ref) => ShapeManager());

@@ -148,7 +148,7 @@ class _ShaderPreviewState extends ConsumerState<ShaderPreview> {
 
               return flutterGlPlugin.isInitialized
                   ? RotatedBox(
-                      quarterTurns: 0, // or 3 for other landscape mode,
+                      quarterTurns: 0, // or -1 for other landscape mode,
                       child: GestureDetector(
                         onHorizontalDragUpdate: (details) {
                           uploadToShader(x: min(max(details.localPosition.dx, 0.0), width));

@@ -8,7 +8,7 @@ class Vector2 {
   });
 
   @override
-  String toString() => "Vector( x : $x, y : $y )";
+  String toString() => "vec2($x, $y)";
 }
 
 class Vector3 {
@@ -23,7 +23,7 @@ class Vector3 {
   });
 
   @override
-  String toString() => "Vector( x : $x, y : $y, z : $z )";
+  String toString() => "vec3($x, $y, $z)";
 }
 
 
@@ -41,7 +41,7 @@ class Vector4 {
   });
 
   @override
-  String toString() => "Vector( x : $x, y : $y, z : $z, w : $w )";
+  String toString() => "vec4($x, $y, $z, $w)";
 }
 
 class DreamDouble {

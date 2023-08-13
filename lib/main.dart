@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
+import 'package:shade/pages/editor/factory.dart';
 import 'package:shade/pages/misc/intro.dart';
 import 'package:shade/utils/theme.dart';
 
@@ -16,10 +17,10 @@ class Shade extends StatelessWidget {
     return ScreenUtilInit(
       builder: (context, child) => MaterialApp(
         title: 'Shade',
-        darkTheme: KdeTheme.dark(),
-        theme: KdeTheme.light(),
+        darkTheme: ShadeTheme.dark(),
+        theme: ShadeTheme.dark(),
         debugShowCheckedModeBanner: false,
-        home: const Splash(),
+        home: const FactoryPage(),
       ),
       splitScreenMode: false,
       designSize: const Size(390, 844),
