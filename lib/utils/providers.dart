@@ -96,9 +96,9 @@ final StateProvider<double> timeProvider =
 
 final StateProvider<DreamCamera> cameraProvider = StateProvider(
   (ref) => DreamCamera(
-    Vector3(x: 0.0, y: 0.0, z: -3.0),
-    Vector3(),
-    Vector2(x: 100.0, y: 50.0),
+    position: Vector3(x: 0.0, y: 0.0, z: -3.0),
+    lookAt: Vector3(),
+    pitchYaw: Vector2(),
   ),
 );
 

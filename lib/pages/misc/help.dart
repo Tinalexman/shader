@@ -392,7 +392,7 @@ class _EditorHelpState extends State<_EditorHelp> {
                   height: 5.h,
                 ),
                 Text(
-                  "Obviously, this deletes a code block  :)",
+                  "Obviously, this deletes a code block 😒",
                   style: context.textTheme.bodyLarge!.copyWith(color: theme),
                 ),
                 SizedBox(

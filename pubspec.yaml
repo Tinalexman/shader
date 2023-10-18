@@ -25,9 +25,11 @@ dependencies:
   flutter_riverpod:
   flutter_highlight: 
   flex_color_picker:
+  flex_color_scheme:
   introduction_screen:
   is_first_run:
   image:
+  go_router:
 
 
 dev_dependencies:

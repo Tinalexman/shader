@@ -9,7 +9,6 @@ import 'package:shade/components/sdf.dart';
 import 'package:shade/utils/constants.dart';
 import 'package:shade/utils/functions.dart';
 import 'package:shade/utils/providers.dart';
-import 'package:shade/utils/theme.dart';
 import 'package:shade/utils/widgets.dart';
 
 class CodeEditor extends ConsumerStatefulWidget {
@@ -42,7 +41,7 @@ vec2 res = vec2(sphere(pos, 1.0), 1.0);
 data = vec2(plane(pos, vec3(0.0, 1.0, 0.0), 1.0), 3.0);
 data = join(res, data);""",
         documentation:
-            "This is the method in which your entire scene is built. "
+        "This is the method in which your entire scene is built. "
             "This method returns the 'data' which contains the shortest "
             "distance from this position 'pos' to any shape in your scene as well "
             "as the 'ID' needed to color it appropriately in the material function.",
@@ -66,139 +65,6 @@ switch( int(ID) ) {
     ];
   }
 
-  Future<String> _assembleShader() async {
-    StringBuffer buffer = StringBuffer();
-    String precisionType = ref.watch(highPrecisionProvider)
-        ? 'precision highp float;'
-        : 'precision mediump float;';
-
-    //String steps = "const int MAXIMUM_STEPS = ${ref.watch(raytraceStepsProvider)};";
-
-    buffer.write("$definitions \n\n");
-    buffer.write('$precisionType \n\n');
-    buffer.write("$defaultDeclarations \n\n");
-    buffer.write("${_getUniforms()} \n\n");
-
-    String buildCode = fragmentConfigs[0].getCode();
-    String materialCode = fragmentConfigs[1].getCode();
-    String importedFunctions = _analyze(buildCode, materialCode);
-
-    buffer.write("$importedFunctions \n\n");
-    buffer.write("$buildCode \n\n");
-    buffer.write("$materialCode \n\n");
-    buffer.write("$rayMarch \n\n");
-    buffer.write("$normal \n\n");
-    buffer.write("$ambientOcclusion \n\n");
-    buffer.write("$shadow \n\n");
-    buffer.write("$lighting \n\n");
-    buffer.write("$rotate \n\n");
-    buffer.write("$mouseUpdate \n\n");
-    buffer.write("$camera \n\n");
-    buffer.write("$render \n\n");
-    buffer.write("$uv \n\n");
-    buffer.write("$render4XAA \n\n");
-
-    bool aliasType = ref.watch(antiAliasProvider);
-    String mode = aliasType
-        ? "vec3 color = render4XAA();"
-        : "vec2 uv = getUV(vec2(0.0));\n\tvec3 color = render(uv);\n\t";
-
-    buffer.write(beginMain);
-    buffer.write(mode);
-    buffer.write(endMain);
-
-    log(buffer.toString());
-
-    return buffer.toString();
-  }
-
-  String _getUniforms() {
-    StringBuffer buffer = StringBuffer();
-
-    Map<String, Pair<int, dynamic>> parameters =
-        ref.watch(shaderUniformsProvider.notifier).state;
-    for (String key in parameters.keys) {
-      Pair<int, dynamic> pair = parameters[key]!;
-      String type = "";
-      if (pair.v is Vector2) {
-        type = "vec2";
-      } else if (pair.v is Vector3) {
-        type = "vec3";
-      } else if (pair.v is Vector4) {
-        type = "vec4";
-      } else if (pair.v is DreamInt) {
-        type = "int";
-      } else if (pair.v is DreamDouble) {
-        type = "float";
-      } else if(pair.v is DreamTexture) {
-        type = 'sampler2D';
-      }
-
-      buffer.write('uniform $type $key; \n');
-    }
-
-    parameters = ref.watch(userParameters.notifier).state;
-    for (String key in parameters.keys) {
-      Pair<int, dynamic> pair = parameters[key]!;
-      String type = "";
-      if (pair.v is Vector2) {
-        type = "vec2";
-      } else if (pair.v is Vector3) {
-        type = "vec3";
-      } else if (pair.v is Vector4) {
-        type = "vec4";
-      } else if (pair.v is DreamInt) {
-        type = "int";
-      } else if (pair.v is DreamDouble) {
-        type = "float";
-      } else if(pair.v is DreamTexture) {
-        type = 'sampler2D';
-      }
-
-      buffer.write('uniform $type $key; \n');
-    }
-
-    return buffer.toString();
-  }
-
-  String _analyze(String buildCode, String materialCode) {
-    List<String> keys = getAllHGKeys();
-    Map<String, bool> processed = {};
-
-    for (String key in keys) {
-      RegExp pattern = RegExp(key);
-      if (pattern.firstMatch(buildCode) != null) {
-        processed[key] = true;
-      }
-    }
-
-    for (String key in keys) {
-      RegExp pattern = RegExp(key);
-      if (pattern.hasMatch(materialCode)) {
-        processed[key] = true;
-      }
-    }
-
-    StringBuffer buffer = StringBuffer();
-    Iterable<String> operators = getOperators();
-
-    for (String key in processed.keys) {
-      String code = getHGCode(key);
-
-      for (String operator in operators) {
-        RegExp pattern = RegExp(operator);
-        if (processed[operator] == null && pattern.hasMatch(code)) {
-          processed[operator] = true;
-        }
-      }
-    }
-
-    for (String key in processed.keys) {
-      buffer.write("${getHGCode(key)} \n\n");
-    }
-
-    return buffer.toString();
-  }
 
   @override
   Widget build(BuildContext context) {
@@ -213,20 +79,20 @@ switch( int(ID) ) {
       });
 
       Future.delayed(const Duration(milliseconds: 100),
-          () => ref.watch(newCodeBlockProvider.notifier).state = false);
+              () => ref.watch(newCodeBlockProvider.notifier).state = false);
     }
 
-    Future.delayed(const Duration(milliseconds: 150), () {
-      int renderFlag = ref.watch(renderProvider);
-      if (renderFlag == 1) {
-        ref.watch(renderStateProvider.notifier).state = "Compiling";
-        _assembleShader().then((shader) {
-          ref.watch(fragmentShaderProvider.notifier).state = shader;
-          ref.watch(renderStateProvider.notifier).state = "Rendering";
-          ref.watch(renderProvider.notifier).state = 2;
-        });
-      }
-    });
+    // Future.delayed(const Duration(milliseconds: 150), () {
+    //   int renderFlag = ref.watch(renderProvider);
+    //   if (renderFlag == 1) {
+    //     ref.watch(renderStateProvider.notifier).state = "Compiling";
+    //     _assembleShader().then((shader) {
+    //       ref.watch(fragmentShaderProvider.notifier).state = shader;
+    //       ref.watch(renderStateProvider.notifier).state = "Rendering";
+    //       ref.watch(renderProvider.notifier).state = 2;
+    //     });
+    //   }
+    // });
 
     return SingleChildScrollView(
       child: Column(
@@ -249,19 +115,19 @@ switch( int(ID) ) {
                       return CodeBlock(
                         config: fragmentConfigs[index],
                         onDelete: () => setState(
-                          () => fragmentConfigs.removeAt(index),
+                              () => fragmentConfigs.removeAt(index),
                         ),
                         onEdit: () => Navigator.of(context)
                             .push(
-                              MaterialPageRoute(
-                                builder: (_) => _EditFunction(
-                                  config: fragmentConfigs[index],
-                                ),
-                              ),
-                            )
+                          MaterialPageRoute(
+                            builder: (_) => _EditFunction(
+                              config: fragmentConfigs[index],
+                            ),
+                          ),
+                        )
                             .then(
                               (_) => setState(() {}),
-                            ),
+                        ),
                       );
                     },
                     separatorBuilder: (_, __) => SizedBox(height: 30.h),
@@ -368,10 +234,10 @@ class _EditFunctionState extends State<_EditFunction> {
                   spacing: 5.0,
                   children: List.generate(
                     params.length,
-                    (index) => Chip(
+                        (index) => Chip(
                       onDeleted: () => setState(() => params.removeAt(index)),
                       deleteIcon:
-                          Icon(Boxicons.bx_x, color: headerColor, size: 18.r),
+                      Icon(Boxicons.bx_x, color: headerColor, size: 18.r),
                       label: Text(
                         params[index].toString(),
                         style: context.textTheme.bodyMedium!.copyWith(

@@ -3,23 +3,39 @@ import 'dart:developer' as d;
 import 'dart:math';
 
 import 'package:flutter/material.dart';
+import 'package:flutter/material.dart';
+import 'package:flutter_boxicons/flutter_boxicons.dart';
 import 'package:flutter_gl/flutter_gl.dart';
 import 'package:flutter_gl/native-array/NativeArray.app.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'package:flutter_screenutil/flutter_screenutil.dart';
+import 'package:flutter_screenutil/flutter_screenutil.dart';
 import 'package:shade/components/math.dart';
 import 'package:shade/components/mesh.dart';
 import 'package:shade/components/shader.dart';
+import 'package:shade/pages/editor/parameters.dart';
+import 'package:shade/pages/editor/preview.dart';
+import 'package:shade/pages/editor/scene_editor.dart';
+import 'package:shade/pages/misc/help.dart';
+import 'package:shade/pages/misc/settings.dart';
 import 'package:shade/utils/constants.dart';
+import 'package:shade/utils/constants.dart';
+import 'package:shade/utils/functions.dart';
 import 'package:shade/utils/providers.dart';
+import 'package:shade/utils/providers.dart';
+import 'package:shade/utils/shader_tools.dart';
+import 'package:shade/utils/theme.dart';
+import 'package:shade/utils/widgets.dart';
 
-class ShaderPreview extends ConsumerStatefulWidget {
-  const ShaderPreview({Key? key}) : super(key: key);
+class SceneEditor extends ConsumerStatefulWidget {
+  const SceneEditor({Key? key}) : super(key: key);
 
   @override
-  ConsumerState<ShaderPreview> createState() => _ShaderPreviewState();
+  ConsumerState<SceneEditor> createState() => _SceneEditorState();
 }
 
-class _ShaderPreviewState extends ConsumerState<ShaderPreview> {
+class _SceneEditorState extends ConsumerState<SceneEditor> {
   late FlutterGlPlugin flutterGlPlugin;
 
   late double devicePixelRatio;
@@ -36,6 +52,44 @@ class _ShaderPreviewState extends ConsumerState<ShaderPreview> {
 
   late DreamMesh dreamMesh;
   Timer? timer;
+
+  late CodeBlockConfig materialConfig, buildConfig;
+
+  @override
+  void initState() {
+    super.initState();
+    buildConfig = CodeBlockConfig(
+      name: "build",
+      returnVariable: "data",
+      returnType: "vec2",
+      parameters: ["vec3 pos"],
+      fixed: true,
+      body: """
+vec2 res = vec2(sphere(pos, 1.0), 1.0);
+data = vec2(plane(pos, vec3(0.0, 1.0, 0.0), 1.0), 3.0);
+data = join(res, data);""",
+      documentation: "This is the method in which your entire scene is built. "
+          "This method returns the 'data' which contains the shortest "
+          "distance from this position 'pos' to any shape in your scene as well "
+          "as the 'ID' needed to color it appropriately in the material function.",
+    );
+    materialConfig = CodeBlockConfig(
+      name: "material",
+      returnVariable: "color",
+      returnType: "vec3",
+      parameters: ['vec3 pos', 'vec3 normal', 'float ID'],
+      fixed: true,
+      body: """
+switch( int(ID) ) {
+  case 1: color = vec3(0.5); break;
+  case 2: color = checkerboard(pos); break;
+  case 3: color = lattice(pos, vec3(sin(2.0 * PI * TIME) * 0.53, 0.12, 0.74));
+}""",
+      documentation: "This is the method in which lighting and textures are "
+          "applied to your scene. This method should return the final "
+          "'color' information calculated for this 'ray' based on the value of 'ID'. ",
+    );
+  }
 
   @override
   void dispose() {
@@ -116,39 +170,66 @@ class _ShaderPreviewState extends ConsumerState<ShaderPreview> {
   Widget build(BuildContext context) {
     int renderState = ref.watch(renderProvider);
 
-    return SizedBox(
-      width: width,
-      height: height,
-      child: Builder(builder: (_) {
-        if (initialized) {
-          if (renderState == 2 && timer == null) {
-            timer =
-                Timer.periodic(const Duration(milliseconds: 16), animate);
-          } else {
-            clear(ref.read(glProvider), stop: true);
-            timer?.cancel();
-            timer = null;
-          }
-        }
+    return Scaffold(
+      body: SafeArea(
+        child: SizedBox(
+          width: width,
+          height: height,
+          child: Builder(builder: (_) {
+            if (initialized) {
+              if (renderState == 2 && timer == null) {
+                timer =
+                    Timer.periodic(const Duration(milliseconds: 16), animate);
+              } else {
+                clear(ref.read(glProvider), stop: true);
+                timer?.cancel();
+                timer = null;
+              }
+            }
 
-        return flutterGlPlugin.isInitialized
-            ? RotatedBox(
-          quarterTurns: 0, // or -1 for other landscape mode,
-          child: GestureDetector(
-            onHorizontalDragUpdate: (details) {
-              uploadToShader(x: min(max(details.localPosition.dx, 0.0), width));
-            },
-            onVerticalDragUpdate: (details) {
-              uploadToShader(y: min(max(details.localPosition.dy, 0.0), height));
-            },
-            child: Texture(
-              textureId: flutterGlPlugin.textureId!,
-              filterQuality: FilterQuality.medium,
-            ),
-          ),
-        )
-            : const SizedBox();
-      }),
+            return flutterGlPlugin.isInitialized
+                ? RotatedBox(
+                    quarterTurns: 0, // or -1 for other landscape mode,
+                    child: GestureDetector(
+                      onHorizontalDragUpdate: (details) {
+                        uploadToShader(
+                            x: min(max(details.localPosition.dx, 0.0), width));
+                      },
+                      onVerticalDragUpdate: (details) {
+                        uploadToShader(
+                            y: min(max(details.localPosition.dy, 0.0), height));
+                      },
+                      child: Texture(
+                        textureId: flutterGlPlugin.textureId!,
+                        filterQuality: FilterQuality.medium,
+                      ),
+                    ),
+                  )
+                : const SizedBox();
+          }),
+        ),
+      ),
+      floatingActionButton: FloatingActionButton(
+        elevation: 2.0,
+        child: Icon(
+          Icons.add_rounded,
+          color: mainDark,
+          size: 26.r,
+        ),
+        onPressed: () {
+          int lastState = ref.watch(renderProvider.notifier).state;
+          int newState = lastState == 0 ? 1 : 0;
+          ref.watch(renderProvider.notifier).state = newState;
+          if (newState == 1) {
+            ShaderTools.assembleShader(ref, buildConfig, materialConfig)
+                .then((shader) {
+              ref.watch(fragmentShaderProvider.notifier).state = shader;
+              ref.watch(renderProvider.notifier).state = 2;
+              setState(() {});
+            });
+          }
+        },
+      ),
     );
   }
 
@@ -161,15 +242,17 @@ class _ShaderPreviewState extends ConsumerState<ShaderPreview> {
   }
 
   void loadUniforms(DreamShader shader, dynamic gl) {
-    Map<String, Pair<int, dynamic>> uniforms = ref.watch(shaderUniformsProvider.notifier).state;
-    for(String key in uniforms.keys) {
+    Map<String, Pair<int, dynamic>> uniforms =
+        ref.watch(shaderUniformsProvider.notifier).state;
+    for (String key in uniforms.keys) {
       Pair<int, dynamic> pair = uniforms[key]!;
       shader.load(gl, pair.k, pair.v);
     }
   }
 
   void animate(timer) {
-    Map<String, Pair<int, dynamic>> uniforms = ref.watch(shaderUniformsProvider.notifier).state;
+    Map<String, Pair<int, dynamic>> uniforms =
+        ref.watch(shaderUniformsProvider.notifier).state;
     Pair<int, dynamic> timePair = uniforms['TIME']!;
     DreamDouble time = timePair.v as DreamDouble;
     time.value = DateTime.now().millisecondsSinceEpoch * 0.001;
@@ -196,8 +279,6 @@ class _ShaderPreviewState extends ConsumerState<ShaderPreview> {
     final gl = ref.watch(glProvider);
     DreamShader shader = ref.watch(shaderProvider);
     clear(gl);
-
-
 
     gl.bindVertexArray(dreamMesh.vertexArrayObject);
     gl.useProgram(shader.program);

@@ -2,11 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:introduction_screen/introduction_screen.dart';
 import 'package:is_first_run/is_first_run.dart';
-import 'package:shade/pages/editor/factory.dart';
-import 'package:shade/pages/misc/help.dart';
-import 'package:shade/pages/editor/shade.dart';
 import 'package:shade/utils/constants.dart';
-import 'package:shade/utils/theme.dart';
 import 'package:shade/utils/providers.dart';
 
 class Splash extends ConsumerStatefulWidget {
@@ -49,32 +45,28 @@ class _SplashState extends ConsumerState<Splash>
     controller.addListener(refresh);
 
     Future.delayed(
-        const Duration(milliseconds: 2500),
-        () => controller.forward().then(
-              (_) {
-                controller.reverse().then(
-                  (__) {
-                    assign();
-                    IsFirstRun.isFirstCall().then(
-                      (first) => Navigator.of(context).pushReplacement(
-                        MaterialPageRoute(
-                          builder: (context) =>
-                              first ? _OnboardScreen() : const SceneEditor(),
-                        ),
-                      ),
-                    );
-                  },
-                );
-              },
-            ));
+      const Duration(milliseconds: 2500),
+      () => controller.forward().then(
+        (_) {
+          controller.reverse().then(
+            (__) {
+              assign();
+              IsFirstRun.isFirstCall().then(
+                (first) => context.router
+                    .pushReplacementNamed(first ? Pages.intro : Pages.explorer),
+              );
+            },
+          );
+        },
+      ),
+    );
   }
 
   void assign() {
     MediaQueryData query = MediaQuery.of(context);
     ref.watch(openGlConfigurationsProvider.notifier).state = [
       query.size.width,
-      query.size.width,
-      //query.size.height,
+      query.size.height,
       query.devicePixelRatio
     ];
   }
@@ -103,9 +95,8 @@ class _SplashState extends ConsumerState<Splash>
             ),
             FadeTransition(
               opacity: trailingAnimation,
-              child: Text(
-                "Shade",
-                style: context.textTheme.headlineMedium!.copyWith(color: theme),
+              child: Text("Shade",
+                  style: context.textTheme.headlineMedium!.copyWith(color: theme)
               ),
             )
           ],
@@ -115,18 +106,21 @@ class _SplashState extends ConsumerState<Splash>
   }
 }
 
-class _OnboardScreen extends StatefulWidget {
+class OnboardScreen extends StatefulWidget {
+
+  const OnboardScreen({super.key});
+
+
   @override
-  State<_OnboardScreen> createState() => _OnboardScreenState();
+  State<OnboardScreen> createState() => _OnboardScreenState();
 }
 
-class _OnboardScreenState extends State<_OnboardScreen> {
+class _OnboardScreenState extends State<OnboardScreen> {
   final introKey = GlobalKey<IntroductionScreenState>();
 
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      backgroundColor: mainDark,
       appBar: AppBar(
         backgroundColor: mainDark,
         elevation: 0.0,
@@ -183,11 +177,7 @@ class _OnboardScreenState extends State<_OnboardScreen> {
           style: context.textTheme.bodyLarge!
               .copyWith(color: theme, fontWeight: FontWeight.w500),
         ),
-        onDone: () => Navigator.of(context).pushReplacement(
-          MaterialPageRoute(
-            builder: (_) => const SceneEditor(),
-          ),
-        ),
+        onDone: () => context.router.pushReplacementNamed(Pages.explorer),
         dotsContainerDecorator: const BoxDecoration(color: mainDark),
       ),
     );

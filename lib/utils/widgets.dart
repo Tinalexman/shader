@@ -3,10 +3,7 @@ import 'dart:io';
 import 'package:flutter/material.dart';
 import 'package:flutter_boxicons/flutter_boxicons.dart';
 import 'package:flutter_gl/native-array/NativeArray.web.dart';
-import 'package:flutter_gl/native-array/index.dart';
 import 'package:flutter_gl/openGL/opengl-desktop/src/opengl_header.dart';
-import 'package:flutter_highlight/flutter_highlight.dart';
-import 'package:flutter_highlight/themes/github.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
 import 'package:image/image.dart' as img;
@@ -15,7 +12,6 @@ import 'package:shade/components/sdf.dart';
 import 'package:shade/utils/constants.dart';
 import 'package:shade/utils/functions.dart';
 import 'package:shade/utils/providers.dart';
-import 'package:shade/utils/theme.dart';
 
 import 'file_handler.dart';
 
@@ -356,6 +352,7 @@ class _CodeBlockState extends ConsumerState<CodeBlock> {
       backgroundColor: mainDark,
       builder: (context) => SizedBox(
         height: 250.h,
+        width: 390.w,
         child: Padding(
           padding: EdgeInsets.symmetric(horizontal: 10.w),
           child: Column(
@@ -417,7 +414,7 @@ class _CodeBlockState extends ConsumerState<CodeBlock> {
                   mainAxisAlignment: MainAxisAlignment.spaceBetween,
                   children: [
                     SizedBox(
-                      width: 180.w,
+                      width: 170.w,
                       child: Text(
                         "${widget.config.name}: ${widget.config.returnType}",
                         style: context.textTheme.bodyLarge!.copyWith(
@@ -861,10 +858,8 @@ class SpecialForm extends StatelessWidget {
           )),
           hintText: hint,
           hintStyle: hintStyle ??
-              Theme.of(context)
-                  .textTheme
-                  .labelMedium!
-                  .copyWith(fontWeight: FontWeight.w200, color: theme),
+              context.textTheme.bodyMedium!.copyWith(
+                  fontWeight: FontWeight.w300, color: theme.withOpacity(0.6)),
         ),
         onChanged: (value) {
           if (onChange == null) return;
@@ -1439,7 +1434,7 @@ class _TextureInputState extends ConsumerState<TextureInput> {
   void _load() {
     dynamic gl = ref.watch(glProvider);
 
-    if(widget.texture.loaded) {
+    if (widget.texture.loaded) {
       gl.deleteTextures(widget.texture.id);
     }
 
@@ -1537,20 +1532,6 @@ class _TextureInputState extends ConsumerState<TextureInput> {
   }
 }
 
-class CodeView extends StatelessWidget {
-  const CodeView({super.key});
-
-  @override
-  Widget build(BuildContext context) {
-    return HighlightView(
-      "",
-      language: 'glsl',
-      theme: githubTheme,
-      textStyle: context.textTheme.bodyMedium!.copyWith(color: theme),
-    );
-  }
-}
-
 class Bullet extends StatelessWidget {
   final Color color;
 
@@ -1562,4 +1543,46 @@ class Bullet extends StatelessWidget {
         height: 5.r,
         decoration: BoxDecoration(color: color, shape: BoxShape.circle),
       );
+}
+
+class ExplorerChoice extends StatelessWidget {
+  final List<String> options;
+
+  const ExplorerChoice({
+    super.key,
+    required this.options,
+  });
+
+  @override
+  Widget build(BuildContext context) {
+    return GestureDetector(
+      onTap: () => context.router.pushNamed(options[0]),
+      child: Container(
+        width: 180.w,
+        height: 250.h,
+        padding: EdgeInsets.symmetric(horizontal: 10.w),
+        decoration: BoxDecoration(
+          borderRadius: BorderRadius.circular(10.w),
+          color: neutral2,
+        ),
+        child: Column(
+          mainAxisAlignment: MainAxisAlignment.end,
+          crossAxisAlignment: CrossAxisAlignment.start,
+          children: [
+            Text(
+              options[1],
+              style: context.textTheme.bodyLarge!
+                  .copyWith(fontWeight: FontWeight.w500),
+            ),
+            SizedBox(height: 5.h),
+            Text(
+              options[2],
+              style: context.textTheme.bodySmall,
+            ),
+            SizedBox(height: 20.h),
+          ],
+        ),
+      ),
+    );
+  }
 }
