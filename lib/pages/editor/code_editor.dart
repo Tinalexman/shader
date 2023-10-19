@@ -1,11 +1,7 @@
-import 'dart:developer';
-
 import 'package:flutter/material.dart';
 import 'package:flutter_boxicons/flutter_boxicons.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
-import 'package:shade/components/math.dart';
-import 'package:shade/components/sdf.dart';
 import 'package:shade/utils/constants.dart';
 import 'package:shade/utils/functions.dart';
 import 'package:shade/utils/providers.dart';
@@ -20,51 +16,7 @@ class CodeEditor extends ConsumerStatefulWidget {
 
 class _CodeEditorState extends ConsumerState<CodeEditor>
     with AutomaticKeepAliveClientMixin {
-  late TabController tabController;
-  late List<CodeBlockConfig> fragmentConfigs = [];
-
-  int currentTab = 0;
-
-  @override
-  void initState() {
-    super.initState();
-
-    fragmentConfigs = [
-      CodeBlockConfig(
-        name: "build",
-        returnVariable: "data",
-        returnType: "vec2",
-        parameters: ["vec3 pos"],
-        fixed: true,
-        body: """
-vec2 res = vec2(sphere(pos, 1.0), 1.0);
-data = vec2(plane(pos, vec3(0.0, 1.0, 0.0), 1.0), 3.0);
-data = join(res, data);""",
-        documentation:
-        "This is the method in which your entire scene is built. "
-            "This method returns the 'data' which contains the shortest "
-            "distance from this position 'pos' to any shape in your scene as well "
-            "as the 'ID' needed to color it appropriately in the material function.",
-      ),
-      CodeBlockConfig(
-        name: "material",
-        returnVariable: "color",
-        returnType: "vec3",
-        parameters: ['vec3 pos', 'vec3 normal', 'float ID'],
-        fixed: true,
-        body: """
-switch( int(ID) ) {
-  case 1: color = vec3(0.5); break;
-  case 2: color = checkerboard(pos); break;
-  case 3: color = lattice(pos, vec3(sin(2.0 * PI * TIME) * 0.53, 0.12, 0.74));
-}""",
-        documentation: "This is the method in which lighting and textures are "
-            "applied to your scene. This method should return the final "
-            "'color' information calculated for this 'ray' based on the value of 'ID'. ",
-      ),
-    ];
-  }
-
+  late List<CodeBlockConfig> configs = [];
 
   @override
   Widget build(BuildContext context) {
@@ -73,13 +25,13 @@ switch( int(ID) ) {
     bool addNewBlock = ref.watch(newCodeBlockProvider);
     if (addNewBlock) {
       setState(() {
-        fragmentConfigs.add(
-          CodeBlockConfig(name: "SDF ${fragmentConfigs.length - 1}"),
+        configs.add(
+          CodeBlockConfig(name: "SDF ${configs.length - 1}"),
         );
       });
 
       Future.delayed(const Duration(milliseconds: 100),
-              () => ref.watch(newCodeBlockProvider.notifier).state = false);
+          () => ref.watch(newCodeBlockProvider.notifier).state = false);
     }
 
     // Future.delayed(const Duration(milliseconds: 150), () {
@@ -94,50 +46,136 @@ switch( int(ID) ) {
     //   }
     // });
 
-    return SingleChildScrollView(
-      child: Column(
-        children: [
-          SizedBox(
-            height: 25.h,
-          ),
-          Padding(
-            padding: EdgeInsets.symmetric(horizontal: 20.w),
-            child: Column(
-              children: [
-                SizedBox(
-                  height: 700.h,
-                  child: ListView.separated(
-                    itemBuilder: (context, index) {
-                      if (index == fragmentConfigs.length) {
-                        return SizedBox(height: 50.h);
-                      }
+    return Scaffold(
+      appBar: AppBar(
+        elevation: 0.0,
+        leading: Image.asset(
+          "assets/icon.png",
+          width: 48.0,
+          height: 48.0,
+          fit: BoxFit.cover,
+        ),
+        title: Text(
+          "Code Editor",
+          style: context.textTheme.titleLarge!
+              .copyWith(fontWeight: FontWeight.w600),
+        ),
+        centerTitle: true,
+        actions: [
+          IconButton(
+            onPressed: () {},
+            iconSize: 26.r,
+            splashRadius: 20.r,
+            icon: const Icon(Icons.menu_rounded, color: appYellow),
+          )
+        ],
+      ),
+      body: SafeArea(
+        child: Padding(
+          padding: EdgeInsets.symmetric(horizontal: 20.w),
+          child: Column(
+            children: [
+              SizedBox(
+                height: 25.h,
+              ),
+              Expanded(
+                child: configs.isEmpty
+                    ? Center(
+                        child: Text(
+                          "No code blocks added",
+                          style: context.textTheme.bodyMedium,
+                        ),
+                      )
+                    : ListView.separated(
+                        itemBuilder: (context, index) {
+                          if (index == configs.length) {
+                            return SizedBox(height: 50.h);
+                          }
 
-                      return CodeBlock(
-                        config: fragmentConfigs[index],
-                        onDelete: () => setState(
-                              () => fragmentConfigs.removeAt(index),
-                        ),
-                        onEdit: () => Navigator.of(context)
-                            .push(
-                          MaterialPageRoute(
-                            builder: (_) => _EditFunction(
-                              config: fragmentConfigs[index],
+                          return CodeBlock(
+                            config: configs[index],
+                            onDelete: () => setState(
+                              () => configs.removeAt(index),
                             ),
-                          ),
-                        )
-                            .then(
-                              (_) => setState(() {}),
-                        ),
-                      );
-                    },
-                    separatorBuilder: (_, __) => SizedBox(height: 30.h),
-                    itemCount: fragmentConfigs.length + 1,
+                            onEdit: () => Navigator.of(context)
+                                .push(
+                                  MaterialPageRoute(
+                                    builder: (_) => _EditFunction(
+                                      config: configs[index],
+                                    ),
+                                  ),
+                                )
+                                .then(
+                                  (_) => setState(() {}),
+                                ),
+                          );
+                        },
+                        separatorBuilder: (_, __) => SizedBox(height: 30.h),
+                        itemCount: configs.length + 1,
+                      ),
+              )
+            ],
+          ),
+        ),
+      ),
+      floatingActionButton: FloatingActionButton(
+        elevation: 2.0,
+        child: Icon(
+          Icons.add_rounded,
+          color: mainDark,
+          size: 26.r,
+        ),
+        onPressed: () => showModalBottomSheet(
+          context: context,
+          builder: (context) => SizedBox(
+            height: 250.h,
+            width: 390.w,
+            child: Padding(
+              padding: EdgeInsets.symmetric(horizontal: 10.w, vertical: 10.h),
+              child: Column(
+                crossAxisAlignment: CrossAxisAlignment.center,
+                children: [
+                  Text(
+                    "Hey, there",
+                    style: context.textTheme.titleLarge!
+                        .copyWith(fontWeight: FontWeight.w600),
                   ),
-                )
-              ],
+                  SizedBox(height: 20.h),
+                  SizedBox(
+                    height: 180.h,
+                    child: ListView(
+                      children: [
+                        ListTile(
+                            leading: const Icon(
+                              Icons.code,
+                              color: appYellow,
+                            ),
+                            title: Text(
+                              "Add Code Block",
+                              style: context.textTheme.bodyLarge,
+                            ),
+                            subtitle: Text(
+                              "Let the fun continue",
+                              style: context.textTheme.bodyMedium,
+                            ),
+                            trailing: Icon(
+                              Icons.chevron_right_rounded,
+                              size: 26.r,
+                              color: appYellow,
+                            ),
+                            onTap: () {
+                              ref.watch(newCodeBlockProvider.notifier).state =
+                                  true;
+                              Navigator.of(context).pop();
+                            })
+                      ],
+                    ),
+                  ),
+                ],
+              ),
             ),
           ),
-        ],
+        ),
       ),
     );
   }
@@ -234,10 +272,10 @@ class _EditFunctionState extends State<_EditFunction> {
                   spacing: 5.0,
                   children: List.generate(
                     params.length,
-                        (index) => Chip(
+                    (index) => Chip(
                       onDeleted: () => setState(() => params.removeAt(index)),
                       deleteIcon:
-                      Icon(Boxicons.bx_x, color: headerColor, size: 18.r),
+                          Icon(Boxicons.bx_x, color: headerColor, size: 18.r),
                       label: Text(
                         params[index].toString(),
                         style: context.textTheme.bodyMedium!.copyWith(

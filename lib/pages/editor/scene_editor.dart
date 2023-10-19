@@ -3,29 +3,16 @@ import 'dart:developer' as d;
 import 'dart:math';
 
 import 'package:flutter/material.dart';
-import 'package:flutter/material.dart';
-import 'package:flutter_boxicons/flutter_boxicons.dart';
 import 'package:flutter_gl/flutter_gl.dart';
 import 'package:flutter_gl/native-array/NativeArray.app.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
-import 'package:flutter_riverpod/flutter_riverpod.dart';
-import 'package:flutter_screenutil/flutter_screenutil.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
 import 'package:shade/components/math.dart';
 import 'package:shade/components/mesh.dart';
 import 'package:shade/components/shader.dart';
-import 'package:shade/pages/editor/parameters.dart';
-import 'package:shade/pages/editor/preview.dart';
-import 'package:shade/pages/editor/scene_editor.dart';
-import 'package:shade/pages/misc/help.dart';
-import 'package:shade/pages/misc/settings.dart';
 import 'package:shade/utils/constants.dart';
-import 'package:shade/utils/constants.dart';
-import 'package:shade/utils/functions.dart';
-import 'package:shade/utils/providers.dart';
 import 'package:shade/utils/providers.dart';
 import 'package:shade/utils/shader_tools.dart';
-import 'package:shade/utils/theme.dart';
 import 'package:shade/utils/widgets.dart';
 
 class SceneEditor extends ConsumerStatefulWidget {
@@ -113,6 +100,13 @@ switch( int(ID) ) {
       initPlatformState().then((_) {
         dreamMesh = DreamMesh();
         initialized = true;
+
+        ShaderTools.assembleShader(ref, buildConfig, materialConfig)
+            .then((shader) {
+          ref.watch(fragmentShaderProvider.notifier).state = shader;
+          ref.watch(renderProvider.notifier).state = 2;
+        });
+
       });
     }
   }
@@ -125,13 +119,8 @@ switch( int(ID) ) {
       "height": height.toInt(),
       "dpr": devicePixelRatio,
     };
-
     await flutterGlPlugin.initialize(options: options);
-
-    setState(() {});
-
     await Future.delayed(const Duration(milliseconds: 100));
-
     setup();
   }
 
@@ -179,7 +168,7 @@ switch( int(ID) ) {
             if (initialized) {
               if (renderState == 2 && timer == null) {
                 timer =
-                    Timer.periodic(const Duration(milliseconds: 16), animate);
+                    Timer.periodic(const Duration(milliseconds: 33), animate);
               } else {
                 clear(ref.read(glProvider), stop: true);
                 timer?.cancel();
@@ -211,11 +200,6 @@ switch( int(ID) ) {
       ),
       floatingActionButton: FloatingActionButton(
         elevation: 2.0,
-        child: Icon(
-          Icons.add_rounded,
-          color: mainDark,
-          size: 26.r,
-        ),
         onPressed: () {
           int lastState = ref.watch(renderProvider.notifier).state;
           int newState = lastState == 0 ? 1 : 0;
@@ -229,9 +213,15 @@ switch( int(ID) ) {
             });
           }
         },
+        child: Icon(
+          Icons.add_rounded,
+          color: mainDark,
+          size: 26.r,
+        ),
       ),
     );
   }
+
 
   void uploadToShader({double x = -1.0, double y = -1.0}) {
     Map<String, Pair<int, dynamic>> uniforms = ref.read(shaderUniformsProvider);

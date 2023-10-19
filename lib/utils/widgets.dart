@@ -414,7 +414,7 @@ class _CodeBlockState extends ConsumerState<CodeBlock> {
                   mainAxisAlignment: MainAxisAlignment.spaceBetween,
                   children: [
                     SizedBox(
-                      width: 170.w,
+                      width: 150.w,
                       child: Text(
                         "${widget.config.name}: ${widget.config.returnType}",
                         style: context.textTheme.bodyLarge!.copyWith(
