@@ -23,13 +23,15 @@ dependencies:
   flutter_spinkit:
   flutter_gl:
   flutter_riverpod:
-  flutter_highlight: 
+  flutter_svg:
   flex_color_picker:
   flex_color_scheme:
   introduction_screen:
   is_first_run:
   image:
   go_router:
+  equatable:
+
 
 
 dev_dependencies:

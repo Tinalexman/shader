@@ -7,7 +7,7 @@ import 'package:shade/components/math.dart';
 import 'package:shade/components/shader.dart';
 import 'package:shade/components/shape_manager.dart';
 import 'package:shade/utils/constants.dart';
-import 'package:shade/utils/theme.dart';
+
 
 final StateProvider<int> renderProvider = StateProvider((ref) => 0);
 final StateProvider<int> tabProvider = StateProvider((ref) => 0);
@@ -109,4 +109,7 @@ final StateProvider<String> raytraceStepsProvider =
     StateProvider((ref) => "256");
 
 
-final StateProvider<ShapeManager> shapesProvider = StateProvider((ref) => ShapeManager());
+final StateProvider<ShapeManager> shapeManagerProvider = StateProvider((ref) => ShapeManager());
+
+
+final StateProvider<int> activeSceneEditorToolIndex = StateProvider((ref) => -1);

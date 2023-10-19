@@ -3,6 +3,7 @@ import 'dart:developer' as d;
 import 'dart:math';
 
 import 'package:flutter/material.dart';
+import 'package:flutter_boxicons/flutter_boxicons.dart';
 import 'package:flutter_gl/flutter_gl.dart';
 import 'package:flutter_gl/native-array/NativeArray.app.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
@@ -14,6 +15,9 @@ import 'package:shade/utils/constants.dart';
 import 'package:shade/utils/providers.dart';
 import 'package:shade/utils/shader_tools.dart';
 import 'package:shade/utils/widgets.dart';
+
+import 'scene_editor_widgets.dart';
+
 
 class SceneEditor extends ConsumerStatefulWidget {
   const SceneEditor({Key? key}) : super(key: key);
@@ -42,6 +46,12 @@ class _SceneEditorState extends ConsumerState<SceneEditor> {
 
   late CodeBlockConfig materialConfig, buildConfig;
 
+  late List<SceneTool> sceneTools;
+
+  final GlobalKey<ScaffoldState> scaffoldKey = GlobalKey();
+
+  Widget drawerWidget = const SizedBox();
+
   @override
   void initState() {
     super.initState();
@@ -53,7 +63,7 @@ class _SceneEditorState extends ConsumerState<SceneEditor> {
       fixed: true,
       body: """
 vec2 res = vec2(sphere(pos, 1.0), 1.0);
-data = vec2(plane(pos, vec3(0.0, 1.0, 0.0), 1.0), 3.0);
+data = vec2(plane(pos, vec3(0.0, 1.0, 0.0), 1.0), 2.0);
 data = join(res, data);""",
       documentation: "This is the method in which your entire scene is built. "
           "This method returns the 'data' which contains the shortest "
@@ -76,6 +86,25 @@ switch( int(ID) ) {
           "applied to your scene. This method should return the final "
           "'color' information calculated for this 'ray' based on the value of 'ID'. ",
     );
+
+    sceneTools = [
+      SceneTool(
+        data: Boxicons.bx_plus,
+        name: "Add",
+        onTap: () {
+          ref.watch(activeSceneEditorToolIndex.notifier).state = 0;
+          setState(() => drawerWidget = const AddShape());
+          scaffoldKey.currentState?.openEndDrawer();
+        },
+        color: appYellow,
+      ),
+      SceneTool(
+        data: Boxicons.bx_pencil,
+        name: "Edit",
+        onTap: () {},
+        color: theme,
+      ),
+    ];
   }
 
   @override
@@ -92,7 +121,7 @@ switch( int(ID) ) {
       List<double> query = ref.read(openGlConfigurationsProvider);
 
       width = query[0];
-      height = query[1];
+      height = query[1] - kToolbarHeight - kBottomNavigationBarHeight;
       devicePixelRatio = query[2];
 
       flutterGlPlugin = FlutterGlPlugin();
@@ -100,13 +129,6 @@ switch( int(ID) ) {
       initPlatformState().then((_) {
         dreamMesh = DreamMesh();
         initialized = true;
-
-        ShaderTools.assembleShader(ref, buildConfig, materialConfig)
-            .then((shader) {
-          ref.watch(fragmentShaderProvider.notifier).state = shader;
-          ref.watch(renderProvider.notifier).state = 2;
-        });
-
       });
     }
   }
@@ -160,68 +182,121 @@ switch( int(ID) ) {
     int renderState = ref.watch(renderProvider);
 
     return Scaffold(
-      body: SafeArea(
-        child: SizedBox(
-          width: width,
-          height: height,
-          child: Builder(builder: (_) {
-            if (initialized) {
-              if (renderState == 2 && timer == null) {
-                timer =
-                    Timer.periodic(const Duration(milliseconds: 33), animate);
-              } else {
-                clear(ref.read(glProvider), stop: true);
-                timer?.cancel();
-                timer = null;
-              }
-            }
-
-            return flutterGlPlugin.isInitialized
-                ? RotatedBox(
-                    quarterTurns: 0, // or -1 for other landscape mode,
-                    child: GestureDetector(
-                      onHorizontalDragUpdate: (details) {
-                        uploadToShader(
-                            x: min(max(details.localPosition.dx, 0.0), width));
-                      },
-                      onVerticalDragUpdate: (details) {
-                        uploadToShader(
-                            y: min(max(details.localPosition.dy, 0.0), height));
-                      },
-                      child: Texture(
-                        textureId: flutterGlPlugin.textureId!,
-                        filterQuality: FilterQuality.medium,
-                      ),
-                    ),
-                  )
-                : const SizedBox();
-          }),
-        ),
+      key: scaffoldKey,
+      endDrawer: Drawer(
+        width: 250.w,
+        child: drawerWidget,
       ),
-      floatingActionButton: FloatingActionButton(
-        elevation: 2.0,
-        onPressed: () {
-          int lastState = ref.watch(renderProvider.notifier).state;
-          int newState = lastState == 0 ? 1 : 0;
-          ref.watch(renderProvider.notifier).state = newState;
-          if (newState == 1) {
-            ShaderTools.assembleShader(ref, buildConfig, materialConfig)
-                .then((shader) {
-              ref.watch(fragmentShaderProvider.notifier).state = shader;
-              ref.watch(renderProvider.notifier).state = 2;
-              setState(() {});
-            });
-          }
-        },
-        child: Icon(
-          Icons.add_rounded,
-          color: mainDark,
-          size: 26.r,
+      onEndDrawerChanged: (change) {
+        if (!change) {
+          ref.watch(activeSceneEditorToolIndex.notifier).state = -1;
+        }
+      },
+      appBar: AppBar(
+        elevation: 0.0,
+        leading: Image.asset(
+          "assets/icon.png",
+          width: 48.0,
+          height: 48.0,
+          fit: BoxFit.cover,
+        ),
+        title: Text(
+          "Scene Editor",
+          style: context.textTheme.titleLarge!
+              .copyWith(fontWeight: FontWeight.w600),
+        ),
+        centerTitle: true,
+        actions: [
+          AnimatedSwitcher(
+            duration: const Duration(milliseconds: 750),
+            child: IconButton(
+              key: ValueKey<int>(ref.read(renderProvider)),
+              onPressed: () {
+                int lastState = ref.watch(renderProvider.notifier).state;
+                int newState = lastState == 0 ? 1 : 0;
+                ref.watch(renderProvider.notifier).state = newState;
+                if (newState == 1) {
+                  ShaderTools.assembleShader(ref, buildConfig, materialConfig)
+                      .then((shader) {
+                    ref.watch(fragmentShaderProvider.notifier).state = shader;
+                    ref.watch(renderProvider.notifier).state = 2;
+                    setState(() {});
+                  });
+                }
+              },
+              iconSize: 32.r,
+              splashRadius: 10.r,
+              icon: Icon(
+                ref.read(renderProvider) == 0
+                    ? Icons.play_arrow_rounded
+                    : Icons.stop_rounded,
+                color: appYellow,
+              ),
+            ),
+          )
+        ],
+      ),
+      body: SafeArea(
+        child: Stack(
+          children: [
+            SizedBox(
+              width: width,
+              height: height,
+              child: Builder(builder: (_) {
+                if (initialized) {
+                  if (renderState == 2 && timer == null) {
+                    timer = Timer.periodic(
+                        const Duration(milliseconds: 100), animate);
+                  } else {
+                    clear(ref.read(glProvider), stop: true);
+                    timer?.cancel();
+                    timer = null;
+                  }
+                }
+
+                return flutterGlPlugin.isInitialized
+                    ? GestureDetector(
+                        onHorizontalDragUpdate: (details) {
+                          uploadToShader(
+                              x: min(
+                                  max(details.localPosition.dx, 0.0), width));
+                        },
+                        onVerticalDragUpdate: (details) {
+                          uploadToShader(
+                              y: min(
+                                  max(details.localPosition.dy, 0.0), height));
+                        },
+                        child: Texture(
+                          textureId: flutterGlPlugin.textureId!,
+                          filterQuality: FilterQuality.medium,
+                        ),
+                      )
+                    : const SizedBox();
+              }),
+            ),
+            Align(
+              alignment: Alignment.bottomCenter,
+              child: Container(
+                height: kToolbarHeight,
+                width: 390.w,
+                color: headerColor,
+                padding: EdgeInsets.symmetric(horizontal: 15.w, vertical: 7.h),
+                child: ListView.separated(
+                  itemBuilder: (_, index) => BottomItem(
+                    tool: sceneTools[index],
+                    index: index,
+                  ),
+                  separatorBuilder: (_, __) => SizedBox(width: 20.w),
+                  itemCount: sceneTools.length,
+                  scrollDirection: Axis.horizontal,
+                ),
+              ),
+            )
+          ],
         ),
       ),
     );
   }
-
 
   void uploadToShader({double x = -1.0, double y = -1.0}) {
     Map<String, Pair<int, dynamic>> uniforms = ref.read(shaderUniformsProvider);

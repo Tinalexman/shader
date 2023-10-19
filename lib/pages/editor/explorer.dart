@@ -31,93 +31,91 @@ class _ExplorerState extends ConsumerState<Explorer> {
     return Scaffold(
       key: scaffoldKey,
       endDrawer: SafeArea(
-        child: SizedBox(
+        child: Drawer(
           width: 300.w,
-          child: Drawer(
-            backgroundColor: mainDark,
-            child: Column(
-              children: [
-                SizedBox(
-                  height: 40.h,
-                ),
-                Row(
-                  children: [
-                    Image.asset('assets/icon.png'),
-                    Column(
-                      crossAxisAlignment: CrossAxisAlignment.start,
-                      children: [
-                        Text(
-                          "Shade",
-                          style: context.textTheme.headlineSmall!
-                              .copyWith(color: theme),
-                        ),
-                        Text(
-                          "Turn your ideas into reality",
-                          style: context.textTheme.bodyMedium!
-                              .copyWith(color: theme),
-                        ),
-                      ],
-                    )
-                  ],
-                ),
-                SizedBox(
-                  height: 40.h,
-                ),
-                const Divider(
-                  color: neutral3,
-                ),
-                ListTile(
-                    leading: SizedBox(
-                      width: 30.w,
-                      child: Center(
-                        child: Icon(
-                          Icons.help,
-                          color: appYellow,
-                          size: 18.r,
-                        ),
+          backgroundColor: mainDark,
+          child: Column(
+            children: [
+              SizedBox(
+                height: 40.h,
+              ),
+              Row(
+                children: [
+                  Image.asset('assets/icon.png'),
+                  Column(
+                    crossAxisAlignment: CrossAxisAlignment.start,
+                    children: [
+                      Text(
+                        "Shade",
+                        style: context.textTheme.headlineSmall!
+                            .copyWith(color: theme),
+                      ),
+                      Text(
+                        "Turn your ideas into reality",
+                        style: context.textTheme.bodyMedium!
+                            .copyWith(color: theme),
+                      ),
+                    ],
+                  )
+                ],
+              ),
+              SizedBox(
+                height: 40.h,
+              ),
+              const Divider(
+                color: neutral3,
+              ),
+              ListTile(
+                  leading: SizedBox(
+                    width: 30.w,
+                    child: Center(
+                      child: Icon(
+                        Icons.help,
+                        color: appYellow,
+                        size: 18.r,
                       ),
                     ),
-                    title: Text(
-                      "Help",
-                      style: context.textTheme.bodyMedium!
-                          .copyWith(color: theme, fontWeight: FontWeight.w600),
-                    ),
-                    subtitle: Text(
-                      "Everything you need to know",
-                      style: context.textTheme.bodySmall!.copyWith(color: theme),
-                    ),
-                    onTap: () {
-                      Navigator.pop(context);
-                      context.router.pushNamed(Pages.help);
-                    },
-                ),
-                ListTile(
-                    leading: SizedBox(
-                      width: 30.w,
-                      child: Center(
-                        child: Icon(
-                          Icons.settings,
-                          color: appYellow,
-                          size: 18.r,
-                        ),
+                  ),
+                  title: Text(
+                    "Help",
+                    style: context.textTheme.bodyMedium!
+                        .copyWith(color: theme, fontWeight: FontWeight.w600),
+                  ),
+                  subtitle: Text(
+                    "Everything you need to know",
+                    style: context.textTheme.bodySmall!.copyWith(color: theme),
+                  ),
+                  onTap: () {
+                    Navigator.pop(context);
+                    context.router.pushNamed(Pages.help);
+                  },
+              ),
+              ListTile(
+                  leading: SizedBox(
+                    width: 30.w,
+                    child: Center(
+                      child: Icon(
+                        Icons.settings,
+                        color: appYellow,
+                        size: 18.r,
                       ),
                     ),
-                    title: Text(
-                      "Settings",
-                      style: context.textTheme.bodyMedium!
-                          .copyWith(color: theme, fontWeight: FontWeight.w600),
-                    ),
-                    subtitle: Text(
-                      "Tweak and customize Shade",
-                      style: context.textTheme.bodySmall!.copyWith(color: theme),
-                    ),
-                    onTap: () {
-                      Navigator.pop(context);
-                      context.router.pushNamed(Pages.settings);
-                    },
-                ),
-              ],
-            ),
+                  ),
+                  title: Text(
+                    "Settings",
+                    style: context.textTheme.bodyMedium!
+                        .copyWith(color: theme, fontWeight: FontWeight.w600),
+                  ),
+                  subtitle: Text(
+                    "Tweak and customize Shade",
+                    style: context.textTheme.bodySmall!.copyWith(color: theme),
+                  ),
+                  onTap: () {
+                    Navigator.pop(context);
+                    context.router.pushNamed(Pages.settings);
+                  },
+              ),
+            ],
           ),
         ),
       ),

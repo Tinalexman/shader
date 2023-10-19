@@ -1,3 +1,4 @@
+import 'package:flex_color_picker/flex_color_picker.dart';
 import 'package:flutter/material.dart';
 import 'package:go_router/go_router.dart';
 
@@ -42,6 +43,7 @@ List<Holder> get returnTypes => [
 
 extension PathExtension on String {
   String get path => "/$this";
+  String get capitalized => capitalize;
 }
 
 class Pages {
@@ -53,4 +55,21 @@ class Pages {
   static const String code = "code";
   static const String help = "help";
   static const String settings = "settings";
+}
+
+
+enum ShapeType {
+  cube,
+  sphere,
+  plane,
+  cylinder,
+  capsule,
+  torus,
+  cone
+}
+
+enum Operation {
+  intersect,
+  join,
+  remove,
 }

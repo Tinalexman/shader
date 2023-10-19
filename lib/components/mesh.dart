@@ -11,7 +11,6 @@ class DreamMesh
   late int count;
 
 
-  late NativeFloat32Array _vertices;
 
   DreamMesh();
 
@@ -19,7 +18,6 @@ class DreamMesh
 
 
   void create(dynamic gl, NativeFloat32Array vertices) {
-    _vertices = vertices;
 
     // var vertices = NativeFloat32Array.from([
     //   -0.5, -0.5, 0, // Vertex #2
