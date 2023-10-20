@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
+import 'package:shade/components/shape_manager.dart';
 import 'package:shade/utils/constants.dart';
 import 'package:shade/utils/providers.dart';
 
@@ -128,7 +129,12 @@ class _BottomItemState extends ConsumerState<BottomItem>
 }
 
 class AddShape extends StatelessWidget {
-  const AddShape({super.key});
+  final Function onAdd;
+
+  const AddShape({
+    super.key,
+    required this.onAdd,
+  });
 
   @override
   Widget build(BuildContext context) {
@@ -200,6 +206,146 @@ class _ShapeContainer extends StatelessWidget {
             ),
           )
         ],
+      ),
+    );
+  }
+}
+
+class EditShape extends StatelessWidget {
+  const EditShape({super.key});
+
+  @override
+  Widget build(BuildContext context) {
+    List<ShapeType> shapes = ShapeType.values;
+
+    return SafeArea(
+      child: Padding(
+        padding: EdgeInsets.symmetric(horizontal: 15.w),
+        child: Column(
+          crossAxisAlignment: CrossAxisAlignment.center,
+          children: [
+            SizedBox(height: 20.h),
+            Text(
+              "Edit Shape",
+              style: context.textTheme.titleLarge!
+                  .copyWith(fontWeight: FontWeight.w600),
+            ),
+            SizedBox(height: 5.h),
+            Text(
+              'Edit a drawable from your masterpiece',
+              textAlign: TextAlign.center,
+              style: context.textTheme.bodyMedium,
+            ),
+            SizedBox(height: 50.h),
+            Expanded(
+              child: GridView.builder(
+                gridDelegate: SliverGridDelegateWithFixedCrossAxisCount(
+                  crossAxisCount: 3,
+                  mainAxisExtent: 50.h,
+                  crossAxisSpacing: 10.w,
+                  mainAxisSpacing: 10.h,
+                ),
+                itemBuilder: (_, index) => _ShapeContainer(type: shapes[index]),
+                itemCount: shapes.length,
+              ),
+            )
+          ],
+        ),
+      ),
+    );
+  }
+}
+
+class ShapeTree extends ConsumerWidget {
+  const ShapeTree({super.key});
+
+  @override
+  Widget build(BuildContext context, WidgetRef ref) {
+    List<Drawable> drawables = ref.read(shapeManagerProvider).root;
+
+    return SafeArea(
+      child: Padding(
+        padding: EdgeInsets.symmetric(horizontal: 15.w),
+        child: Column(
+          crossAxisAlignment: CrossAxisAlignment.center,
+          children: [
+            SizedBox(height: 20.h),
+            Text(
+              "Shape Tree",
+              style: context.textTheme.titleLarge!
+                  .copyWith(fontWeight: FontWeight.w600),
+            ),
+            SizedBox(height: 5.h),
+            Text(
+              'View all your current drawables',
+              textAlign: TextAlign.center,
+              style: context.textTheme.bodyMedium,
+            ),
+            SizedBox(height: 50.h),
+            Expanded(
+              child: ListView.separated(
+                separatorBuilder: (_, __) => SizedBox(height: 20.h),
+                itemBuilder: (_, index) => _TreeValue(
+                  drawable: drawables[index],
+                  selected: ref.watch(activeShapeIndex) == index,
+                  onTap: () =>
+                      ref.watch(activeShapeIndex.notifier).state = index,
+                ),
+                itemCount: drawables.length,
+              ),
+            )
+          ],
+        ),
+      ),
+    );
+  }
+}
+
+class _TreeValue extends StatelessWidget {
+  final Drawable drawable;
+  final bool selected;
+  final VoidCallback onTap;
+
+  const _TreeValue({
+    super.key,
+    required this.onTap,
+    required this.drawable,
+    required this.selected,
+  });
+
+  @override
+  Widget build(BuildContext context) {
+    return GestureDetector(
+      onTap: onTap,
+      child: Container(
+        width: 390.w,
+        padding: EdgeInsets.symmetric(horizontal: 10.w, vertical: 10.h),
+        decoration: BoxDecoration(
+          borderRadius: BorderRadius.circular(10.w),
+          color: selected ? appYellow : appYellow.withOpacity(0.2),
+        ),
+        child: Column(
+          crossAxisAlignment: CrossAxisAlignment.start,
+          children: [
+            Text(
+              "Name:",
+              style: context.textTheme.bodySmall!
+                  .copyWith(color: selected ? headerColor : null),
+            ),
+            Text(
+              drawable.name,
+              style: context.textTheme.bodyLarge!.copyWith(
+                  fontWeight: FontWeight.w600,
+                  color: selected ? headerColor : null),
+            ),
+            SizedBox(height: 10.h),
+            Text(
+              "ID: ${drawable.id}",
+              style: context.textTheme.bodyMedium!
+                  .copyWith(color: selected ? headerColor : null),
+            ),
+          ],
+        ),
       ),
     );
   }

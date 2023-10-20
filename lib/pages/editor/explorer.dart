@@ -1,8 +1,10 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
+import 'package:shade/components/shape_manager.dart';
 import 'package:shade/utils/constants.dart';
 import 'package:shade/utils/functions.dart';
+import 'package:shade/utils/providers.dart';
 import 'package:shade/utils/widgets.dart';
 
 
@@ -24,6 +26,7 @@ class _ExplorerState extends ConsumerState<Explorer> {
 
 
   final GlobalKey<ScaffoldState> scaffoldKey = GlobalKey();
+
 
 
   @override

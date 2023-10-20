@@ -113,3 +113,4 @@ final StateProvider<ShapeManager> shapeManagerProvider = StateProvider((ref) => 
 
 
 final StateProvider<int> activeSceneEditorToolIndex = StateProvider((ref) => -1);
+final StateProvider<int> activeShapeIndex = StateProvider((ref) => -1);

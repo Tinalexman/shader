@@ -13,7 +13,7 @@ import 'constants.dart';
 class ShaderTools {
 
 
-  static Future<String> assembleShader(WidgetRef ref, CodeBlockConfig buildConfig, CodeBlockConfig materialConfig) async {
+  static Future<String> assembleShader(WidgetRef ref, String buildCode, String materialCode) async {
     StringBuffer buffer = StringBuffer();
     String precisionType = ref.watch(highPrecisionProvider)
         ? 'precision highp float;'
@@ -24,8 +24,6 @@ class ShaderTools {
     buffer.write("$defaultDeclarations \n\n");
     buffer.write("${_getUniforms(ref)} \n\n");
 
-    String buildCode = buildConfig.getCode();
-    String materialCode = materialConfig.getCode();
     String importedFunctions = _analyze(buildCode, materialCode);
 
     buffer.write("$importedFunctions \n\n");
@@ -54,7 +52,7 @@ class ShaderTools {
     buffer.write(mode);
     buffer.write(endMain);
 
-    log(buffer.toString());
+    //log(buffer.toString());
 
     return buffer.toString();
   }

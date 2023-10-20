@@ -11,13 +11,13 @@ import 'package:flutter_screenutil/flutter_screenutil.dart';
 import 'package:shade/components/math.dart';
 import 'package:shade/components/mesh.dart';
 import 'package:shade/components/shader.dart';
+import 'package:shade/components/shape_manager.dart';
 import 'package:shade/utils/constants.dart';
 import 'package:shade/utils/providers.dart';
 import 'package:shade/utils/shader_tools.dart';
 import 'package:shade/utils/widgets.dart';
 
 import 'scene_editor_widgets.dart';
-
 
 class SceneEditor extends ConsumerStatefulWidget {
   const SceneEditor({Key? key}) : super(key: key);
@@ -44,7 +44,7 @@ class _SceneEditorState extends ConsumerState<SceneEditor> {
   late DreamMesh dreamMesh;
   Timer? timer;
 
-  late CodeBlockConfig materialConfig, buildConfig;
+  late CodeBlockConfig materialConfig;
 
   late List<SceneTool> sceneTools;
 
@@ -55,21 +55,6 @@ class _SceneEditorState extends ConsumerState<SceneEditor> {
   @override
   void initState() {
     super.initState();
-    buildConfig = CodeBlockConfig(
-      name: "build",
-      returnVariable: "data",
-      returnType: "vec2",
-      parameters: ["vec3 pos"],
-      fixed: true,
-      body: """
-vec2 res = vec2(sphere(pos, 1.0), 1.0);
-data = vec2(plane(pos, vec3(0.0, 1.0, 0.0), 1.0), 2.0);
-data = join(res, data);""",
-      documentation: "This is the method in which your entire scene is built. "
-          "This method returns the 'data' which contains the shortest "
-          "distance from this position 'pos' to any shape in your scene as well "
-          "as the 'ID' needed to color it appropriately in the material function.",
-    );
     materialConfig = CodeBlockConfig(
       name: "material",
       returnVariable: "color",
@@ -93,15 +78,33 @@ switch( int(ID) ) {
         name: "Add",
         onTap: () {
           ref.watch(activeSceneEditorToolIndex.notifier).state = 0;
-          setState(() => drawerWidget = const AddShape());
+          setState(
+            () => drawerWidget = AddShape(
+              onAdd: (shape) => ref.watch(shapeManagerProvider.notifier).state.create(shape),
+            ),
+          );
           scaffoldKey.currentState?.openEndDrawer();
         },
         color: appYellow,
       ),
       SceneTool(
+        data: Boxicons.bxs_tree,
+        name: "Tree",
+        onTap: () {
+          ref.watch(activeSceneEditorToolIndex.notifier).state = 1;
+          setState(() => drawerWidget = const ShapeTree());
+          scaffoldKey.currentState?.openEndDrawer();
+        },
+        color: containerGreen,
+      ),
+      SceneTool(
         data: Boxicons.bx_pencil,
         name: "Edit",
-        onTap: () {},
+        onTap: () {
+          ref.watch(activeSceneEditorToolIndex.notifier).state = 2;
+          setState(() => drawerWidget = const EditShape());
+          scaffoldKey.currentState?.openEndDrawer();
+        },
         color: theme,
       ),
     ];
@@ -216,8 +219,13 @@ switch( int(ID) ) {
                 int newState = lastState == 0 ? 1 : 0;
                 ref.watch(renderProvider.notifier).state = newState;
                 if (newState == 1) {
-                  ShaderTools.assembleShader(ref, buildConfig, materialConfig)
-                      .then((shader) {
+                  ShaderTools.assembleShader(
+                    ref,
+                    ShapeFormat.generateBuildCode(
+                        ref.read(shapeManagerProvider).root),
+                    ShapeFormat.generateMaterialCode(
+                        ref.read(shapeManagerProvider).materials),
+                  ).then((shader) {
                     ref.watch(fragmentShaderProvider.notifier).state = shader;
                     ref.watch(renderProvider.notifier).state = 2;
                     setState(() {});

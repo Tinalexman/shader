@@ -12,7 +12,7 @@ class Vector2 {
   }
 
   @override
-  String toString() => "vec2($x, $y)";
+  String toString() => x == 0.0 && y == 0.0 ? "vec2(0.0)" : "vec2($x, $y)";
 }
 
 class Vector3 {
@@ -31,7 +31,7 @@ class Vector3 {
   }
 
   @override
-  String toString() => "vec3($x, $y, $z)";
+  String toString() => x == 0.0 && y == 0.0 && z == 0.0 ? "vec3(0.0)" :  "vec3($x, $y, $z)";
 }
 
 
@@ -53,7 +53,7 @@ class Vector4 {
   }
 
   @override
-  String toString() => "vec4($x, $y, $z, $w)";
+  String toString() => x == 0.0 && y == 0.0 && z == 0.0 && z == 0.0 ? "vec3(0.0)" :   "vec4($x, $y, $z, $w)";
 }
 
 class DreamDouble {
