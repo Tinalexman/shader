@@ -1,22 +1,7 @@
+import 'dart:developer';
+
 import 'package:shade/utils/constants.dart';
-import 'package:shade/components/math.dart';
-
-abstract class Drawable {
-  String get name;
-
-  int get id;
-
-  @override
-  bool operator ==(Object other) {
-    if (other is! Drawable) return false;
-    if (other == this) return true;
-
-    return id == other.id;
-  }
-
-  @override
-  int get hashCode => id * 256 + 3869;
-}
+import 'drawable.dart';
 
 class ShapeManager {
   static int drawablesCount = 0;
@@ -32,12 +17,8 @@ class ShapeManager {
 
   ShapeManager() {
     _root = [
-
-      Group(
-        first: Sphere(),
-        second: Plane(materialCode: 1),
-        operation: Operation.join,
-      ),
+      Plane(materialCode: 1),
+      Sphere(),
     ];
 
     _materials = [
@@ -57,10 +38,28 @@ class ShapeManager {
   }
 
   void create(ShapeType type) {
-    switch(type) {
-      case ShapeType.plane: add(Plane()); break;
-      case ShapeType.sphere: add(Sphere()); break;
-      default: break;
+    switch (type) {
+      case ShapeType.plane:
+        add(Plane());
+        return;
+      case ShapeType.sphere:
+        add(Sphere());
+        return;
+      case ShapeType.torus:
+        add(Torus());
+        return;
+      case ShapeType.cylinder:
+        add(Cylinder());
+        return;
+      case ShapeType.cone:
+        add(Cone());
+        return;
+      case ShapeType.capsule:
+        add(Capsule());
+        return;
+      case ShapeType.cube:
+        add(Cube());
+        return;
     }
   }
 
@@ -78,74 +77,18 @@ class ShapeManager {
   }
 }
 
-abstract class Shape with Drawable {
-  @override
-  late int id;
-
-  late double material;
-
-  late Vector3 position, rotation, scale;
-
-  @override
-  late String name;
-
-  Shape({required String shapeName, double materialCode = 0.0}) {
-    id = ShapeManager.drawablesCount++;
-    material = materialCode;
-    name = "$shapeName$id";
-    position = Vector3();
-    rotation = Vector3();
-    scale = Vector3.value(1);
-  }
-}
-
-class Group with Drawable {
-  late Drawable first, second;
-  late Operation operation;
-
-  Group({
-    required this.first,
-    required this.second,
-    required this.operation,
-  });
-
-  @override
-  int get id => first.id * ShapeManager.groupIDMultiplier + second.id;
-
-  @override
-  String get name => "group${first.name}${first.id}${second.name}${second.id}";
-}
-
-class Sphere extends Shape {
-  double radius;
-
-  Sphere({
-    this.radius = 1.0,
-    super.shapeName = "sphere",
-    super.materialCode,
-  });
-}
-
-class Plane extends Shape {
-  late Vector3 normal;
-  double distance;
-
-  Plane({
-    super.shapeName = "plane",
-    this.distance = 1.0,
-    super.materialCode,
-  }) {
-    normal = Vector3(x: 0.0, y: 1.0, z: 0.0);
-  }
-}
-
 class ShapeFormat {
   static String generateBuildCode(List<Drawable> drawables) {
     StringBuffer buffer = StringBuffer();
-    buffer.writeln("vec2 build(vec3 pos) {\n");
-    buffer.writeln("\tvec2 data = vec2(0.0);\n");
+    buffer.writeln("vec2 build(vec3 pos) {");
+    buffer.writeln("\tvec2 data = vec2(0.0);");
     for (Drawable drawable in drawables) {
       buffer.writeln("\t${_getShapeCode(drawable)}");
+    }
+    for (Drawable drawable in drawables) {
+      if (drawable is! Group) {
+        buffer.writeln("\tdata = join(data, ${drawable.name});");
+      }
     }
     buffer.writeln("\treturn data;\n}");
     return buffer.toString();
@@ -156,40 +99,73 @@ class ShapeFormat {
       return _sphere(drawable);
     } else if (drawable is Plane) {
       return _plane(drawable);
+    } else if (drawable is Cube) {
+      return _cube(drawable);
+    } else if (drawable is Capsule) {
+      return _capsule(drawable);
+    } else if(drawable is Cylinder) {
+      return _cylinder(drawable);
+    } else if(drawable is Cone) {
+      return _cone(drawable);
+    } else if(drawable is Torus) {
+      return _torus(drawable);
     } else if (drawable is Group) {
       return _group(drawable);
     }
     return "";
   }
 
+  static String _operation(Operation operation) {
+    switch(operation) {
+      case Operation.join: return "join";
+      case Operation.remove: return "remove";
+      case Operation.intersect: return "intersect";
+    }
+  }
+
   static String _group(Group group) {
-    String operation = group.operation == Operation.join
-        ? "join"
-        : group.operation == Operation.remove
-            ? "remove"
-            : "intersect";
+    String operation = _operation(group.operation);
     String previousCode =
         "${_getShapeCode(group.first)}\n${_getShapeCode(group.second)}\n";
     return "$previousCode\ndata = $operation(${group.first.name}, ${group.second.name});";
   }
 
   static String _sphere(Sphere sphere) =>
-      "vec2 sphere${sphere.id} = vec2(sphere(pos + ${sphere.position}, "
+      "vec2 ${sphere.name} = vec2(sphere(pos + ${sphere.position}, "
       "${sphere.radius}), ${sphere.material});";
 
   static String _plane(Plane plane) =>
-      "vec2 plane${plane.id} = vec2(plane(pos + ${plane.position}, ${plane.normal}, "
+      "vec2 ${plane.name} = vec2(plane(pos + ${plane.position}, ${plane.normal}, "
       "${plane.distance}), ${plane.material});";
+
+  static String _cube(Cube cube) =>
+    "vec2 ${cube.name} = vec2(cube(pos + ${cube.position}, ${cube.size}), ${cube.material});";
+
+  static String _cylinder(Cylinder cylinder) =>
+      "vec2 ${cylinder.name} = vec2(cylinder(pos + ${cylinder.position}, ${cylinder.radius}, "
+          "${cylinder.height}), ${cylinder.material});";
+
+  static String _cone(Cone cone) =>
+      "vec2 ${cone.name} = vec2(cone(pos + ${cone.position}, ${cone.radius}, "
+          "${cone.height}), ${cone.material});";
+
+  static String _torus(Torus torus) =>
+      "vec2 ${torus.name} = vec2(cone(pos + ${torus.position}, ${torus.innerRadius}, "
+          "${torus.outerRadius}), ${torus.material});";
+
+  static String _capsule(Capsule capsule) =>
+      "vec2 ${capsule.name} = vec2(cone(pos + ${capsule.position}, ${capsule.radius}, "
+          "${capsule.capHeight}), ${capsule.material});";
 
   static String generateMaterialCode(List<Material> materials) {
     StringBuffer buffer = StringBuffer();
-    buffer.writeln("vec3 material(vec3 pos, vec3 normal, float ID) {\n");
+    buffer.writeln("vec3 material(vec3 pos, vec3 normal, float ID) {");
     buffer.writeln("\tvec3 color = vec3(0.0);\n\tswitch( int(ID) ) {");
     for (Material material in materials) {
-      buffer.writeln("\t\tcase ${material.index}: ${material.definition} break;");
+      buffer
+          .writeln("\t\tcase ${material.index}: ${material.definition} break;");
     }
-
-    buffer.writeln("\n}\n\treturn color;\n}");
+    buffer.writeln("\n\t}\n\treturn color;\n}");
     return buffer.toString();
   }
 }

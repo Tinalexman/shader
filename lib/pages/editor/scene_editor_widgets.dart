@@ -1,9 +1,11 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
+import 'package:shade/components/drawable.dart';
 import 'package:shade/components/shape_manager.dart';
 import 'package:shade/utils/constants.dart';
 import 'package:shade/utils/providers.dart';
+import 'package:shade/utils/widgets.dart';
 
 class SceneTool {
   final IconData data;
@@ -167,7 +169,13 @@ class AddShape extends StatelessWidget {
                   crossAxisSpacing: 10.w,
                   mainAxisSpacing: 10.h,
                 ),
-                itemBuilder: (_, index) => _ShapeContainer(type: shapes[index]),
+                itemBuilder: (_, index) => GestureDetector(
+                  onTap: () {
+                    onAdd(shapes[index]);
+                    Navigator.pop(context);
+                  },
+                  child: _ShapeContainer(type: shapes[index]),
+                ),
                 itemCount: shapes.length,
               ),
             )
@@ -192,8 +200,9 @@ class _ShapeContainer extends StatelessWidget {
       width: 70.w,
       height: 50.h,
       decoration: BoxDecoration(
-          borderRadius: BorderRadius.circular(10.w),
-          color: appYellow.withOpacity(0.2)),
+        borderRadius: BorderRadius.circular(10.w),
+        color: appYellow.withOpacity(0.2),
+      ),
       child: Column(
         mainAxisAlignment: MainAxisAlignment.center,
         crossAxisAlignment: CrossAxisAlignment.center,
@@ -211,13 +220,118 @@ class _ShapeContainer extends StatelessWidget {
   }
 }
 
-class EditShape extends StatelessWidget {
-  const EditShape({super.key});
+class EditShape extends ConsumerStatefulWidget {
+  final VoidCallback onEdit;
+
+  const EditShape({
+    super.key,
+    required this.onEdit,
+  });
+
+  @override
+  ConsumerState<EditShape> createState() => _EditShapeState();
+}
+
+class _EditShapeState extends ConsumerState<EditShape> {
+  final TextEditingController one = TextEditingController(),
+      two = TextEditingController();
+
+  late Drawable activeDrawable;
+
+  @override
+  void initState() {
+    super.initState();
+
+    int active = ref.read(activeShapeIndex);
+    if (active == -1) return;
+    Drawable drawable = ref.read(shapeManagerProvider).root[active];
+
+    if (drawable is Sphere) {
+      one.text = drawable.radius.toString();
+    } else if (drawable is Cube) {
+      one.text = drawable.size.toString();
+    } else if (drawable is Plane) {
+      one.text = drawable.distance.toString();
+    } else if (drawable is Cylinder) {
+      one.text = drawable.radius.toString();
+      two.text = drawable.height.toString();
+    } else if (drawable is Capsule) {
+      one.text = drawable.radius.toString();
+      two.text = drawable.capHeight.toString();
+    } else if (drawable is Torus) {
+      one.text = drawable.innerRadius.toString();
+      two.text = drawable.outerRadius.toString();
+    } else if (drawable is Cone) {
+      one.text = drawable.radius.toString();
+      two.text = drawable.height.toString();
+    }
+
+    activeDrawable = drawable;
+  }
+
+  @override
+  void dispose() {
+    one.dispose();
+    two.dispose();
+    super.dispose();
+  }
+
+  Widget get child {
+    if (activeDrawable is Sphere ||
+        activeDrawable is Plane ||
+        activeDrawable is Cube) {
+      return Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          Text(
+            "Value",
+            style: context.textTheme.bodySmall,
+          ),
+          SizedBox(height: 5.h),
+          SpecialForm(
+            controller: one,
+            width: 60.w,
+            height: 40.h,
+          ),
+        ],
+      );
+    } else if (activeDrawable is Cylinder ||
+        activeDrawable is Cone ||
+        activeDrawable is Torus ||
+        activeDrawable is Capsule) {
+      return Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          Text(
+            "Value 1",
+            style: context.textTheme.bodySmall,
+          ),
+          SizedBox(height: 5.h),
+          SpecialForm(
+            controller: one,
+            width: 60.w,
+            height: 40.h,
+          ),
+          SizedBox(height: 10.h),
+          Text(
+            "Value 2",
+            style: context.textTheme.bodySmall,
+          ),
+          SizedBox(height: 5.h),
+          SpecialForm(
+            controller: two,
+            width: 60.w,
+            height: 40.h,
+          ),
+        ],
+      );
+    }
+
+    return const SizedBox();
+  }
 
   @override
   Widget build(BuildContext context) {
-    List<ShapeType> shapes = ShapeType.values;
-
     return SafeArea(
       child: Padding(
         padding: EdgeInsets.symmetric(horizontal: 15.w),
@@ -237,16 +351,35 @@ class EditShape extends StatelessWidget {
               style: context.textTheme.bodyMedium,
             ),
             SizedBox(height: 50.h),
-            Expanded(
-              child: GridView.builder(
-                gridDelegate: SliverGridDelegateWithFixedCrossAxisCount(
-                  crossAxisCount: 3,
-                  mainAxisExtent: 50.h,
-                  crossAxisSpacing: 10.w,
-                  mainAxisSpacing: 10.h,
+            Text(
+              "Name: ${activeDrawable.name}",
+              style: context.textTheme.bodyLarge,
+            ),
+            SizedBox(height: 5.h),
+            Text(
+              "ID: ${activeDrawable.id}",
+              style: context.textTheme.bodyLarge,
+            ),
+            SizedBox(height: 10.h),
+            child,
+            SizedBox(height: 20.h),
+            ElevatedButton(
+              onPressed: () {
+                widget.onEdit();
+                Navigator.pop(context);
+              },
+              style: ElevatedButton.styleFrom(
+                backgroundColor: appYellow,
+                minimumSize: Size(100.w, 40.h),
+                maximumSize: Size(100.w, 40.h),
+                elevation: 1.0,
+              ),
+              child: Text(
+                "Apply",
+                style: context.textTheme.bodyLarge!.copyWith(
+                  fontWeight: FontWeight.w600,
+                  color: headerColor,
                 ),
-                itemBuilder: (_, index) => _ShapeContainer(type: shapes[index]),
-                itemCount: shapes.length,
               ),
             )
           ],
@@ -288,6 +421,7 @@ class ShapeTree extends ConsumerWidget {
                 itemBuilder: (_, index) => _TreeValue(
                   drawable: drawables[index],
                   selected: ref.watch(activeShapeIndex) == index,
+                  onDelete: () => drawables.removeAt(index),
                   onTap: () =>
                       ref.watch(activeShapeIndex.notifier).state = index,
                 ),
@@ -305,12 +439,14 @@ class _TreeValue extends StatelessWidget {
   final Drawable drawable;
   final bool selected;
   final VoidCallback onTap;
+  final VoidCallback onDelete;
 
   const _TreeValue({
     super.key,
     required this.onTap,
     required this.drawable,
     required this.selected,
+    required this.onDelete,
   });
 
   @override

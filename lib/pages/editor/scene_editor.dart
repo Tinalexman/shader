@@ -80,7 +80,8 @@ switch( int(ID) ) {
           ref.watch(activeSceneEditorToolIndex.notifier).state = 0;
           setState(
             () => drawerWidget = AddShape(
-              onAdd: (shape) => ref.watch(shapeManagerProvider.notifier).state.create(shape),
+              onAdd: (shape) =>
+                  ref.watch(shapeManagerProvider.notifier).state.create(shape),
             ),
           );
           scaffoldKey.currentState?.openEndDrawer();
@@ -102,7 +103,11 @@ switch( int(ID) ) {
         name: "Edit",
         onTap: () {
           ref.watch(activeSceneEditorToolIndex.notifier).state = 2;
-          setState(() => drawerWidget = const EditShape());
+          setState(
+            () => drawerWidget = EditShape(
+              onEdit: () {},
+            ),
+          );
           scaffoldKey.currentState?.openEndDrawer();
         },
         color: theme,
